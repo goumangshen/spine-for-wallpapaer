@@ -1,4 +1,4 @@
 dist
 node_modules
 public/assets/*
-!public/assets/config.json
+!public/assets/*.json
