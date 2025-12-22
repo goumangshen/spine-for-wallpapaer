@@ -1,0 +1,565 @@
+{
+  "width": 4000,
+  "height": 1920,
+  "backgroundColor": {
+    "r": 248,
+    "g": 244,
+    "b": 241
+  },
+  "backgroundImage": [
+    "bg.png",
+    "bg2.png",
+    "bg3.png",
+    "bg4.png",
+    "bg5.png",
+    "bg6.png",
+    "bg7.png",
+    "bg8.png",
+    "bg9.png",
+    "bg10.png"
+  ],
+  "backgroundImageFit": "width",
+  "canvasAlignLeftPercent": -1,
+  "canvasAlignRightPercent": -1,
+  "responsiveLayout": {
+    "enabled": false,
+    "mode": "height",
+    "baseCanvasHeight": 700,
+    "positionEnabled": true,
+    "scaleEnabled": true,
+    "invertPosition": false,
+    "invertScale": true,
+    "scaleDamp": 0.3
+  },
+  "backgroundMusic": {
+    "fileName": "bg.flac",
+    "volume": 0.5
+  },
+  "meshes": [
+    {
+      "type": "spine",
+      "skeletonFileName": "6040101.skel",
+      "atlasFileName": "6040101.atlas",
+      "animations": [
+        {
+          "name": "battlestand",
+          "weight": 90
+        },
+        {
+          "name": "casting1",
+          "weight": 5,
+          "audioFileName": "2.mp3"
+        },
+        {
+          "name": "born_break",
+          "weight": 5,
+          "audioFileName": "3.mp3"
+        }
+      ],
+      "scale": 5.2,
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": -1200
+      },
+      "hiddenSlots": [
+        "bj4",
+        "dm2",
+        "guangxiao_9",
+        "guangxiaoo_8",
+        "fengye11"
+      ],
+      "controlSlots": {
+        "backgroundMusic": [
+          "shiping_1"
+        ],
+        "voiceAnimation": [
+          "yifu_19"
+        ]
+      },
+      "clickEffects": [
+        {
+          "imageFileName": "11.png",
+          "weight": 43,
+          "duration": 500,
+          "scale": 0.2
+        },
+        {
+          "imageFileName": "12.png",
+          "weight": 42,
+          "duration": 500,
+          "scale": 0.15
+        },
+        {
+          "imageFileName": "3.png",
+          "weight": 5,
+          "duration": 500,
+          "scale": 0.2
+        }
+      ],
+      "overlayMedia": [
+        {
+          "triggerSlot": "shiping_7",
+          "videoFileName": "full.webm",
+          "audioFileName": "",
+          "pauseBackgroundMusic": true,
+          "closeOnClick": false,
+          "videoVolume": 1.0,
+          "audioVolume": 1.0,
+          "loopVideo": false
+        },
+        {
+          "triggerSlotsWhenHidden": [
+            "#daoju_10",
+            "#daoju_23",
+            "#daoju_17",
+            "#daoju_19"
+          ],
+          "videoFileName": "4.webm",
+          "audioFileName": "12.MP3",
+          "switchToMeshIndex": 1,
+          "pauseBackgroundMusic": false,
+          "closeOnClick": false,
+          "videoVolume": 1.0,
+          "audioVolume": 1.0,
+          "loopVideo": false
+        }
+      ],
+      "backgroundImageSwitchSlot": "yifu_23",
+      "slotHideRules": [
+        {
+          "triggerSlots": "#daoju_23",
+          "hideSlots": [
+            "#daoju_23"
+          ],
+          "hideDuration": 10000
+        },
+        {
+          "triggerSlots": "#guangxiaoo_2",
+          "hideSlots": [
+            "#daoju_10",
+            "#daoju_11",
+            "#daoju_14",
+            "#daoju_15",
+            "#daoju_8",
+            "#guangxiaoo_2"
+          ],
+          "hideDuration": 10000
+        },
+        {
+          "triggerSlots": "#guangxiaoo_4",
+          "hideSlots": [
+            "#daoju_17",
+            "#daoju_18",
+            "#guangxiaoo_4"
+          ],
+          "hideDuration": 10000
+        },
+        {
+          "triggerSlots": "#guangxiaoo_5",
+          "hideSlots": [
+            "#daoju_19",
+            "#daoju_5",
+            "#daoju_6",
+            "#guangxiaoo_5"
+          ],
+          "hideDuration": 10000
+        }
+      ]
+    },
+    {
+      "type": "spine",
+      "skeletonFileName": "6040201.skel",
+      "atlasFileName": "6040201.atlas",
+      "animations": [
+        {
+          "name": "battlestand",
+          "weight": 90
+        },
+        {
+          "name": "casting1",
+          "weight": 5,
+          "audioFileName": "2.mp3"
+        },
+        {
+          "name": "born_break",
+          "weight": 5,
+          "audioFileName": "3.mp3"
+        }
+      ],
+      "scale": 5.2,
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": -1200
+      },
+      "hiddenSlots": [
+        "bj4",
+        "dm2",
+        "guangxiao_9",
+        "guangxiaoo_8",
+        "fengye11"
+      ],
+      "controlSlots": {
+        "backgroundMusic": [
+          "shiping_1"
+        ],
+        "voiceAnimation": [
+          "yifu_19"
+        ]
+      },
+      "clickEffects": [
+        {
+          "imageFileName": "21.png",
+          "weight": 43,
+          "duration": 500,
+          "scale": 0.2
+        },
+        {
+          "imageFileName": "22.png",
+          "weight": 42,
+          "duration": 500,
+          "scale": 0.15
+        },
+        {
+          "imageFileName": "3.png",
+          "weight": 5,
+          "duration": 500,
+          "scale": 0.2
+        }
+      ],
+      "overlayMedia": [
+        {
+          "triggerSlot": "shiping_7",
+          "videoFileName": "full.webm",
+          "audioFileName": "",
+          "pauseBackgroundMusic": true,
+          "closeOnClick": false,
+          "videoVolume": 1.0,
+          "audioVolume": 1.0,
+          "loopVideo": false
+        },
+        {
+          "triggerSlotsWhenHidden": [
+            "#daoju_10",
+            "#daoju_23",
+            "#daoju_17",
+            "#daoju_19"
+          ],
+          "videoFileName": "1.webm",
+          "audioFileName": "23.MP3",
+          "switchToMeshIndex": 2,
+          "pauseBackgroundMusic": false,
+          "closeOnClick": false,
+          "videoVolume": 1.0,
+          "audioVolume": 1.0,
+          "loopVideo": false
+        }
+      ],
+      "backgroundImageSwitchSlot": "yifu_23",
+      "slotHideRules": [
+        {
+          "triggerSlots": "#daoju_23",
+          "hideSlots": [
+            "#daoju_23"
+          ],
+          "hideDuration": 10000
+        },
+        {
+          "triggerSlots": "#guangxiaoo_2",
+          "hideSlots": [
+            "#daoju_10",
+            "#daoju_11",
+            "#daoju_14",
+            "#daoju_15",
+            "#daoju_8",
+            "#guangxiaoo_2"
+          ],
+          "hideDuration": 10000
+        },
+        {
+          "triggerSlots": "#guangxiaoo_4",
+          "hideSlots": [
+            "#daoju_17",
+            "#daoju_18",
+            "#guangxiaoo_4"
+          ],
+          "hideDuration": 10000
+        },
+        {
+          "triggerSlots": "#guangxiaoo_5",
+          "hideSlots": [
+            "#daoju_19",
+            "#daoju_5",
+            "#daoju_6",
+            "#guangxiaoo_5"
+          ],
+          "hideDuration": 10000
+        }
+      ]
+    },
+    {
+      "type": "spine",
+      "skeletonFileName": "6040301.skel",
+      "atlasFileName": "6040301.atlas",
+      "animations": [
+        {
+          "name": "battlestand",
+          "weight": 90
+        },
+        {
+          "name": "casting1",
+          "weight": 5,
+          "audioFileName": "2.mp3"
+        },
+        {
+          "name": "born_break",
+          "weight": 5,
+          "audioFileName": "3.mp3"
+        }
+      ],
+      "scale": 5.2,
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": -1200
+      },
+      "hiddenSlots": [
+        "bj4",
+        "dm2",
+        "guangxiao_9",
+        "guangxiaoo_8",
+        "fengye11"
+      ],
+      "controlSlots": {
+        "backgroundMusic": [
+          "shiping_1"
+        ],
+        "voiceAnimation": [
+          "yifu_19"
+        ]
+      },
+      "clickEffects": [
+        {
+          "imageFileName": "31.png",
+          "weight": 43,
+          "duration": 500,
+          "scale": 0.2
+        },
+        {
+          "imageFileName": "32.png",
+          "weight": 42,
+          "duration": 500,
+          "scale": 0.15
+        },
+        {
+          "imageFileName": "3.png",
+          "weight": 5,
+          "duration": 500,
+          "scale": 0.2
+        }
+      ],
+      "overlayMedia": [
+        {
+          "triggerSlot": "shiping_7",
+          "videoFileName": "full.webm",
+          "audioFileName": "",
+          "pauseBackgroundMusic": true,
+          "closeOnClick": false,
+          "videoVolume": 1.0,
+          "audioVolume": 1.0,
+          "loopVideo": false
+        },
+        {
+          "triggerSlotsWhenHidden": [
+            "#daoju_10",
+            "#daoju_23",
+            "#daoju_17",
+            "#daoju_19"
+          ],
+          "videoFileName": "2.webm",
+          "audioFileName": "34.MP3",
+          "switchToMeshIndex": 3,
+          "pauseBackgroundMusic": false,
+          "closeOnClick": false,
+          "videoVolume": 1.0,
+          "audioVolume": 1.0,
+          "loopVideo": false
+        }
+      ],
+      "backgroundImageSwitchSlot": "yifu_23",
+      "slotHideRules": [
+        {
+          "triggerSlots": "#daoju_23",
+          "hideSlots": [
+            "#daoju_23"
+          ],
+          "hideDuration": 10000
+        },
+        {
+          "triggerSlots": "#guangxiaoo_2",
+          "hideSlots": [
+            "#daoju_10",
+            "#daoju_11",
+            "#daoju_14",
+            "#daoju_15",
+            "#daoju_8",
+            "#guangxiaoo_2"
+          ],
+          "hideDuration": 10000
+        },
+        {
+          "triggerSlots": "#guangxiaoo_4",
+          "hideSlots": [
+            "#daoju_17",
+            "#daoju_18",
+            "#guangxiaoo_4"
+          ],
+          "hideDuration": 10000
+        },
+        {
+          "triggerSlots": "#guangxiaoo_5",
+          "hideSlots": [
+            "#daoju_19",
+            "#daoju_5",
+            "#daoju_6",
+            "#guangxiaoo_5"
+          ],
+          "hideDuration": 10000
+        }
+      ]
+    },
+    {
+      "type": "spine",
+      "skeletonFileName": "6040401.skel",
+      "atlasFileName": "6040401.atlas",
+      "animations": [
+        {
+          "name": "battlestand",
+          "weight": 90
+        },
+        {
+          "name": "casting1",
+          "weight": 5,
+          "audioFileName": "2.mp3"
+        },
+        {
+          "name": "born_break",
+          "weight": 5,
+          "audioFileName": "3.mp3"
+        }
+      ],
+      "scale": 5.2,
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": -1200
+      },
+      "hiddenSlots": [
+        "bj4",
+        "dm2",
+        "guangxiao_9",
+        "guangxiaoo_8",
+        "fengye11"
+      ],
+      "controlSlots": {
+        "backgroundMusic": [
+          "shiping_1"
+        ],
+        "voiceAnimation": [
+          "yifu_19"
+        ]
+      },
+      "clickEffects": [
+        {
+          "imageFileName": "41.png",
+          "weight": 43,
+          "duration": 500,
+          "scale": 0.2
+        },
+        {
+          "imageFileName": "42.png",
+          "weight": 42,
+          "duration": 500,
+          "scale": 0.15
+        },
+        {
+          "imageFileName": "3.png",
+          "weight": 5,
+          "duration": 500,
+          "scale": 0.2
+        }
+      ],
+      "overlayMedia": [
+        {
+          "triggerSlot": "shiping_7",
+          "videoFileName": "full.webm",
+          "audioFileName": "",
+          "pauseBackgroundMusic": true,
+          "closeOnClick": false,
+          "videoVolume": 1.0,
+          "audioVolume": 1.0,
+          "loopVideo": false
+        },
+        {
+          "triggerSlotsWhenHidden": [
+            "#daoju_10",
+            "#daoju_23",
+            "#daoju_17",
+            "#daoju_19"
+          ],
+          "videoFileName": "3.webm",
+          "audioFileName": "41.MP3",
+          "switchToMeshIndex": 0,
+          "pauseBackgroundMusic": false,
+          "closeOnClick": false,
+          "videoVolume": 1.0,
+          "audioVolume": 1.0,
+          "loopVideo": false
+        }
+      ],
+      "backgroundImageSwitchSlot": "yifu_23",
+      "slotHideRules": [
+        {
+          "triggerSlots": "#daoju_23",
+          "hideSlots": [
+            "#daoju_23"
+          ],
+          "hideDuration": 10000
+        },
+        {
+          "triggerSlots": "#guangxiaoo_2",
+          "hideSlots": [
+            "#daoju_10",
+            "#daoju_11",
+            "#daoju_14",
+            "#daoju_15",
+            "#daoju_8",
+            "#guangxiaoo_2"
+          ],
+          "hideDuration": 10000
+        },
+        {
+          "triggerSlots": "#guangxiaoo_4",
+          "hideSlots": [
+            "#daoju_17",
+            "#daoju_18",
+            "#guangxiaoo_4"
+          ],
+          "hideDuration": 10000
+        },
+        {
+          "triggerSlots": "#guangxiaoo_5",
+          "hideSlots": [
+            "#daoju_19",
+            "#daoju_5",
+            "#daoju_6",
+            "#guangxiaoo_5"
+          ],
+          "hideDuration": 10000
+        }
+      ]
+    }
+  ],
+  "activeMeshIndex": 0
+}
