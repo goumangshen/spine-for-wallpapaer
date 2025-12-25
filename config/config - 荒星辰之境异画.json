@@ -1,5 +1,5 @@
 {
-  "width": 3800,
+  "width": 3000,
   "height": 1920,
   "backgroundColor": {
     "r": 248,
@@ -7,11 +7,31 @@
     "b": 241
   },
   "backgroundImage": [
-    "bg.jpg"
+    "bg7.png",
+    "bg3.png",
+    "bg4.png",
+    "bg5.png",
+    "bg6.png",
+    "bg2.png",
+    "bg8.png",
+    "bg9.png",
+    "bg10.png",
+    "bg11.png",
+    "bg12.png",
+    "bg13.png",
+    "bg14.png",
+    "bg15.png",
+    "bg16.png",
+    "bg17.png",
+    "bg18.png",
+    "bg19.png",
+    "bg20.png",
+    "bg21.png",
+    "bg22.png"
   ],
   "backgroundImageFit": "width",
   "canvasAlignLeftPercent": -1,
-  "canvasAlignRightPercent": 0,
+  "canvasAlignRightPercent": -1,
   "responsiveLayout": {
     "enabled": false,
     "mode": "height",
@@ -23,14 +43,14 @@
     "scaleDamp": 0.3
   },
   "backgroundMusic": {
-    "fileName": "bg.mp3",
+    "fileName": "bg.flac",
     "volume": 0.5
   },
   "meshes": [
     {
       "type": "spine",
-      "skeletonFileName": "6290001.skel",
-      "atlasFileName": "6290001.atlas",
+      "skeletonFileName": "17835.skel",
+      "atlasFileName": "17835.atlas",
       "animations": [
         {
           "name": "battlestand",
@@ -39,59 +59,54 @@
         {
           "name": "casting1",
           "weight": 5,
-          "audioFileName": "3.mp3"
+          "audioFileName": "2.mp3"
         },
         {
           "name": "born_break",
           "weight": 5,
-          "audioFileName": "4.mp3"
+          "audioFileName": "3.mp3"
         },
         {
           "name": "idle1",
           "weight": 10,
-          "audioFileName": "2.mp3"
+          "audioFileName": "1.mp3"
         }
       ],
-      "scale": 7,
+      "scale": 5.5,
       "position": {
         "x": 0,
         "y": 0,
         "z": -1200
       },
       "hiddenSlots": [
+        "beijing","glow8","glow008"
       ],
       "controlSlots": {
         "backgroundMusic": [
-          "mianlinqi_68"
+          "shu3_1","shu3_4"
         ],
         "voiceAnimation": [
-          "mianlinqi_170"
+          "shu_2","shu_3"
         ]
       },
       "clickEffects": [
         {
           "imageFileName": "1.png",
-          "weight": 45,
+          "weight": 50,
           "duration": 500,
-          "scale": 0.1
+          "scale": 0.2
         },
         {
           "imageFileName": "2.png",
-          "weight": 45,
+          "weight": 50,
           "duration": 500,
-          "scale": 0.25
-        },
-        {
-          "imageFileName": "3.png",
-          "weight": 10,
-          "duration": 500,
-          "scale": 0.25
+          "scale": 0.15
         }
       ],
       "overlayMedia": [
         {
-          "triggerSlot": "mianlinqi_32",
-          "videoFileName": "6290001.webm",
+          "triggerSlot": "erhuan1",
+          "videoFileName": "17835.webm",
           "audioFileName": "1.mp3",
           "pauseBackgroundMusic": false,
           "closeOnClick": false,
@@ -101,9 +116,9 @@
         },
         {
           "triggerSlotsWhenHidden": [
-            "mianlinqi_116",
-            "mianlinqi_117",
-            "mianlinqi_42"
+            "shu7_1",
+            "shu6_1",
+            "shu10_1"
           ],
           "videoFileName": "full.webm",
           "audioFileName": "",
@@ -114,29 +129,30 @@
           "loopVideo": false
         }
       ],
-      "backgroundImageSwitchSlot": "",
+      "backgroundImageSwitchSlot": "diqiuyi",
       "slotHideRules": [
         {
-          "triggerSlots": "mianlinqi_116",
+          "triggerSlots": "shu7_1",
           "hideSlots": [
-            "mianlinqi_116",
-            "mianlinqi_123"
+            "shu7_1"
           ],
           "hideDuration": 10000
         },
         {
-          "triggerSlots": "mianlinqi_117",
+          "triggerSlots": ["shu10_1","shu10_4"],
           "hideSlots": [
-            "mianlinqi_117",
-            "mianlinqi_124"
+            "shu10_1",
+            "shu10_2",
+            "shu10_3",
+            "shu10_4"
           ],
           "hideDuration": 10000
         },
         {
-          "triggerSlots": "mianlinqi_42",
+          "triggerSlots": "shu6_1",
           "hideSlots": [
-            "mianlinqi_42",
-            "mianlinqi_8"
+            "shu6_1",
+            "shu6_2"
           ],
           "hideDuration": 10000
         }
