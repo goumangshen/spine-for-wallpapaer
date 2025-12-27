@@ -433,6 +433,47 @@ export const switchBackgroundImage = () => {
 };
 
 /**
+ * 设置 mesh 的背景图片（优先使用 mesh 配置的背景图片，否则使用全局背景图片）
+ * @param meshBackgroundImage mesh 配置的背景图片（可选）
+ * @param globalBackgroundImage 全局配置的背景图片（可选）
+ * @param useTransition 是否使用过渡效果
+ */
+export const setMeshBackgroundImage = (
+  meshBackgroundImage?: string | string[],
+  globalBackgroundImage?: string | string[],
+  useTransition: boolean = true
+) => {
+  // 优先使用 mesh 的背景图片，否则使用全局的背景图片
+  let targetBackgroundImage: string | string[] | undefined;
+  
+  if (meshBackgroundImage) {
+    // mesh 配置了背景图片，优先使用
+    targetBackgroundImage = meshBackgroundImage;
+  } else if (globalBackgroundImage) {
+    // mesh 没有配置背景图片，使用全局的背景图片
+    targetBackgroundImage = globalBackgroundImage;
+  }
+  
+  if (!targetBackgroundImage) {
+    // 都没有配置背景图片，不设置
+    return;
+  }
+  
+  // 处理数组格式（取第一个）
+  const imageFileName = Array.isArray(targetBackgroundImage) 
+    ? targetBackgroundImage[0] 
+    : targetBackgroundImage;
+  
+  // 如果背景层还没有创建，先创建背景层
+  if (!backgroundContainer && imageFileName) {
+    createBackgroundLayers();
+  }
+  
+  // 设置背景图片
+  setBackgroundImage(imageFileName, useTransition);
+};
+
+/**
  * 暂停 canvas 渲染（用于视频播放时释放 GPU 资源）
  */
 export const pauseCanvas = () => {

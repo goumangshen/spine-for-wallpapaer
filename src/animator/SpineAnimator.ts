@@ -43,10 +43,12 @@ export class SpineAnimator {
   private baseSkeletonScaleY: number = 1;
   private slotsToHide: string[] = []; // 需要隐藏的插槽名称列表
   private slotsHiddenInitialized: boolean = false; // 标记是否已经初始化隐藏插槽
+  private isFirstAnimation: boolean = true; // 标记是否是第一个动画（用于决定使用 setAnimation 还是 addAnimation）
 
   constructor(
     meshConfig: SpineMeshConfig,
-    spineAssetManager: threejsSpine.AssetManager
+    spineAssetManager: threejsSpine.AssetManager,
+    animationMixConfig?: { enabled?: boolean; duration?: number }
   ) {
     const geometry = new THREE.BoxGeometry(100, 100, 100);
     const material = new THREE.MeshBasicMaterial({
@@ -96,6 +98,12 @@ export class SpineAnimator {
     // 记录基础缩放（后续响应式会在此基础上乘比例）
     this.baseSkeletonScaleX = this.skeletonMesh.skeleton.scaleX || 1;
     this.baseSkeletonScaleY = this.skeletonMesh.skeleton.scaleY || 1;
+    
+    // 设置动画混合时间，用于平滑过渡
+    // 如果配置了 animationMix，使用配置的值；否则使用默认值（启用，0.2秒）
+    const mixEnabled = animationMixConfig?.enabled !== false; // 默认启用
+    const mixDuration = animationMixConfig?.duration ?? 0.2; // 默认0.2秒
+    this.skeletonMesh.state.data.defaultMix = mixEnabled ? mixDuration : 0;
 
     // 处理动画配置
     if (meshConfig.animations && meshConfig.animations.length > 0) {
@@ -122,9 +130,14 @@ export class SpineAnimator {
     this.skeletonMesh.state.addListener({
       start: () => {},
       interrupt: () => {},
-      end: () => {},
+      end: (entry: any) => {
+        // end 回调在动画结束时触发（当动画被移除时）
+        // 对于循环动画，end 回调不会在每次循环结束时触发
+      },
       dispose: () => {},
       complete: (entry: any) => {
+        // complete 回调在每次循环完成时触发（包括循环动画的每次循环结束）
+        // 根据 Spine 源码，对于循环动画，complete 会在每次循环结束时触发
         // 如果用户请求了语音动画，优先播放语音动画
         if (this.pendingVoiceAnimation) {
           this.pendingVoiceAnimation = false;
@@ -132,7 +145,9 @@ export class SpineAnimator {
         } else {
           // 动画播放完成后，随机选择下一个动画
           // 如果当前有语音正在播放，切换动画但不播放新动画的语音
-          if (this.animations.length > 1) {
+          // 检查是否已经有下一个动画在队列中，避免重复添加
+          const currentTrack = this.skeletonMesh.state.tracks[0];
+          if (this.animations.length > 1 && (!currentTrack || !currentTrack.next)) {
             this.playRandomAnimation();
           }
         }
@@ -217,7 +232,22 @@ export class SpineAnimator {
     this.stopCurrentAudio();
     
     // 播放选中的动画（循环播放）
-    this.skeletonMesh.state.setAnimation(0, selectedAnimation.name, true);
+    // 使用 addAnimation 而不是 setAnimation，实现平滑过渡，避免闪屏
+    // 第一个动画使用 setAnimation，后续动画使用 addAnimation 进行平滑混合
+    if (this.isFirstAnimation) {
+      // 第一个动画，使用 setAnimation
+      this.skeletonMesh.state.setAnimation(0, selectedAnimation.name, true);
+      this.isFirstAnimation = false;
+    } else {
+      // 后续动画，使用 addAnimation 进行平滑混合
+      // addAnimation 会在当前动画结束后排队播放新动画，并使用混合时间平滑过渡
+      const trackEntry = this.skeletonMesh.state.addAnimation(0, selectedAnimation.name, true, 0);
+      // 如果 trackEntry 存在，可以进一步配置混合时间
+      if (trackEntry) {
+        // 使用默认混合时间（已在初始化时设置）
+        // 如果需要，可以在这里为特定动画设置不同的混合时间
+      }
+    }
     
     // 如果动画重复，不播放音频
     // 如果当前有语音正在播放，也不播放新动画的音频（让语音继续播放）
@@ -370,7 +400,13 @@ export class SpineAnimator {
     this.stopCurrentAudio(true);
     
     // 播放选中的动画（循环播放）
-    this.skeletonMesh.state.setAnimation(0, selectedVoiceAnimation.name, true);
+    // 语音动画切换也使用 addAnimation 实现平滑过渡
+    if (this.isFirstAnimation) {
+      this.skeletonMesh.state.setAnimation(0, selectedVoiceAnimation.name, true);
+      this.isFirstAnimation = false;
+    } else {
+      this.skeletonMesh.state.addAnimation(0, selectedVoiceAnimation.name, true, 0);
+    }
     
     // 播放对应的音频
     this.playAudio(selectedVoiceAnimation);

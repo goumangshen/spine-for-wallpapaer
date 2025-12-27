@@ -1,0 +1,147 @@
+{
+  "width": 3800,
+  "height": 1920,
+  "backgroundColor": {
+    "r": 248,
+    "g": 244,
+    "b": 241
+  },
+  "backgroundImage": [
+    "bg.jpg"
+  ],
+  "backgroundImageFit": "width",
+  "canvasAlignLeftPercent": -1,
+  "canvasAlignRightPercent": 0,
+  "responsiveLayout": {
+    "enabled": false,
+    "mode": "height",
+    "baseCanvasHeight": 700,
+    "positionEnabled": true,
+    "scaleEnabled": true,
+    "invertPosition": false,
+    "invertScale": true,
+    "scaleDamp": 0.3
+  },
+  "backgroundMusic": {
+    "fileName": "bg.mp3",
+    "volume": 0.5
+  },
+  "meshes": [
+    {
+      "type": "spine",
+      "skeletonFileName": "6290001.skel",
+      "atlasFileName": "6290001.atlas",
+      "animations": [
+        {
+          "name": "battlestand",
+          "weight": 80
+        },
+        {
+          "name": "casting1",
+          "weight": 5,
+          "audioFileName": "3.mp3"
+        },
+        {
+          "name": "born_break",
+          "weight": 5,
+          "audioFileName": "4.mp3"
+        },
+        {
+          "name": "idle1",
+          "weight": 10,
+          "audioFileName": "2.mp3"
+        }
+      ],
+      "scale": 7,
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": -1200
+      },
+      "hiddenSlots": [
+      ],
+      "controlSlots": {
+        "backgroundMusic": [
+          "mianlinqi_68"
+        ],
+        "voiceAnimation": [
+          "mianlinqi_170"
+        ]
+      },
+      "clickEffects": [
+        {
+          "imageFileName": "1.png",
+          "weight": 45,
+          "duration": 500,
+          "scale": 0.1
+        },
+        {
+          "imageFileName": "2.png",
+          "weight": 45,
+          "duration": 500,
+          "scale": 0.25
+        },
+        {
+          "imageFileName": "3.png",
+          "weight": 10,
+          "duration": 500,
+          "scale": 0.25
+        }
+      ],
+      "overlayMedia": [
+        {
+          "triggerSlot": "mianlinqi_32",
+          "videoFileName": "6290001.webm",
+          "audioFileName": "1.mp3",
+          "pauseBackgroundMusic": false,
+          "closeOnClick": false,
+          "videoVolume": 1.0,
+          "audioVolume": 1.0,
+          "loopVideo": false
+        },
+        {
+          "triggerSlotsWhenHidden": [
+            "mianlinqi_116",
+            "mianlinqi_117",
+            "mianlinqi_42"
+          ],
+          "videoFileName": "full.webm",
+          "audioFileName": "",
+          "pauseBackgroundMusic": true,
+          "closeOnClick": false,
+          "videoVolume": 1.0,
+          "audioVolume": 1.0,
+          "loopVideo": false
+        }
+      ],
+      "backgroundImageSwitchSlot": "",
+      "slotHideRules": [
+        {
+          "triggerSlots": "mianlinqi_116",
+          "hideSlots": [
+            "mianlinqi_116",
+            "mianlinqi_123"
+          ],
+          "hideDuration": 10000
+        },
+        {
+          "triggerSlots": "mianlinqi_117",
+          "hideSlots": [
+            "mianlinqi_117",
+            "mianlinqi_124"
+          ],
+          "hideDuration": 10000
+        },
+        {
+          "triggerSlots": "mianlinqi_42",
+          "hideSlots": [
+            "mianlinqi_42",
+            "mianlinqi_8"
+          ],
+          "hideDuration": 10000
+        }
+      ]
+    }
+  ],
+  "activeMeshIndex": 0
+}

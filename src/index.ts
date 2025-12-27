@@ -22,7 +22,7 @@ import { SpineAnimator } from './animator';
 import { Configs, SpineMeshConfig, OverlayMediaItem, SlotHideRule } from './config.type';
 import { ASSET_PATH } from './constants';
 import * as Scene from './initScene';
-import { switchBackgroundImage } from './initScene';
+import { switchBackgroundImage, setMeshBackgroundImage } from './initScene';
 import { playOverlayMediaItem, setOverlayMediaEndCallback, setOverlayMediaStartCallback } from './overlayMedia';
 import { handleClickEffect, preloadClickEffectImages } from './clickEffect';
 
@@ -169,7 +169,7 @@ const main = async () => {
    */
   const initializeSpineAnimator = (meshConfig: SpineMeshConfig, assetManager: threejsSpine.AssetManager) => {
     if (meshConfig.type === 'spine') {
-      const spineAnimator = new SpineAnimator(meshConfig, assetManager);
+      const spineAnimator = new SpineAnimator(meshConfig, assetManager, configs.animationMix);
       spineAnimatorInstance = spineAnimator;
       meshUpdateCallbacks.push(function (delta: number) {
         spineAnimator.update(delta);
@@ -289,6 +289,13 @@ const main = async () => {
           triggeredConditionalVideos
         );
         
+        // 设置 mesh 的背景图片（优先使用 mesh 配置的背景图片，否则使用全局背景图片）
+        setMeshBackgroundImage(
+          currentActiveMeshConfig!.backgroundImage,
+          configs.backgroundImage,
+          true // 使用过渡效果
+        );
+        
         // 清除待切换标记
         pendingMeshSwitch = null;
         
@@ -373,6 +380,13 @@ const main = async () => {
         currentActiveMeshConfig!, 
         conditionalOverlayMediaItems, 
         triggeredConditionalVideos
+      );
+
+      // 设置 mesh 的背景图片（优先使用 mesh 配置的背景图片，否则使用全局背景图片）
+      setMeshBackgroundImage(
+        currentActiveMeshConfig!.backgroundImage,
+        configs.backgroundImage,
+        false // 初始化时不使用过渡效果
       );
 
       requestAnimationFrame(render);

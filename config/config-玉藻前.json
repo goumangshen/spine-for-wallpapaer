@@ -1,0 +1,113 @@
+{
+  "width": 2000,
+  "height": 1920,
+  "backgroundColor": {
+    "r": 248,
+    "g": 244,
+    "b": 241
+  },
+  "backgroundImage": [
+    "bg2.png",
+    "bg.png",
+    "bg9.png",
+    "bg16.png"
+  ],
+  "backgroundImageFit": "width",
+  "canvasAlignLeftPercent": -1,
+  "canvasAlignRightPercent": -1,
+  "responsiveLayout": {
+    "enabled": false,
+    "mode": "height",
+    "baseCanvasHeight": 700,
+    "positionEnabled": true,
+    "scaleEnabled": true,
+    "invertPosition": false,
+    "invertScale": true,
+    "scaleDamp": 0.3
+  },
+  "backgroundMusic": {
+    "fileName": "bg.mp3",
+    "volume": 0.2
+  },
+  "meshes": [
+    {
+      "type": "spine",
+      "skeletonFileName": "6600001.skel",
+      "atlasFileName": "6600001.atlas",
+      "animations": [
+        {
+          "name": "battlestand",
+          "weight": 80
+        },
+        {
+          "name": "casting1",
+          "weight": 5,
+          "audioFileName": "1.mp3"
+        },
+        {
+          "name": "born_break",
+          "weight": 5,
+          "audioFileName": "2.mp3"
+        },
+        {
+          "name": "idle1",
+          "weight": 10,
+          "audioFileName": "3.mp3"
+        }
+      ],
+      "scale": 5.5,
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": -1200
+      },
+      "hiddenSlots": [
+      ],
+      "controlSlots": {
+        "backgroundMusic": [
+          "chun_73"
+        ],
+        "voiceAnimation": [
+          "chun_86"
+        ]
+      },
+      "clickEffects": [
+        {
+          "imageFileName": "1.png",
+          "weight": 50,
+          "duration": 500,
+          "scale": 0.25
+        },
+        {
+          "imageFileName": "2.png",
+          "weight": 50,
+          "duration": 500,
+          "scale": 0.15
+        }
+      ],
+      "overlayMedia": [
+        {
+          "triggerSlot": "chun_52",
+          "videoFileName": "full.webm",
+          "audioFileName": "",
+          "pauseBackgroundMusic": true,
+          "closeOnClick": false,
+          "videoVolume": 1.0,
+          "audioVolume": 1.0,
+          "loopVideo": false
+        }
+      ],
+      "backgroundImageSwitchSlot": "chun_64",
+      "slotHideRules": [
+        {
+          "triggerSlots": "chun_66",
+          "hideSlots": [
+            "chun_166"
+          ],
+          "hideDuration": -1
+        }
+      ]
+    }
+  ],
+  "activeMeshIndex": 0
+}

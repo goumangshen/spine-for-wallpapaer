@@ -1,5 +1,5 @@
 {
-  "width": 2400,
+  "width": 3000,
   "height": 1920,
   "backgroundColor": {
     "r": 248,
@@ -15,7 +15,7 @@
   },
   "backgroundImageFit": "width",
   "canvasAlignLeftPercent": -1,
-  "canvasAlignRightPercent": 0,
+  "canvasAlignRightPercent": -1,
   "responsiveLayout": {
     "enabled": false,
     "mode": "height",
@@ -33,8 +33,8 @@
   "meshes": [
     {
       "type": "spine",
-      "skeletonFileName": "25205.skel",
-      "atlasFileName": "25205.atlas",
+      "skeletonFileName": "24103.skel",
+      "atlasFileName": "24103.atlas",
       "animations": [
         {
           "name": "battlestand",
@@ -56,7 +56,7 @@
           "audioFileName": "b1.mp3"
         }
       ],
-      "scale": 8.7,
+      "scale": 5.5,
       "position": {
         "x": 0,
         "y": 0,
@@ -73,13 +73,13 @@
       },
       "clickEffects": [
         {
-          "imageFileName": "00.png",
+          "imageFileName": "11.png",
           "weight": 50,
           "duration": 500,
           "scale": 0.25
         },
         {
-          "imageFileName": "01.png",
+          "imageFileName": "a.png",
           "weight": 50,
           "duration": 500,
           "scale": 0.25
@@ -113,6 +113,7 @@
           "loopVideo": false
         }
       ],
+      "backgroundImageSwitchSlot": "",
       "slotHideRules": [
         {
           "triggerSlots": "shizi_11",
@@ -139,16 +140,15 @@
     },
     {
       "type": "spine",
-      "skeletonFileName": "2520501.skel",
-      "atlasFileName": "2520501.atlas",
-      "backgroundImage": "bg2.jpg",
+      "skeletonFileName": "24003.skel",
+      "atlasFileName": "24003.atlas",
       "animations": [
         {
           "name": "battlestand",
           "weight": 80
         },
         {
-          "name": "casting1",
+          "name": "cassting1",
           "weight": 2,
           "audioFileName": "h3.mp3"
         },
@@ -180,13 +180,13 @@
       },
       "clickEffects": [
         {
-          "imageFileName": "10.png",
+          "imageFileName": "11.png",
           "weight": 50,
           "duration": 500,
           "scale": 0.25
         },
         {
-          "imageFileName": "11.png",
+          "imageFileName": "a.png",
           "weight": 50,
           "duration": 500,
           "scale": 0.25
@@ -205,14 +205,15 @@
           "loopVideo": false
         }
       ],
+      "backgroundImageSwitchSlot": "",
       "slotHideRules": [
       ]
     },
     {
       "type": "spine",
-      "skeletonFileName": "2520599.skel",
-      "atlasFileName": "2520599.atlas",
-      "backgroundImage": "bg3.png",
+      "skeletonFileName": "24104.skel",
+      "atlasFileName": "24104.atlas",
+      "backgroundImage": "bg2.png",
       "animations": [
         {
           "name": "battlestand",
@@ -251,13 +252,13 @@
       },
       "clickEffects": [
         {
-          "imageFileName": "20.png",
+          "imageFileName": "2.png",
           "weight": 50,
           "duration": 500,
           "scale": 0.25
         },
         {
-          "imageFileName": "21.png",
+          "imageFileName": "a.png",
           "weight": 50,
           "duration": 500,
           "scale": 0.25
@@ -280,6 +281,7 @@
           "loopVideo": false
         }
       ],
+      "backgroundImageSwitchSlot": "",
       "slotHideRules": [
         {
           "triggerSlots": "beijing_4",
@@ -303,7 +305,148 @@
           "hideDuration": 10000
         }
       ]
+    },
+    {
+      "type": "spine",
+      "skeletonFileName": "24004.skel",
+      "atlasFileName": "24004.atlas",
+      "backgroundImage": "bg3.png",
+      "animations": [
+        {
+          "name": "battlestand",
+          "weight": 80
+        },
+        {
+          "name": "casting1",
+          "weight": 2,
+          "audioFileName": "h3.mp3"
+        },
+        {
+          "name": "born_break",
+          "weight": 3,
+          "audioFileName": "h2.mp3"
+        },
+        {
+          "name": "idle1",
+          "weight": 15,
+          "audioFileName": "h1.mp3"
+        }
+      ],
+      "scale": 5.5,
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": -1200
+      },
+      "hiddenSlots": [],
+      "controlSlots": {
+        "backgroundMusic": [
+          "shengzi1"
+        ],
+        "voiceAnimation": [
+          "shengzi4"
+        ]
+      },
+      "clickEffects": [
+        {
+          "imageFileName": "1.png",
+          "weight": 50,
+          "duration": 500,
+          "scale": 0.25
+        },
+        {
+          "imageFileName": "a.png",
+          "weight": 50,
+          "duration": 500,
+          "scale": 0.25
+        }
+      ],
+      "overlayMedia": [
+        {
+          "triggerSlotsWhenHidden": [
+            "shuagu1",
+            "shuagu2",
+            "shuagu4"
+          ],
+          "videoFileName": "2hb.webm",
+          "audioFileName": "b2z.mp3",
+          "switchToMeshIndex": 2,
+          "pauseBackgroundMusic": false,
+          "closeOnClick": false,
+          "videoVolume": 1.0,
+          "audioVolume": 1.0,
+          "loopVideo": false
+        },
+        {
+          "triggerSlotsWhenHidden": [
+            "bgyan1",
+            "bgyan3",
+            "bgyan4",
+            "bgyan7"
+          ],
+          "videoFileName": "2hTO1b.webm",
+          "audioFileName": "b1z.mp3",
+          "switchToMeshIndex": 0,
+          "pauseBackgroundMusic": false,
+          "closeOnClick": false,
+          "videoVolume": 1.0,
+          "audioVolume": 1.0,
+          "loopVideo": false
+        }
+      ],
+      "backgroundImageSwitchSlot": "",
+      "slotHideRules": [
+        {
+          "triggerSlots": "shuagu4",
+          "hideSlots": [
+            "shuagu4"
+          ],
+          "hideDuration": 10000
+        },
+        {
+          "triggerSlots": "shuagu1",
+          "hideSlots": [
+            "shuagu1"
+          ],
+          "hideDuration": 10000
+        },
+        {
+          "triggerSlots": "shuagu2",
+          "hideSlots": [
+            "shuagu2"
+          ],
+          "hideDuration": 10000
+        },
+        {
+          "triggerSlots": "bgyan1",
+          "hideSlots": [
+            "bgyan1"
+          ],
+          "hideDuration": 10000
+        },
+        {
+          "triggerSlots": "bgyan3",
+          "hideSlots": [
+            "bgyan3"
+          ],
+          "hideDuration": 10000
+        },
+        {
+          "triggerSlots": "bgyan4",
+          "hideSlots": [
+            "bgyan4"
+          ],
+          "hideDuration": 10000
+        },
+        {
+          "triggerSlots": "bgyan7",
+          "hideSlots": [
+            "bgyan7"
+          ],
+          "hideDuration": 10000
+        }
+      ]
     }
   ],
-  "activeMeshIndex": 2
+  "activeMeshIndex": 0
 }

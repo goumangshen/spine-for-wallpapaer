@@ -95,6 +95,15 @@ export type Configs = {
     fileName: string;
     volume?: number; // 0-1 的音量值，默认1.0
   };
+  /**
+   * 动画混合时间配置
+   */
+  animationMix?: {
+    /** 是否启用动画混合时间，默认 true（启用混合可以避免动画切换时的闪屏） */
+    enabled?: boolean;
+    /** 混合时间（秒），默认 0.2 秒。设置为 0 表示不使用混合，立即切换 */
+    duration?: number;
+  };
   meshes: Array<SpineMeshConfig>;
   /**
    * 生效的 mesh 元素索引（从 0 开始），只有此索引的 mesh 会被加载和渲染
@@ -200,5 +209,7 @@ export type SpineMeshConfig = MeshConfig & {
   slotHideRules?: SlotHideRule[];
   /** 可选：点击指定插槽切换背景图片（滚动式切换） */
   backgroundImageSwitchSlot?: string | string[];
+  /** 可选：mesh 绑定的背景图片（字符串或字符串数组），如果配置了此项，优先使用此背景图片；否则使用全局的 backgroundImage */
+  backgroundImage?: string | string[];
 };
 
