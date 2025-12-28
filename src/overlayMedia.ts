@@ -1,6 +1,7 @@
 import { Configs, OverlayMediaItem } from './config.type';
 import { ASSET_PATH } from './constants';
 import * as Scene from './initScene';
+import { clearAllClickEffects } from './clickEffect';
 
 type BackgroundImageFit = 'height' | 'width';
 
@@ -164,6 +165,9 @@ export function playOverlayMediaItem(
 
   // 单实例：重复触发时重启
   stopOverlayMedia();
+  
+  // 清除所有在场的点击特效
+  clearAllClickEffects();
   
   // 保存当前播放的视频项
   currentOverlayMediaItem = item;

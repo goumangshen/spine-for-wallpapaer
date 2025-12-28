@@ -22,9 +22,9 @@ import { SpineAnimator } from './animator';
 import { Configs, SpineMeshConfig, OverlayMediaItem, SlotHideRule } from './config.type';
 import { ASSET_PATH } from './constants';
 import * as Scene from './initScene';
-import { switchBackgroundImage, setMeshBackgroundImage } from './initScene';
+import { switchBackgroundImage, setMeshBackgroundImage, setMeshCanvasAlignment } from './initScene';
 import { playOverlayMediaItem, setOverlayMediaEndCallback, setOverlayMediaStartCallback } from './overlayMedia';
-import { handleClickEffect, preloadClickEffectImages } from './clickEffect';
+import { handleClickEffect, preloadClickEffectImages, areClickEffectsActive } from './clickEffect';
 
 const main = async () => {
   const configs: Configs = await (await fetch('./assets/config.json')).json();
@@ -272,11 +272,19 @@ const main = async () => {
               ? currentActiveMeshConfig!.overlayMedia.filter((it: OverlayMediaItem) => !!it?.videoFileName)
               : [currentActiveMeshConfig!.overlayMedia].filter((it: OverlayMediaItem) => !!it?.videoFileName))
           : [];
-        conditionalOverlayMediaItems = allOverlayMediaItemsForConditional.filter((it: OverlayMediaItem) => !!it?.triggerSlotsWhenHidden);
+        conditionalOverlayMediaItems = allOverlayMediaItemsForConditional.filter((it: OverlayMediaItem) => 
+          !!it?.triggerSlotsWhenHidden || !!it?.triggerEffectsWhenActive
+        );
         
         // 性能优化：预加载点击特效图片
         if (currentActiveMeshConfig!.clickEffects) {
           preloadClickEffectImages(currentActiveMeshConfig!.clickEffects);
+        }
+        // 预加载插槽专属点击特效图片
+        if (currentActiveMeshConfig!.slotClickEffects) {
+          currentActiveMeshConfig!.slotClickEffects.forEach(slotEffectConfig => {
+            preloadClickEffectImages(slotEffectConfig.effects);
+          });
         }
         
         // 设置canvas点击事件（从生效的 mesh 配置中读取相关配置）
@@ -294,6 +302,14 @@ const main = async () => {
           currentActiveMeshConfig!.backgroundImage,
           configs.backgroundImage,
           true // 使用过渡效果
+        );
+        
+        // 设置 mesh 的 canvas 对齐（优先使用 mesh 配置的对齐值，否则使用全局对齐值）
+        setMeshCanvasAlignment(
+          currentActiveMeshConfig!.canvasAlignLeftPercent,
+          currentActiveMeshConfig!.canvasAlignRightPercent,
+          configs.canvasAlignLeftPercent,
+          configs.canvasAlignRightPercent
         );
         
         // 清除待切换标记
@@ -365,11 +381,19 @@ const main = async () => {
             ? currentActiveMeshConfig!.overlayMedia.filter((it: OverlayMediaItem) => !!it?.videoFileName)
             : [currentActiveMeshConfig!.overlayMedia].filter((it: OverlayMediaItem) => !!it?.videoFileName))
         : [];
-      conditionalOverlayMediaItems = allOverlayMediaItemsForConditional.filter((it: OverlayMediaItem) => !!it?.triggerSlotsWhenHidden);
+      conditionalOverlayMediaItems = allOverlayMediaItemsForConditional.filter((it: OverlayMediaItem) => 
+        !!it?.triggerSlotsWhenHidden || !!it?.triggerEffectsWhenActive
+      );
       
       // 性能优化：预加载点击特效图片
       if (currentActiveMeshConfig!.clickEffects) {
         preloadClickEffectImages(currentActiveMeshConfig!.clickEffects);
+      }
+      // 预加载插槽专属点击特效图片
+      if (currentActiveMeshConfig!.slotClickEffects) {
+        currentActiveMeshConfig!.slotClickEffects.forEach(slotEffectConfig => {
+          preloadClickEffectImages(slotEffectConfig.effects);
+        });
       }
       
       // 设置canvas点击事件（从生效的 mesh 配置中读取相关配置）
@@ -387,6 +411,14 @@ const main = async () => {
         currentActiveMeshConfig!.backgroundImage,
         configs.backgroundImage,
         false // 初始化时不使用过渡效果
+      );
+
+      // 设置 mesh 的 canvas 对齐（优先使用 mesh 配置的对齐值，否则使用全局对齐值）
+      setMeshCanvasAlignment(
+        currentActiveMeshConfig!.canvasAlignLeftPercent,
+        currentActiveMeshConfig!.canvasAlignRightPercent,
+        configs.canvasAlignLeftPercent,
+        configs.canvasAlignRightPercent
       );
 
       requestAnimationFrame(render);
@@ -422,28 +454,48 @@ const main = async () => {
       frameCount = 0;
       
       // 检查条件触发的 overlayMedia
-      if (spineAnimatorInstance && spineAnimatorInstance.slotController) {
-        for (const item of conditionalOverlayMediaItems) {
-          // 如果已经触发过，跳过
-          if (triggeredConditionalVideos.has(item)) {
-            continue;
+      for (const item of conditionalOverlayMediaItems) {
+        // 如果已经触发过，跳过
+        if (triggeredConditionalVideos.has(item)) {
+          continue;
+        }
+        
+        let shouldTrigger = false;
+        
+        // 检查插槽隐藏条件
+        if (item.triggerSlotsWhenHidden) {
+          if (spineAnimatorInstance && spineAnimatorInstance.slotController) {
+            const triggerSlots = Array.isArray(item.triggerSlotsWhenHidden)
+              ? item.triggerSlotsWhenHidden
+              : [item.triggerSlotsWhenHidden];
+            
+            // 检查所有插槽是否都隐藏
+            const allSlotsHidden = triggerSlots.every(slotName => 
+              spineAnimatorInstance.slotController.isSlotHidden(slotName)
+            );
+            
+            if (allSlotsHidden) {
+              shouldTrigger = true;
+            }
           }
+        }
+        
+        // 检查点击特效活跃条件
+        if (!shouldTrigger && item.triggerEffectsWhenActive) {
+          const triggerEffects = Array.isArray(item.triggerEffectsWhenActive)
+            ? item.triggerEffectsWhenActive
+            : [item.triggerEffectsWhenActive];
           
-          // 获取需要检查的插槽列表
-          const triggerSlots = Array.isArray(item.triggerSlotsWhenHidden)
-            ? item.triggerSlotsWhenHidden
-            : [item.triggerSlotsWhenHidden];
-          
-          // 检查所有插槽是否都隐藏
-          const allSlotsHidden = triggerSlots.every(slotName => 
-            spineAnimatorInstance!.slotController.isSlotHidden(slotName)
-          );
-          
-          // 如果所有插槽都隐藏，触发视频播放
-          if (allSlotsHidden) {
-            triggeredConditionalVideos.add(item);
-            playOverlayMediaItem(item, configs, backgroundMusic);
+          // 检查所有特效是否都活跃
+          if (areClickEffectsActive(triggerEffects)) {
+            shouldTrigger = true;
           }
+        }
+        
+        // 如果满足触发条件，播放视频
+        if (shouldTrigger) {
+          triggeredConditionalVideos.add(item);
+          playOverlayMediaItem(item, configs, backgroundMusic);
         }
       }
     }
@@ -528,6 +580,9 @@ function setupCanvasClickHandlers(
         : [activeMeshConfig.backgroundImageSwitchSlot])
     : [];
   
+  // 从生效的 mesh 配置中获取插槽专属点击特效配置
+  const slotClickEffects = activeMeshConfig.slotClickEffects || [];
+  
   // 存储每个插槽的恢复定时器（用于自动恢复显示）
   const slotRestoreTimers: Map<string, number> = new Map();
   
@@ -573,19 +628,27 @@ function setupCanvasClickHandlers(
 
     // 检查是否点击在控制插槽上
     if (spineAnimator && spineAnimator.slotController) {
-      // 检查是否点击在“全屏媒体覆盖层”触发插槽上
+      // 检查是否点击在"全屏媒体覆盖层"触发插槽上（支持多个插槽）
       for (const item of overlayMediaItems) {
-        if (
-          spineAnimator.slotController.checkSlotClick(
-            x,
-            y,
-            canvasWidth,
-            canvasHeight,
-            item.triggerSlot
-          )
-        ) {
-          playOverlayMediaItem(item, configs, backgroundMusic);
-          return;
+        if (!item.triggerSlot) continue;
+        
+        const triggerSlots = Array.isArray(item.triggerSlot) 
+          ? item.triggerSlot 
+          : [item.triggerSlot];
+        
+        for (const triggerSlot of triggerSlots) {
+          if (
+            spineAnimator.slotController.checkSlotClick(
+              x,
+              y,
+              canvasWidth,
+              canvasHeight,
+              triggerSlot
+            )
+          ) {
+            playOverlayMediaItem(item, configs, backgroundMusic);
+            return;
+          }
         }
       }
 
@@ -692,6 +755,23 @@ function setupCanvasClickHandlers(
         }
       }
 
+      // 检查是否点击在配置了专属点击特效的插槽上
+      for (const slotEffectConfig of slotClickEffects) {
+        const triggerSlots = Array.isArray(slotEffectConfig.triggerSlots)
+          ? slotEffectConfig.triggerSlots
+          : [slotEffectConfig.triggerSlots];
+        
+        for (const triggerSlot of triggerSlots) {
+          if (spineAnimator.slotController.checkSlotClick(x, y, canvasWidth, canvasHeight, triggerSlot)) {
+            // 点击在配置了专属特效的插槽上，触发专属特效
+            // 使用屏幕坐标（clientX, clientY）用于点击特效显示
+            handleClickEffect(clientX, clientY, slotEffectConfig.effects);
+            console.log(`Slot-specific click effect triggered for slot: ${triggerSlot}`);
+            return;
+          }
+        }
+      }
+
     }
   };
 
@@ -721,7 +801,31 @@ function setupCanvasClickHandlers(
         clientY = touch.clientY;
       }
 
-      // 直接使用页面坐标显示特效
+      // 检查是否点击在配置了专属特效的插槽上
+      // 如果点击在配置的插槽上，不触发全局特效
+      if (spineAnimator && spineAnimator.slotController) {
+        const rect = canvas.getBoundingClientRect();
+        const canvasWidth = configs.width ?? 2048;
+        const canvasHeight = configs.height ?? 2048;
+        const x = ((clientX - rect.left) / rect.width) * canvasWidth;
+        const y = ((clientY - rect.top) / rect.height) * canvasHeight;
+        
+        // 检查是否点击在配置了专属特效的插槽上
+        for (const slotEffectConfig of slotClickEffects) {
+          const triggerSlots = Array.isArray(slotEffectConfig.triggerSlots)
+            ? slotEffectConfig.triggerSlots
+            : [slotEffectConfig.triggerSlots];
+          
+          for (const triggerSlot of triggerSlots) {
+            if (spineAnimator.slotController.checkSlotClick(x, y, canvasWidth, canvasHeight, triggerSlot)) {
+              // 点击在配置的插槽上，不触发全局特效
+              return;
+            }
+          }
+        }
+      }
+
+      // 没有点击在配置的插槽上，触发全局特效
       handleClickEffect(clientX, clientY, activeMeshConfig.clickEffects);
     };
 

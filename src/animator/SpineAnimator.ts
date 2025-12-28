@@ -236,7 +236,7 @@ export class SpineAnimator {
     // 第一个动画使用 setAnimation，后续动画使用 addAnimation 进行平滑混合
     if (this.isFirstAnimation) {
       // 第一个动画，使用 setAnimation
-      this.skeletonMesh.state.setAnimation(0, selectedAnimation.name, true);
+    this.skeletonMesh.state.setAnimation(0, selectedAnimation.name, true);
       this.isFirstAnimation = false;
     } else {
       // 后续动画，使用 addAnimation 进行平滑混合
@@ -402,7 +402,7 @@ export class SpineAnimator {
     // 播放选中的动画（循环播放）
     // 语音动画切换也使用 addAnimation 实现平滑过渡
     if (this.isFirstAnimation) {
-      this.skeletonMesh.state.setAnimation(0, selectedVoiceAnimation.name, true);
+    this.skeletonMesh.state.setAnimation(0, selectedVoiceAnimation.name, true);
       this.isFirstAnimation = false;
     } else {
       this.skeletonMesh.state.addAnimation(0, selectedVoiceAnimation.name, true, 0);

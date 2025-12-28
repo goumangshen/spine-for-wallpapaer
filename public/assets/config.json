@@ -11,21 +11,11 @@
   ],
   "animationMix": {
     "enabled": false,  
-    "duration": 0.5   
+    "duration": 0.2   
   },
   "backgroundImageFit": "width",
   "canvasAlignLeftPercent": -1,
   "canvasAlignRightPercent": 0,
-  "responsiveLayout": {
-    "enabled": false,
-    "mode": "height",
-    "baseCanvasHeight": 700,
-    "positionEnabled": true,
-    "scaleEnabled": true,
-    "invertPosition": false,
-    "invertScale": true,
-    "scaleDamp": 0.3
-  },
   "backgroundMusic": {
     "fileName": "bg.flac",
     "volume": 0.2
@@ -62,33 +52,36 @@
         "y": 0,
         "z": -1200
       },
-      "hiddenSlots": ["hj_di"],
+      "hiddenSlots": [],
       "controlSlots": {
         "backgroundMusic": [
-          "btz_jie1"
+          "sanmu_12"
         ],
         "voiceAnimation": [
-          "btz_jie4"
+          "wuwang_39","wuwang_40"
         ]
       },
       "clickEffects": [
         {
           "imageFileName": "00.png",
           "weight": 50,
-          "duration": 500,
-          "scale": 0.25
+          "duration": 10000,
+          "scale": 0.25,
+          "effect": 1
         },
         {
           "imageFileName": "01.png",
           "weight": 50,
-          "duration": 500,
-          "scale": 0.25
+          "duration": 10000,
+          "scale": 0.5,
+          "effect": 2
         }
       ],
       "overlayMedia": [
         {
-          "triggerSlot": "btz_shjizi",
-          "videoFileName": "1bh.webm",
+          "triggerSlot": ["btz_shjizi"],
+          "triggerEffectsWhenActive": ["00.png", "01.png"],
+          "videoFileName": "full.webm",
           "audioFileName": "h1z.mp3",
           "switchToMeshIndex": 1,
           "pauseBackgroundMusic": false,
@@ -96,214 +89,9 @@
           "videoVolume": 1.0,
           "audioVolume": 1.0,
           "loopVideo": false
-        },
-        {
-          "triggerSlotsWhenHidden": [
-            "shizi_11",
-            "shizi_15",
-            "shizi_18"
-          ],
-          "videoFileName": "1bTO2h.webm",
-          "audioFileName": "h2z.mp3",
-          "switchToMeshIndex": 3,
-          "pauseBackgroundMusic": false,
-          "closeOnClick": false,
-          "videoVolume": 1.0,
-          "audioVolume": 1.0,
-          "loopVideo": false
-        }
-      ],
-      "slotHideRules": [
-        {
-          "triggerSlots": "shizi_11",
-          "hideSlots": [
-            "shizi_11"
-          ],
-          "hideDuration": 10000
-        },
-        {
-          "triggerSlots": "shizi_15",
-          "hideSlots": [
-            "shizi_15"
-          ],
-          "hideDuration": 10000
-        },
-        {
-          "triggerSlots": "shizi_18",
-          "hideSlots": [
-            "shizi_18"
-          ],
-          "hideDuration": 10000
-        }
-      ]
-    },
-    {
-      "type": "spine",
-      "skeletonFileName": "2520501.skel",
-      "atlasFileName": "2520501.atlas",
-      "backgroundImage": "bg2.jpg",
-      "animations": [
-        {
-          "name": "battlestand",
-          "weight": 80
-        },
-        {
-          "name": "casting1",
-          "weight": 2,
-          "audioFileName": "h3.mp3"
-        },
-        {
-          "name": "born_break",
-          "weight": 3,
-          "audioFileName": "h2.mp3"
-        },
-        {
-          "name": "idle1",
-          "weight": 15,
-          "audioFileName": "h1.mp3"
-        }
-      ],
-      "scale": 5.5,
-      "position": {
-        "x": 0,
-        "y": 0,
-        "z": -1200
-      },
-      "hiddenSlots": ["hj_di2"],
-      "controlSlots": {
-        "backgroundMusic": [
-          "htz_jie1"
-        ],
-        "voiceAnimation": [
-          "htz_jie3"
-        ]
-      },
-      "clickEffects": [
-        {
-          "imageFileName": "10.png",
-          "weight": 50,
-          "duration": 500,
-          "scale": 0.25
-        },
-        {
-          "imageFileName": "11.png",
-          "weight": 50,
-          "duration": 500,
-          "scale": 0.25
-        }
-      ],
-      "overlayMedia": [
-        {
-          "triggerSlot": "btz_shjizi2",
-          "videoFileName": "1hb.webm",
-          "audioFileName": "b1z.mp3",
-          "switchToMeshIndex": 0,
-          "pauseBackgroundMusic": false,
-          "closeOnClick": false,
-          "videoVolume": 1.0,
-          "audioVolume": 1.0,
-          "loopVideo": false
-        }
-      ],
-      "slotHideRules": [
-      ]
-    },
-    {
-      "type": "spine",
-      "skeletonFileName": "2520599.skel",
-      "atlasFileName": "2520599.atlas",
-      "backgroundImage": "bg3.png",
-      "animations": [
-        {
-          "name": "battlestand",
-          "weight": 80
-        },
-        {
-          "name": "casting1",
-          "weight": 2,
-          "audioFileName": "b3.mp3"
-        },
-        {
-          "name": "born_break",
-          "weight": 3,
-          "audioFileName": "b2.mp3"
-        },
-        {
-          "name": "idle1",
-          "weight": 15,
-          "audioFileName": "b1.mp3"
-        }
-      ],
-      "scale": 5.5,
-      "position": {
-        "x": 0,
-        "y": 0,
-        "z": -1200
-      },
-      "hiddenSlots": [],
-      "controlSlots": {
-        "backgroundMusic": [
-          "shangshen_1"
-        ],
-        "voiceAnimation": [
-          "shangshen_2"
-        ]
-      },
-      "clickEffects": [
-        {
-          "imageFileName": "20.png",
-          "weight": 50,
-          "duration": 500,
-          "scale": 0.25
-        },
-        {
-          "imageFileName": "21.png",
-          "weight": 50,
-          "duration": 500,
-          "scale": 0.25
-        }
-      ],
-      "overlayMedia": [
-        {
-          "triggerSlotsWhenHidden": [
-            "beijing_4",
-            "beijing_5",
-            "beijing_6"
-          ],
-          "videoFileName": "2bh.webm",
-          "audioFileName": "h2z.mp3",
-          "switchToMeshIndex": 3,
-          "pauseBackgroundMusic": false,
-          "closeOnClick": false,
-          "videoVolume": 1.0,
-          "audioVolume": 1.0,
-          "loopVideo": false
-        }
-      ],
-      "slotHideRules": [
-        {
-          "triggerSlots": "beijing_4",
-          "hideSlots": [
-            "beijing_4"
-          ],
-          "hideDuration": 10000
-        },
-        {
-          "triggerSlots": "beijing_5",
-          "hideSlots": [
-            "beijing_5"
-          ],
-          "hideDuration": 10000
-        },
-        {
-          "triggerSlots": "beijing_6",
-          "hideSlots": [
-            "beijing_6"
-          ],
-          "hideDuration": 10000
         }
       ]
     }
   ],
-  "activeMeshIndex": 2
+  "activeMeshIndex": 0
 }

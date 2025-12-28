@@ -121,13 +121,17 @@ export type ClickEffectConfig = {
   duration?: number;
   /** 可选：特效缩放比例，默认 1.0 */
   scale?: number;
+  /** 可选：附加的动画效果，0=无额外动画，1=摇晃（摇摆），2=放大缩小，默认 0 */
+  effect?: number;
 };
 
 export type OverlayMediaItem = {
-  /** 触发该功能的插槽名（点击触发），例如 "bj_ren9" */
-  triggerSlot?: string;
+  /** 触发该功能的插槽名（点击触发），例如 "bj_ren9"，支持一个或多个插槽 */
+  triggerSlot?: string | string[];
   /** 当这些插槽同时处于隐藏状态时触发（条件触发），支持一个或多个插槽 */
   triggerSlotsWhenHidden?: string | string[];
+  /** 当这些点击特效图片都存在于页面上还未消失时触发（条件触发），支持一个或多个特效图片文件名 */
+  triggerEffectsWhenActive?: string | string[];
   /** 全屏播放的视频文件名（相对于 assets 目录） */
   videoFileName: string;
   /** 可选：同步播放的音频文件名（相对于 assets 目录），例如 mp3 */
@@ -203,6 +207,13 @@ export type SpineMeshConfig = MeshConfig & {
   };
   /** 可选：点击特效配置 */
   clickEffects?: ClickEffectConfig[];
+  /** 可选：插槽专属点击特效配置（点击指定插槽时触发专属特效，不触发原有的全局点击特效） */
+  slotClickEffects?: Array<{
+    /** 触发该特效的插槽名称（一个或多个，只要点击其中任意一个即可触发） */
+    triggerSlots: string | string[];
+    /** 特效配置列表（一个或多个，支持权重和持续时间） */
+    effects: ClickEffectConfig[];
+  }>;
   /** 可选：点击指定插槽后，弹出"全屏覆盖层"同时播放视频与音频（覆盖背景与 canvas） */
   overlayMedia?: OverlayMediaItem | OverlayMediaItem[];
   /** 可选：插槽隐藏规则配置（可配置多个规则） */
@@ -211,5 +222,22 @@ export type SpineMeshConfig = MeshConfig & {
   backgroundImageSwitchSlot?: string | string[];
   /** 可选：mesh 绑定的背景图片（字符串或字符串数组），如果配置了此项，优先使用此背景图片；否则使用全局的 backgroundImage */
   backgroundImage?: string | string[];
+  /**
+   * 可选：canvas 相对"背景图片实际显示区域"的左对齐百分比
+   * - 0~1：按比例（例如 0.17 表示 17%）
+   * - 0~100：按百分数（例如 17 表示 17%）
+   * - 非法值时，如果右对齐也非法，则canvas居中
+   * - 如果配置了此项，优先使用此值；否则使用全局的 canvasAlignLeftPercent
+   */
+  canvasAlignLeftPercent?: number;
+  /**
+   * 可选：canvas 相对"背景图片实际显示区域"的右对齐百分比
+   * - 0~1：按比例（例如 0.17 表示 17%）
+   * - 0~100：按百分数（例如 17 表示 17%）
+   * - 非法值时，如果左对齐也非法，则canvas居中
+   * - 当左对齐和右对齐都有效时，优先使用左对齐
+   * - 如果配置了此项，优先使用此值；否则使用全局的 canvasAlignRightPercent
+   */
+  canvasAlignRightPercent?: number;
 };
 

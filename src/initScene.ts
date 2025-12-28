@@ -474,6 +474,58 @@ export const setMeshBackgroundImage = (
 };
 
 /**
+ * 设置 mesh 的 canvas 对齐（优先使用 mesh 配置的对齐值，否则使用全局对齐值）
+ * @param meshAlignLeftPercent mesh 配置的左对齐百分比（可选）
+ * @param meshAlignRightPercent mesh 配置的右对齐百分比（可选）
+ * @param globalAlignLeftPercent 全局配置的左对齐百分比（可选）
+ * @param globalAlignRightPercent 全局配置的右对齐百分比（可选）
+ */
+export const setMeshCanvasAlignment = (
+  meshAlignLeftPercent?: number,
+  meshAlignRightPercent?: number,
+  globalAlignLeftPercent?: number,
+  globalAlignRightPercent?: number
+) => {
+  // 优先使用 mesh 的对齐配置，否则使用全局的对齐配置
+  let targetAlignLeftPercent: number | undefined;
+  let targetAlignRightPercent: number | undefined;
+  
+  if (meshAlignLeftPercent !== undefined) {
+    // mesh 配置了左对齐，优先使用
+    targetAlignLeftPercent = meshAlignLeftPercent;
+  } else if (globalAlignLeftPercent !== undefined) {
+    // mesh 没有配置左对齐，使用全局的左对齐
+    targetAlignLeftPercent = globalAlignLeftPercent;
+  }
+  
+  if (meshAlignRightPercent !== undefined) {
+    // mesh 配置了右对齐，优先使用
+    targetAlignRightPercent = meshAlignRightPercent;
+  } else if (globalAlignRightPercent !== undefined) {
+    // mesh 没有配置右对齐，使用全局的右对齐
+    targetAlignRightPercent = globalAlignRightPercent;
+  }
+  
+  // 规范化对齐值并更新全局变量（用于 resize 事件）
+  canvasAlignLeftPercent = targetAlignLeftPercent !== undefined
+    ? normalizePercentToRatio(targetAlignLeftPercent)
+    : normalizePercentToRatio(DEFAULT_CANVAS_ALIGN_LEFT_PERCENT);
+  canvasAlignRightPercent = targetAlignRightPercent !== undefined
+    ? normalizePercentToRatio(targetAlignRightPercent)
+    : null;
+  
+  // 应用对齐
+  if (canvasElement) {
+    void alignCanvasToBackgroundImage(
+      canvasElement,
+      canvasAlignLeftPercent,
+      canvasAlignRightPercent,
+      backgroundImageFit
+    );
+  }
+};
+
+/**
  * 暂停 canvas 渲染（用于视频播放时释放 GPU 资源）
  */
 export const pauseCanvas = () => {
