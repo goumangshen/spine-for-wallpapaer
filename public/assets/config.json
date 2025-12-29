@@ -10,8 +10,8 @@
     "bg.png"
   ],
   "animationMix": {
-    "enabled": false,  
-    "duration": 0.2   
+    "enabled": false,
+    "duration": 0.2
   },
   "backgroundImageFit": "width",
   "canvasAlignLeftPercent": -1,
@@ -33,17 +33,17 @@
         {
           "name": "casting1",
           "weight": 2,
-          "audioFileName": "b3.mp3"
+          "audioFileName": "3.mp3"
         },
         {
           "name": "born_break",
           "weight": 3,
-          "audioFileName": "b2.mp3"
+          "audioFileName": "2.mp3"
         },
         {
           "name": "idle1",
           "weight": 15,
-          "audioFileName": "b1.mp3"
+          "audioFileName": "1.mp3"
         }
       ],
       "scale": 8.7,
@@ -57,33 +57,95 @@
         "backgroundMusic": [
           "sanmu_12"
         ],
-        "voiceAnimation": [
-          "wuwang_39","wuwang_40"
-        ]
+        "voiceAnimation": ["sanmu_1"]
       },
       "clickEffects": [
         {
-          "imageFileName": "00.png",
-          "weight": 50,
-          "duration": 10000,
-          "scale": 0.25,
-          "effect": 1
+          "imageFileName": "1.png",
+          "weight": 40,
+          "duration": 500,
+          "scale": 0.15,
+          "effect": 0
         },
         {
-          "imageFileName": "01.png",
-          "weight": 50,
+          "imageFileName": "2.png",
+          "weight": 40,
+          "duration": 500,
+          "scale": 0.15,
+          "effect": 0
+        },
+        {
+          "imageFileName": "3.png",
+          "weight": 10,
           "duration": 10000,
-          "scale": 0.5,
+          "scale": 0.4,
           "effect": 2
+        },
+        {
+          "imageFileName": "4.png",
+          "weight": 5,
+          "duration": 10000,
+          "scale": 0.4,
+          "effect": 2
+        },
+        {
+          "imageFileName": "5.png",
+          "weight": 5,
+          "duration": 10000,
+          "scale": 0.4,
+          "effect": 2
+        }
+      ],
+      "specialEffects": [
+        {
+          "triggerEffectsWhenActive": [
+            "3.png",
+            "4.png"
+          ],
+          "image1FileName": "e1.png",
+          "image2FileName": "e2.png",
+          "image3FileName": "e3.png",
+          "audioFileName": "voice.mp3",
+          "animationName": "casting1",
+          "image1Duration": 400,
+          "scaleDuration": 100,
+          "fadeOutDuration": 1500,
+          "image1Scale": 0.82,
+          "image2InitialScale": 2.0,
+          "image2FinalScale": 0.65,
+          "image3InitialScale": 0.5,
+          "image3FinalScale": 1.5,
+          "image2AlignPercent": 60
+        },
+        {
+          "triggerEffectsWhenActive": [
+            "3.png",
+            "5.png"
+          ],
+          "image1FileName": "e1.png",
+          "image2FileName": "e2.png",
+          "image3FileName": "e3.png",
+          "audioFileName": "voice.mp3",
+          "animationName": "casting1",
+          "image1Duration": 400,
+          "scaleDuration": 100,
+          "fadeOutDuration": 1500,
+          "image1Scale": 0.82,
+          "image2InitialScale": 2.0,
+          "image2FinalScale": 0.65,
+          "image3InitialScale": 0.5,
+          "image3FinalScale": 1.5,
+          "image2AlignPercent": 60
         }
       ],
       "overlayMedia": [
         {
-          "triggerSlot": ["btz_shjizi"],
-          "triggerEffectsWhenActive": ["00.png", "01.png"],
+          "triggerSlot": [
+            "wuwan_39",
+            "wuwan_40"
+          ],
           "videoFileName": "full.webm",
-          "audioFileName": "h1z.mp3",
-          "switchToMeshIndex": 1,
+          "audioFileName": "full.mp3",
           "pauseBackgroundMusic": false,
           "closeOnClick": false,
           "videoVolume": 1.0,

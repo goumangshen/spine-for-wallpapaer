@@ -27,7 +27,7 @@ import { isOverlayMediaActive, OVERLAY_MEDIA_ACTIVE_EVENT } from '@src/overlayMe
 import { getResponsiveLayoutParams } from '@src/responsiveLayout';
 
 export class SpineAnimator {
-  private skeletonMesh: threejsSpine.SkeletonMesh;
+  public readonly skeletonMesh: threejsSpine.SkeletonMesh; // 公开 skeletonMesh 以便外部控制动画
   private animations: SpineAnimationConfig[];
   private currentAnimationIndex: number = -1;
   private audioElements: Map<string, HTMLAudioElement> = new Map();

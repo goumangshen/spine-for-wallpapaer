@@ -103,6 +103,9 @@ function recycleEffectElement(element: HTMLImageElement): void {
   element.style.transform = '';
   element.style.left = '';
   element.style.top = '';
+  element.style.animation = ''; // 清除动画
+  element.style.transition = ''; // 清除过渡
+  element.style.willChange = ''; // 清除 willChange
   element.src = '';
   
   // 如果对象池未满，回收元素
@@ -186,6 +189,11 @@ export function showClickEffect(
   
   // 根据 effect 配置应用附加动画效果
   const effect = effectConfig.effect ?? 0;
+  
+  // 确保清除之前的动画（特别是从对象池获取的元素）
+  if (effect === 0) {
+    effectElement.style.animation = ''; // 明确清除动画
+  }
   
   if (effect === 1) {
     // 摇晃（摇摆）效果
@@ -338,6 +346,10 @@ export function clearAllClickEffects(): void {
   // 遍历所有活跃的特效元素
   for (const [imageFileName, activeSet] of activeEffectElements.entries()) {
     for (const element of activeSet) {
+      // 立即停止所有动画和过渡
+      element.style.animation = '';
+      element.style.transition = '';
+      
       // 立即移除元素（不等待动画完成）
       if (element.parentNode) {
         element.parentNode.removeChild(element);
@@ -348,6 +360,7 @@ export function clearAllClickEffects(): void {
       element.style.transform = '';
       element.style.left = '';
       element.style.top = '';
+      element.style.willChange = '';
       element.src = '';
       
       // 回收到对象池（如果对象池未满）

@@ -155,6 +155,43 @@ export type OverlayMediaItem = {
   switchToMeshIndex?: number;
 };
 
+export type SpecialEffectItem = {
+  /** 触发该功能的插槽名（点击触发），例如 "bj_ren9"，支持一个或多个插槽 */
+  triggerSlot?: string | string[];
+  /** 当这些插槽同时处于隐藏状态时触发（条件触发），支持一个或多个插槽 */
+  triggerSlotsWhenHidden?: string | string[];
+  /** 当这些点击特效图片都存在于页面上还未消失时触发（条件触发），支持一个或多个特效图片文件名 */
+  triggerEffectsWhenActive?: string | string[];
+  /** 第一张图片文件名（相对于 assets 目录） 宽高应为460*900*/
+  image1FileName: string;
+  /** 第二张图片文件名（相对于 assets 目录） */
+  image2FileName: string;
+  /** 第三张图片文件名（相对于 assets 目录） */
+  image3FileName: string;
+  /** 可选：第一张图片显示持续时间（毫秒），默认 500 */
+  image1Duration?: number;
+  /** 可选：第一张图片缩放比例，默认 1.0 */
+  image1Scale?: number;
+  /** 可选：第二、三张图片缩放动画持续时间（毫秒），默认 800 */
+  scaleDuration?: number;
+  /** 可选：渐隐消失持续时间（毫秒），默认 500 */
+  fadeOutDuration?: number;
+  /** 可选：第二张图片初始缩放比例，默认 5.0 */
+  image2InitialScale?: number;
+  /** 可选：第二张图片最终缩放比例，默认 1.0 */
+  image2FinalScale?: number;
+  /** 可选：第三张图片初始缩放比例，默认 0.5 */
+  image3InitialScale?: number;
+  /** 可选：第三张图片最终缩放比例，默认 1.0 */
+  image3FinalScale?: number;
+  /** 可选：第二张图片下端相对于第三张图片的对齐位置（百分比，0-100），0表示顶部，50表示中心，100表示底部，默认 50 */
+  image2AlignPercent?: number;
+  /** 可选：特效开始时播放的语音文件名（相对于 assets 目录），语音会一直播放到结束，不会在特效结束时停止 */
+  audioFileName?: string;
+  /** 可选：特效开始时播放的 Spine 动画名称，会立即停止当前动画并播放一次指定动画 */
+  animationName?: string;
+};
+
 export type ActionAnimation = {
   animationName: string;
   boneName: string;
@@ -216,6 +253,8 @@ export type SpineMeshConfig = MeshConfig & {
   }>;
   /** 可选：点击指定插槽后，弹出"全屏覆盖层"同时播放视频与音频（覆盖背景与 canvas） */
   overlayMedia?: OverlayMediaItem | OverlayMediaItem[];
+  /** 可选：特殊特效配置（三图片特效，触发规则与 overlayMedia 相同） */
+  specialEffects?: SpecialEffectItem | SpecialEffectItem[];
   /** 可选：插槽隐藏规则配置（可配置多个规则） */
   slotHideRules?: SlotHideRule[];
   /** 可选：点击指定插槽切换背景图片（滚动式切换） */

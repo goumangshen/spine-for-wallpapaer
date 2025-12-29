@@ -19,12 +19,13 @@
 
 import * as threejsSpine from 'threejs-spine-3.8-runtime-es6';
 import { SpineAnimator } from './animator';
-import { Configs, SpineMeshConfig, OverlayMediaItem, SlotHideRule } from './config.type';
+import { Configs, SpineMeshConfig, OverlayMediaItem, SlotHideRule, SpecialEffectItem } from './config.type';
 import { ASSET_PATH } from './constants';
 import * as Scene from './initScene';
 import { switchBackgroundImage, setMeshBackgroundImage, setMeshCanvasAlignment } from './initScene';
 import { playOverlayMediaItem, setOverlayMediaEndCallback, setOverlayMediaStartCallback } from './overlayMedia';
-import { handleClickEffect, preloadClickEffectImages, areClickEffectsActive } from './clickEffect';
+import { handleClickEffect, preloadClickEffectImages, areClickEffectsActive, clearAllClickEffects } from './clickEffect';
+import { playSpecialEffect } from './specialEffect';
 
 const main = async () => {
   const configs: Configs = await (await fetch('./assets/config.json')).json();
@@ -77,6 +78,10 @@ const main = async () => {
   // 条件触发的 overlayMedia 相关变量（需要在 render 函数中访问）
   let conditionalOverlayMediaItems: OverlayMediaItem[] = [];
   const triggeredConditionalVideos: Set<OverlayMediaItem> = new Set();
+  
+  // 条件触发的 specialEffects 相关变量（需要在 render 函数中访问）
+  let conditionalSpecialEffectItems: SpecialEffectItem[] = [];
+  const triggeredSpecialEffects: Set<SpecialEffectItem> = new Set();
   
   // 当前活动的 mesh 索引和配置
   let currentActiveMeshIndex = configs.activeMeshIndex ?? 0;
@@ -252,6 +257,8 @@ const main = async () => {
     
     // 清空条件触发视频标记
     triggeredConditionalVideos.clear();
+    // 清空条件触发特效标记
+    triggeredSpecialEffects.clear();
     
     // 使用预加载的资源管理器
     spineAssetManager = assetManager;
@@ -385,6 +392,16 @@ const main = async () => {
         !!it?.triggerSlotsWhenHidden || !!it?.triggerEffectsWhenActive
       );
       
+      // 从生效的 mesh 配置中获取条件触发的 specialEffects
+      const allSpecialEffectItems = currentActiveMeshConfig!.specialEffects
+        ? (Array.isArray(currentActiveMeshConfig!.specialEffects)
+            ? currentActiveMeshConfig!.specialEffects
+            : [currentActiveMeshConfig!.specialEffects])
+        : [];
+      conditionalSpecialEffectItems = allSpecialEffectItems.filter((it: SpecialEffectItem) => 
+        !!it?.triggerSlotsWhenHidden || !!it?.triggerEffectsWhenActive
+      );
+      
       // 性能优化：预加载点击特效图片
       if (currentActiveMeshConfig!.clickEffects) {
         preloadClickEffectImages(currentActiveMeshConfig!.clickEffects);
@@ -498,6 +515,73 @@ const main = async () => {
           playOverlayMediaItem(item, configs, backgroundMusic);
         }
       }
+      
+      // 检查条件触发的 specialEffects
+      for (const item of conditionalSpecialEffectItems) {
+        // 如果已经触发过，跳过（避免同一帧重复触发）
+        if (triggeredSpecialEffects.has(item)) {
+          continue;
+        }
+        
+        let shouldTrigger = false;
+        let isSlotTriggered = false; // 标记是否由插槽隐藏触发
+        let isEffectTriggered = false; // 标记是否由点触特效触发
+        
+        // 检查插槽隐藏条件
+        if (item.triggerSlotsWhenHidden) {
+          if (spineAnimatorInstance && spineAnimatorInstance.slotController) {
+            const triggerSlots = Array.isArray(item.triggerSlotsWhenHidden)
+              ? item.triggerSlotsWhenHidden
+              : [item.triggerSlotsWhenHidden];
+            
+            // 检查所有插槽是否都隐藏
+            const allSlotsHidden = triggerSlots.every(slotName => 
+              spineAnimatorInstance.slotController.isSlotHidden(slotName)
+            );
+            
+            if (allSlotsHidden) {
+              shouldTrigger = true;
+              isSlotTriggered = true; // 标记为由插槽隐藏触发
+            }
+          }
+        }
+        
+        // 检查点击特效活跃条件
+        if (!shouldTrigger && item.triggerEffectsWhenActive) {
+          const triggerEffects = Array.isArray(item.triggerEffectsWhenActive)
+            ? item.triggerEffectsWhenActive
+            : [item.triggerEffectsWhenActive];
+          
+          // 检查所有特效是否都活跃
+          if (areClickEffectsActive(triggerEffects)) {
+            shouldTrigger = true;
+            isEffectTriggered = true; // 标记为由点触特效触发
+          }
+        }
+        
+        // 如果满足触发条件，播放特效
+        if (shouldTrigger) {
+          // 标记为已触发（避免同一帧重复触发）
+          triggeredSpecialEffects.add(item);
+          
+          // 如果是由插槽隐藏触发的，恢复所有隐藏的插槽
+          if (isSlotTriggered && spineAnimatorInstance && spineAnimatorInstance.slotController) {
+            spineAnimatorInstance.slotController.restoreAllHiddenSlots();
+          }
+          
+          // 如果是由点触特效触发的，清除所有在场的点触特效
+          if (isEffectTriggered) {
+            clearAllClickEffects();
+          }
+          
+          playSpecialEffect(item, spineAnimatorInstance);
+          
+          // 在下一帧清除触发标记，允许再次触发
+          requestAnimationFrame(() => {
+            triggeredSpecialEffects.delete(item);
+          });
+        }
+      }
     }
     
     Scene.renderer?.render(Scene.scene, Scene.camera);
@@ -569,6 +653,14 @@ function setupCanvasClickHandlers(
   
   // 分离点击触发的和条件触发的 overlayMedia
   const overlayMediaItems = allOverlayMediaItems.filter((it: OverlayMediaItem) => !!it?.triggerSlot);
+  
+  // 从生效的 mesh 配置中获取点击触发的 specialEffects
+  const allSpecialEffectItems = activeMeshConfig.specialEffects
+    ? (Array.isArray(activeMeshConfig.specialEffects)
+        ? activeMeshConfig.specialEffects
+        : [activeMeshConfig.specialEffects])
+    : [];
+  const clickTriggerSpecialEffectItems = allSpecialEffectItems.filter((it: SpecialEffectItem) => !!it?.triggerSlot);
   
   // 从生效的 mesh 配置中获取插槽隐藏规则
   const slotHideRules = activeMeshConfig.slotHideRules || [];
@@ -647,6 +739,31 @@ function setupCanvasClickHandlers(
             )
           ) {
             playOverlayMediaItem(item, configs, backgroundMusic);
+            return;
+          }
+        }
+      }
+
+      // 检查是否点击在特殊特效触发插槽上（支持多个插槽）
+      for (const item of clickTriggerSpecialEffectItems) {
+        if (!item.triggerSlot) continue;
+        
+        const triggerSlots = Array.isArray(item.triggerSlot) 
+          ? item.triggerSlot 
+          : [item.triggerSlot];
+        
+        for (const triggerSlot of triggerSlots) {
+          if (
+            spineAnimator.slotController.checkSlotClick(
+              x,
+              y,
+              canvasWidth,
+              canvasHeight,
+              triggerSlot
+            )
+          ) {
+            playSpecialEffect(item, spineAnimator);
+            console.log(`Special effect triggered for slot: ${triggerSlot}`);
             return;
           }
         }
