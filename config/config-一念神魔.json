@@ -1,0 +1,229 @@
+{
+  "width": 4000,
+  "height": 1920,
+  "backgroundImage": [
+    "bg.jpg"
+  ],
+  "animationMix": {
+    "enabled": false,
+    "duration": 0.2
+  },
+  "backgroundImageFit": "auto",
+  "canvasAlignLeftPercent": -1,
+  "canvasAlignRightPercent": -1,
+  "canvasEdgeTransition": 1,
+  "backgroundMusic": {
+    "fileName": "bg.flac",
+    "volume": 0.1
+  },
+  "specialEffectLibrary":[
+    {
+      "type":2,
+      "image1FileName": "p1.webp",
+      "image2FileName": "e1.png",
+      "image3FileName": "t1.png",
+      "audioFileName": "p1.mp3",
+      "image1Scale":0.8,
+      "image1Duration": 400,
+      "scaleDuration": 100,
+      "fadeOutDuration": 1500
+    },
+    {
+      "type":2,
+      "image1FileName": "s.png",
+      "image2FileName": "e0.png",
+      "image3FileName": "t0.png",
+      "audioFileName": "p2.mp3",
+      "image1Scale":0.6,
+      "image1Duration": 1,
+      "scaleDuration": 100,
+      "fadeOutDuration": 1500
+    },
+    {
+      "type":1,
+      "image1FileName": "cm1.png",
+      "audioFileName": "cme.mp3",
+      "image1Scale":0.6,
+      "image1Duration": 2000,
+      "fadeOutDuration": 500
+    }
+  ],
+  "meshes": [
+    {
+      "type": "spine",
+      "jsonFileName":"6020301.json",
+      "atlasFileName": "6020301.atlas",
+      "animations": [
+        {
+          "name": "battlestand",
+          "weight": 100
+        }
+      ],
+      "scale": 6,
+      "position": {
+        "x": -300,
+        "y": 0,
+        "z": -1200
+      },
+      "controlSlots": {
+        "backgroundMusic": [
+          "pingzi2"
+        ]
+      },
+      "clickEffects": [
+        {
+          "imageFileName": "d11.png",
+          "weight": 23,
+          "duration": 500,
+          "scale": 0.2,
+          "effect": 0
+        },
+        {
+          "imageFileName": "d12.png",
+          "weight": 23,
+          "duration": 500,
+          "scale": 0.3,
+          "effect": 0
+        },
+        {
+          "imageFileName": "d13.png",
+          "weight": 4,
+          "duration": 500,
+          "scale": 0.25,
+          "effect": 0
+        },
+        {
+          "imageFileName": "d21.png",
+          "weight": 23,
+          "duration": 500,
+          "scale": 0.6,
+          "effect": 0
+        },
+        {
+          "imageFileName": "d22.png",
+          "weight": 23,
+          "duration": 500,
+          "scale": 0.3,
+          "effect": 0
+        },
+        {
+          "imageFileName": "d23.png",
+          "weight": 4,
+          "duration": 500,
+          "scale": 0.25,
+          "effect": 0
+        }
+      ],
+      "specialEffectTriggers":[
+        {
+        "triggerSlot":["#shewei","she1","she2","she3","she12","she11","shetou"],
+        "effectIndices":[0]
+        },
+        {
+          "triggerSlot":["cimu_qiu"],
+          "effectIndices":[1,2]
+        }
+    ],
+      "slotHideRules":[
+        {
+          "triggerSlots":["zhuoqiu1"],
+          "hideSlots":["zhuoqiu1_1","zhuoqiu1"],
+          "hideDuration":10000
+        },
+        {
+          "triggerSlots":["zhuoqiu2"],
+          "hideSlots":["zhuoqiu2_1","zhuoqiu2"],
+          "hideDuration":10000
+        },
+        {
+          "triggerSlots":["zhuoqiu3"],
+          "hideSlots":["zhuoqiu3_1","zhuoqiu3"],
+          "hideDuration":10000
+        },
+        {
+          "triggerSlots":["zhuoqiu4"],
+          "hideSlots":["zhuoqiu4_1","zhuoqiu4"],
+          "hideDuration":10000
+        },
+        {
+          "triggerSlots":["zhuoqiu5"],
+          "hideSlots":["zhuoqiu5_1","zhuoqiu5"],
+          "hideDuration":10000
+        },
+        {
+          "triggerSlots":["zhuoqiu6"],
+          "hideSlots":["zhuoqiu6_1","zhuoqiu6"],
+          "hideDuration":10000
+        },
+        {
+          "triggerSlots":["zhuoqiu7"],
+          "hideSlots":["zhuoqiu7_1","zhuoqiu7"],
+          "hideDuration":10000
+        },
+        {
+          "triggerSlots":["gaojiaobei"],
+          "hideSlots":["gaojiaobei"],
+          "hideDuration":5000
+        },
+        {
+          "triggerSlots":["jiuping"],
+          "hideSlots":["jiuping"],
+          "hideDuration":10000
+        },
+        {
+          "triggerSlots":["niunaihe"],
+          "hideSlots":["niunaihe","niunaiheyinying"],
+          "hideDuration":10000
+        }
+      ],
+      "hiddenSlots":["1"],
+      "overlayMedia": [
+        {
+          "triggerSlotsWhenHidden": [
+            "gaojiaobei","jiuping"
+          ],
+          "videoFileName": ["jtfull.webm","jtr.webm"],
+          "pauseBackgroundMusic": true,
+          "closeOnClick": false,
+          "videoVolume": 1.0,
+          "audioVolume": 1.0,
+          "loopVideo": false
+        },
+        {
+          "triggerSlotsWhenHidden": [
+            "gaojiaobei","niunaihe"
+          ],
+          "videoFileName": ["cmfull.webm","cmr.webm"],
+          "pauseBackgroundMusic": true,
+          "closeOnClick": false,
+          "videoVolume": 1.0,
+          "audioVolume": 1.0,
+          "loopVideo": false
+        },
+        {
+          "triggerSlot": [
+            "jiu"
+          ],
+          "videoFileName": ["jtbk.webm","jtcs.webm"],
+          "pauseBackgroundMusic": false,
+          "closeOnClick": false,
+          "videoVolume": 1.0,
+          "audioVolume": 1.0,
+          "loopVideo": false
+        },
+        {
+          "triggerSlot": [
+            "cimu_bei_guang"
+          ],
+          "videoFileName": ["cmbk.webm","cmcs.webm"],
+          "pauseBackgroundMusic": false,
+          "closeOnClick": false,
+          "videoVolume": 1.0,
+          "audioVolume": 1.0,
+          "loopVideo": false
+        }
+      ]
+    }
+  ],
+  "activeMeshIndex": 0
+}

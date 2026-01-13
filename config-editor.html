@@ -1,0 +1,1666 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>配置编辑器</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: #f5f5f5;
+      padding: 20px;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header h1 {
+      font-size: 24px;
+      font-weight: 600;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.3s;
+    }
+
+    .btn-primary {
+      background: white;
+      color: #667eea;
+    }
+
+    .btn-primary:hover {
+      background: #f0f0f0;
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    .content {
+      padding: 30px;
+    }
+
+    .nav-sidebar {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 280px;
+      max-height: calc(100vh - 100px);
+      overflow-y: auto;
+      background: white;
+      border: 2px solid #667eea;
+      border-radius: 8px;
+      padding: 15px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(20px);
+      transition: all 0.3s ease;
+      z-index: 1000;
+    }
+
+    .nav-trigger-area {
+      position: fixed;
+      bottom: 0;
+      right: 0;
+      width: 120px;
+      height: 120px;
+      z-index: 998;
+      pointer-events: auto;
+    }
+
+    .nav-sidebar.show {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    .nav-trigger-hint {
+      position: fixed;
+      bottom: 10px;
+      right: 10px;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: rgba(102, 126, 234, 0.1);
+      border: 2px dashed #667eea;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #667eea;
+      font-size: 24px;
+      pointer-events: none;
+      z-index: 997;
+      transition: all 0.3s;
+    }
+
+    .nav-sidebar.show~.nav-trigger-hint,
+    .nav-trigger-area:hover~.nav-trigger-hint {
+      opacity: 0;
+    }
+
+    .nav-sidebar h3 {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 15px;
+      color: #667eea;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #667eea;
+      position: sticky;
+      top: 0;
+      background: white;
+      z-index: 10;
+    }
+
+    .nav-menu {
+      list-style: none;
+    }
+
+    .nav-menu li {
+      margin-bottom: 8px;
+    }
+
+    .nav-menu a {
+      display: block;
+      padding: 8px 12px;
+      color: #555;
+      text-decoration: none;
+      border-radius: 4px;
+      transition: all 0.2s;
+      font-size: 14px;
+    }
+
+    .nav-menu a:hover {
+      background: #e8e8e8;
+      color: #667eea;
+    }
+
+    .nav-menu a.nav-top {
+      font-weight: 600;
+      color: #667eea;
+    }
+
+    .nav-menu .nav-submenu {
+      margin-left: 20px;
+      margin-top: 5px;
+    }
+
+    .nav-menu .nav-submenu a {
+      font-size: 13px;
+      padding: 6px 12px;
+      color: #777;
+    }
+
+    .nav-menu .nav-submenu a:hover {
+      color: #667eea;
+    }
+
+    .form-section {
+      margin-bottom: 30px;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 20px;
+      background: #fafafa;
+      scroll-margin-top: 100px;
+    }
+
+    .form-section-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 20px;
+      color: #333;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #667eea;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 500;
+      color: #555;
+      font-size: 14px;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+      transition: border-color 0.3s;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 80px;
+      font-family: 'Courier New', monospace;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+    }
+
+    .array-item {
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 15px;
+      margin-bottom: 10px;
+      position: relative;
+    }
+
+    .array-item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .array-item-title {
+      font-weight: 600;
+      color: #667eea;
+    }
+
+    .btn-remove {
+      background: #ff4757;
+      color: white;
+      padding: 5px 12px;
+      font-size: 12px;
+    }
+
+    .btn-remove:hover {
+      background: #ff3838;
+    }
+
+    .btn-add {
+      background: #2ed573;
+      color: white;
+      padding: 8px 16px;
+      margin-top: 10px;
+    }
+
+    .btn-add:hover {
+      background: #26d467;
+    }
+
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .checkbox-group input[type="checkbox"] {
+      width: auto;
+    }
+
+    .file-input-wrapper {
+      position: relative;
+      display: inline-block;
+    }
+
+    .file-input-wrapper input[type="file"] {
+      position: absolute;
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .nested-section {
+      margin-left: 20px;
+      margin-top: 15px;
+      padding-left: 20px;
+      border-left: 3px solid #667eea;
+      scroll-margin-top: 120px;
+    }
+
+    .array-item {
+      scroll-margin-top: 120px;
+    }
+
+    .collapsible {
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .collapsible::before {
+      content: '▼';
+      display: inline-block;
+      margin-right: 8px;
+      transition: transform 0.3s;
+    }
+
+    .collapsible.collapsed::before {
+      transform: rotate(-90deg);
+    }
+
+    .collapsible-content {
+      overflow: hidden;
+      transition: max-height 0.3s;
+    }
+
+    .collapsible-content.collapsed {
+      max-height: 0;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .string-array-input {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .string-array-item {
+      display: flex;
+      gap: 5px;
+    }
+
+    .string-array-item input {
+      flex: 1;
+    }
+
+    .number-range-input {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .info-text {
+      font-size: 12px;
+      color: #888;
+      margin-top: 5px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container" id="top">
+    <div class="header">
+      <h1>配置编辑器</h1>
+      <div class="header-actions">
+        <input type="file" id="importFile" accept=".json" style="display: none;">
+        <button class="btn-secondary" onclick="document.getElementById('importFile').click()">导入 JSON</button>
+        <button class="btn-primary" onclick="exportConfig()">导出 JSON</button>
+      </div>
+    </div>
+
+    <div class="content" id="formContainer">
+      <!-- 表单内容将通过 JavaScript 动态生成 -->
+    </div>
+    <div class="nav-trigger-area"></div>
+    <div class="nav-trigger-hint">📋</div>
+    <div class="nav-sidebar" id="navSidebar">
+      <h3>快速导航</h3>
+      <ul class="nav-menu" id="navMenu">
+        <li><a href="#top" class="nav-top">返回顶部</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <script>
+    // 配置数据结构定义
+    const configSchema = {
+      width: { type: 'number', required: true, label: '宽度' },
+      height: { type: 'number', required: true, label: '高度' },
+      backgroundImage: { type: 'stringOrArray', label: '背景图片' },
+      backgroundImageFit: { type: 'select', label: '背景图适配方式', options: ['height', 'width', 'auto'] },
+      canvasAlignLeftPercent: { type: 'number', label: 'Canvas 左对齐百分比' },
+      canvasAlignRightPercent: { type: 'number', label: 'Canvas 右对齐百分比' },
+      canvasEdgeTransition: { type: 'select', label: 'Canvas 边缘过渡方式', options: [0, 1, 2, 3] },
+      canvasEdgeTransitionImage: { type: 'string', label: 'Canvas 边缘过渡图片' },
+      canvasEdgeBorderColor: { type: 'string', label: 'Canvas 边框颜色' },
+      backgroundMusic: {
+        type: 'object',
+        label: '背景音乐',
+        fields: {
+          fileName: { type: 'string', label: '文件名', required: true },
+          volume: { type: 'number', label: '音量 (0-1)' }
+        }
+      },
+      animationMix: {
+        type: 'object',
+        label: '动画混合',
+        fields: {
+          enabled: { type: 'boolean', label: '启用' },
+          duration: { type: 'number', label: '混合时间（秒）' }
+        }
+      },
+      specialEffectLibrary: {
+        type: 'array',
+        label: '特殊特效库',
+        itemType: 'specialEffect'
+      },
+      meshes: {
+        type: 'array',
+        label: 'Mesh 配置',
+        required: true,
+        itemType: 'mesh'
+      },
+      activeMeshIndex: { type: 'number', label: '生效的 Mesh 索引' }
+    };
+
+    let formData = {};
+
+    // 初始化表单
+    function initForm() {
+      const container = document.getElementById('formContainer');
+      container.innerHTML = '';
+
+      Object.keys(configSchema).forEach(key => {
+        const schema = configSchema[key];
+        const element = createFormElement(key, schema, formData[key]);
+        container.appendChild(element);
+      });
+
+      // 更新导航菜单
+      updateNavigation();
+
+      // 初始化导航栏显示/隐藏控制
+      initNavigationControls();
+    }
+
+    // 初始化导航栏控制（只调用一次，使用事件委托）
+    let navigationControlsInitialized = false;
+    function initNavigationControls() {
+      if (navigationControlsInitialized) return;
+      navigationControlsInitialized = true;
+
+      const triggerArea = document.querySelector('.nav-trigger-area');
+      const navSidebar = document.getElementById('navSidebar');
+
+      if (!triggerArea || !navSidebar) return;
+
+      let hideTimeout;
+
+      // 鼠标移动到右下角触发区域时显示导航栏
+      triggerArea.addEventListener('mouseenter', () => {
+        clearTimeout(hideTimeout);
+        navSidebar.classList.add('show');
+      });
+
+      triggerArea.addEventListener('mouseleave', () => {
+        hideTimeout = setTimeout(() => {
+          if (!navSidebar.matches(':hover')) {
+            navSidebar.classList.remove('show');
+          }
+        }, 100);
+      });
+
+      // 鼠标移动到导航栏时保持显示
+      navSidebar.addEventListener('mouseenter', () => {
+        clearTimeout(hideTimeout);
+        navSidebar.classList.add('show');
+      });
+
+      // 鼠标离开导航栏时隐藏
+      navSidebar.addEventListener('mouseleave', () => {
+        hideTimeout = setTimeout(() => {
+          navSidebar.classList.remove('show');
+        }, 300);
+      });
+
+      // 使用事件委托处理导航链接点击
+      navSidebar.addEventListener('click', (e) => {
+        if (e.target.tagName === 'A') {
+          setTimeout(() => {
+            navSidebar.classList.remove('show');
+          }, 500);
+        }
+      });
+    }
+
+    // 更新导航菜单
+    function updateNavigation() {
+      const navMenu = document.getElementById('navMenu');
+      if (!navMenu) return;
+
+      // 1. 清空导航（保留返回顶部）
+      navMenu.innerHTML = '<li><a href="#top" class="nav-top">返回顶部</a></li>';
+
+      /**
+       * =========================
+       * 特殊特效库
+       * =========================
+       */
+      const specialEffectSection = document.getElementById('section-specialEffectLibrary');
+      if (specialEffectSection) {
+        const li = document.createElement('li');
+        const a = document.createElement('a');
+        a.href = '#section-specialEffectLibrary';
+        a.textContent = '特殊特效库';
+        li.appendChild(a);
+        navMenu.appendChild(li);
+      }
+
+      /**
+       * =========================
+       * Mesh 导航（关键修复）
+       * =========================
+       */
+      const meshesSection = document.getElementById('section-meshes');
+      const meshesContainer = document.getElementById('array-meshes');
+
+      if (!meshesSection || !meshesContainer) return;
+
+      /**
+       * 2. 只获取「顶层 Mesh」
+       *    ❌ 不再使用 .querySelectorAll('.array-item')
+       */
+      const meshItems = Array.from(meshesContainer.children).filter(el =>
+        el.classList.contains('array-item')
+      );
+
+      meshItems.forEach((meshItem, meshIndex) => {
+        /**
+         * 3. 强制重排 Mesh ID（核心）
+         */
+        const meshId = `meshes-${meshIndex}`;
+        meshItem.id = meshId;
+
+        // Mesh 主导航
+        const meshLi = document.createElement('li');
+        const meshLink = document.createElement('a');
+        meshLink.href = `#${meshId}`;
+        meshLink.textContent = `Mesh #${meshIndex + 1}`;
+        meshLi.appendChild(meshLink);
+
+        /**
+         * 子导航
+         */
+        const submenu = document.createElement('ul');
+        submenu.className = 'nav-submenu';
+
+        const subSections = [
+          { suffix: 'slotClickEffects', label: '插槽专属点击特效' },
+          { suffix: 'clickEffects', label: '点击特效' },
+          { suffix: 'overlayMedia', label: '覆盖媒体' },
+          { suffix: 'specialEffectTriggers', label: '特殊特效触发' },
+          { suffix: 'slotHideRules', label: '插槽隐藏规则' }
+        ];
+
+        subSections.forEach(({ suffix, label }) => {
+          const subId = `${meshId}-${suffix}`;
+          const subSection = document.getElementById(subId);
+
+          if (subSection) {
+            const subLi = document.createElement('li');
+            const subA = document.createElement('a');
+            subA.href = `#${subId}`;
+            subA.textContent = label;
+            subLi.appendChild(subA);
+            submenu.appendChild(subLi);
+          }
+        });
+
+        if (submenu.children.length > 0) {
+          meshLi.appendChild(submenu);
+        }
+
+        navMenu.appendChild(meshLi);
+      });
+    }
+
+
+    // 创建表单元素
+    function createFormElement(key, schema, value) {
+      const group = document.createElement('div');
+      group.className = 'form-group';
+
+      if (schema.type === 'object') {
+        return createObjectField(key, schema, value);
+      } else if (schema.type === 'array') {
+        return createArrayField(key, schema, value);
+      } else {
+        return createSimpleField(key, schema, value);
+      }
+    }
+
+    // 创建简单字段
+    function createSimpleField(key, schema, value) {
+      const group = document.createElement('div');
+      group.className = 'form-group';
+
+      const label = document.createElement('label');
+      label.textContent = schema.label || key;
+      if (schema.required) label.textContent += ' *';
+      group.appendChild(label);
+
+      let input;
+
+      if (schema.type === 'select') {
+        input = document.createElement('select');
+        input.id = key;
+        schema.options.forEach(opt => {
+          const option = document.createElement('option');
+          option.value = opt;
+          option.textContent = opt;
+          if (value === opt) option.selected = true;
+          input.appendChild(option);
+        });
+      } else if (schema.type === 'boolean') {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'checkbox-group';
+        input = document.createElement('input');
+        input.type = 'checkbox';
+        input.id = key;
+        input.checked = value === true;
+        wrapper.appendChild(input);
+        wrapper.appendChild(document.createTextNode('启用'));
+        group.appendChild(wrapper);
+        return group;
+      } else if (schema.type === 'stringOrArray') {
+        input = document.createElement('textarea');
+        input.id = key;
+        input.placeholder = '输入字符串或 JSON 数组，例如: "image.png" 或 ["img1.png", "img2.png"]';
+        if (value !== undefined) {
+          input.value = Array.isArray(value) ? JSON.stringify(value) : value;
+        }
+      } else {
+        input = document.createElement('input');
+        input.id = key;
+        input.type = schema.type === 'number' ? 'number' : 'text';
+        if (value !== undefined) input.value = value;
+      }
+
+      input.addEventListener('input', () => updateFormData());
+      group.appendChild(input);
+
+      return group;
+    }
+
+    // 创建对象字段
+    function createObjectField(key, schema, value) {
+      const section = document.createElement('div');
+      section.className = 'form-section';
+      section.id = `section-${key}`;
+
+      const title = document.createElement('div');
+      title.className = 'form-section-title';
+      title.textContent = schema.label || key;
+      section.appendChild(title);
+
+      const content = document.createElement('div');
+      content.className = 'nested-section';
+
+      Object.keys(schema.fields).forEach(fieldKey => {
+        const fieldSchema = schema.fields[fieldKey];
+        const fieldGroup = createFormElement(`${key}.${fieldKey}`, fieldSchema, value?.[fieldKey]);
+        content.appendChild(fieldGroup);
+      });
+
+      section.appendChild(content);
+      return section;
+    }
+
+    // 创建数组字段
+    function createArrayField(key, schema, value) {
+      const section = document.createElement('div');
+      section.className = 'form-section';
+      section.id = `section-${key}`;
+
+      const title = document.createElement('div');
+      title.className = 'form-section-title';
+      title.textContent = schema.label || key;
+      if (schema.required) title.textContent += ' *';
+      section.appendChild(title);
+
+      const container = document.createElement('div');
+      container.id = `array-${key}`;
+
+      const items = value || [];
+      items.forEach((item, index) => {
+        container.appendChild(createArrayItem(key, schema.itemType, item, index));
+      });
+
+      const addBtn = document.createElement('button');
+      addBtn.type = 'button';
+      addBtn.className = 'btn-add';
+      addBtn.textContent = `添加 ${schema.label || key} 项`;
+      addBtn.onclick = () => {
+        const newItem = getDefaultValueForType(schema.itemType);
+        container.appendChild(createArrayItem(key, schema.itemType, newItem, items.length));
+        updateFormData();
+        updateNavigation(); // 更新导航菜单
+      };
+
+      section.appendChild(container);
+      section.appendChild(addBtn);
+
+      return section;
+    }
+
+    // 创建数组项
+    function createArrayItem(arrayKey, itemType, item, index) {
+      const itemDiv = document.createElement('div');
+      itemDiv.className = 'array-item';
+
+      if (itemType === 'mesh') {
+        itemDiv.classList.add('mesh-item');
+      }
+
+      itemDiv.id = `${arrayKey}-${index}`;
+
+
+      const header = document.createElement('div');
+      header.className = 'array-item-header';
+
+      const title = document.createElement('div');
+      title.className = 'array-item-title';
+      title.textContent = `${itemType === 'mesh' ? 'Mesh' : itemType === 'specialEffect' ? '特效' : '项'} #${index + 1}`;
+      header.appendChild(title);
+
+      const removeBtn = document.createElement('button');
+      removeBtn.type = 'button';
+      removeBtn.className = 'btn-remove';
+      removeBtn.textContent = '删除';
+      removeBtn.onclick = () => {
+        itemDiv.remove();
+        updateFormData();
+        updateNavigation(); // 更新导航菜单
+      };
+      header.appendChild(removeBtn);
+
+      itemDiv.appendChild(header);
+
+      const content = document.createElement('div');
+      if (itemType === 'mesh') {
+        content.appendChild(createMeshFields(arrayKey, index, item));
+      } else if (itemType === 'specialEffect') {
+        content.appendChild(createSpecialEffectFields(arrayKey, index, item));
+      }
+      itemDiv.appendChild(content);
+
+      return itemDiv;
+    }
+
+    // 创建 Mesh 字段
+    function createMeshFields(arrayKey, index, mesh) {
+      const container = document.createElement('div');
+
+      const fields = [
+        { key: 'type', type: 'select', label: '类型', options: ['spine'], value: mesh?.type || 'spine' },
+        { key: 'scale', type: 'number', label: '缩放', value: mesh?.scale },
+        { key: 'skeletonFileName', type: 'string', label: 'Skeleton 文件名', value: mesh?.skeletonFileName },
+        { key: 'jsonFileName', type: 'string', label: 'JSON 文件名', value: mesh?.jsonFileName },
+        { key: 'atlasFileName', type: 'string', label: 'Atlas 文件名', value: mesh?.atlasFileName },
+        { key: 'animationName', type: 'string', label: '动画名称（旧版）', value: mesh?.animationName },
+        { key: 'backgroundImage', type: 'stringOrArray', label: '背景图片', value: mesh?.backgroundImage },
+        { key: 'width', type: 'number', label: 'Canvas 宽度', value: mesh?.width },
+        { key: 'height', type: 'number', label: 'Canvas 高度', value: mesh?.height },
+        { key: 'canvasAlignLeftPercent', type: 'number', label: 'Canvas 左对齐百分比', value: mesh?.canvasAlignLeftPercent },
+        { key: 'canvasAlignRightPercent', type: 'number', label: 'Canvas 右对齐百分比', value: mesh?.canvasAlignRightPercent },
+        { key: 'canvasEdgeTransition', type: 'select', label: 'Canvas 边缘过渡方式', options: [0, 1, 2, 3], value: mesh?.canvasEdgeTransition },
+        { key: 'canvasEdgeTransitionImage', type: 'string', label: 'Canvas 边缘过渡图片', value: mesh?.canvasEdgeTransitionImage },
+        { key: 'canvasEdgeBorderColor', type: 'string', label: 'Canvas 边框颜色', value: mesh?.canvasEdgeBorderColor },
+        { key: 'premultipliedAlpha', type: 'boolean', label: '预乘Alpha通道', value: mesh?.premultipliedAlpha },
+        { key: 'alphaTest', type: 'number', label: 'Alpha测试阈值', value: mesh?.alphaTest },
+        { key: 'backgroundImageSwitchSlot', type: 'stringOrArray', label: '背景图片切换插槽', value: mesh?.backgroundImageSwitchSlot },
+        { key: 'hiddenSlots', type: 'stringOrArray', label: '隐藏插槽', value: mesh?.hiddenSlots }
+      ];
+
+      fields.forEach(field => {
+        const group = createFieldGroup(`${arrayKey}[${index}].${field.key}`, field.label, field.type, field.value, field.options);
+        container.appendChild(group);
+      });
+
+      // Position
+      const positionSection = document.createElement('div');
+      positionSection.className = 'nested-section';
+      positionSection.innerHTML = '<div class="form-section-title" style="font-size: 14px; margin-bottom: 10px;">位置</div>';
+      ['x', 'y', 'z'].forEach(axis => {
+        const group = createFieldGroup(`${arrayKey}[${index}].position.${axis}`, axis.toUpperCase(), 'number', mesh?.position?.[axis]);
+        positionSection.appendChild(group);
+      });
+      container.appendChild(positionSection);
+
+      // Animations
+      const animSection = document.createElement('div');
+      animSection.className = 'nested-section';
+      animSection.innerHTML = '<div class="form-section-title" style="font-size: 14px; margin-bottom: 10px;">动画配置</div>';
+      const animContainer = document.createElement('div');
+      animContainer.id = `animations-${arrayKey}-${index}`;
+      (mesh?.animations || []).forEach((anim, animIndex) => {
+        animContainer.appendChild(createAnimationItem(arrayKey, index, animIndex, anim));
+      });
+      const addAnimBtn = document.createElement('button');
+      addAnimBtn.type = 'button';
+      addAnimBtn.className = 'btn-add';
+      addAnimBtn.textContent = '添加动画';
+      addAnimBtn.onclick = () => {
+        animContainer.appendChild(createAnimationItem(arrayKey, index, animContainer.children.length, {}));
+        updateFormData();
+        updateNavigation();
+      };
+      animSection.appendChild(animContainer);
+      animSection.appendChild(addAnimBtn);
+      container.appendChild(animSection);
+
+      // Control Slots
+      const controlSection = document.createElement('div');
+      controlSection.className = 'nested-section';
+      controlSection.innerHTML = '<div class="form-section-title" style="font-size: 14px; margin-bottom: 10px;">控制插槽</div>';
+      const bgMusicGroup = createFieldGroup(`${arrayKey}[${index}].controlSlots.backgroundMusic`, '背景音乐插槽', 'stringOrArray', mesh?.controlSlots?.backgroundMusic);
+      const voiceAnimGroup = createFieldGroup(`${arrayKey}[${index}].controlSlots.voiceAnimation`, '语音动画插槽', 'stringOrArray', mesh?.controlSlots?.voiceAnimation);
+      controlSection.appendChild(bgMusicGroup);
+      controlSection.appendChild(voiceAnimGroup);
+      container.appendChild(controlSection);
+
+      // Click Effects
+      const clickEffectsSection = document.createElement('div');
+      clickEffectsSection.className = 'nested-section';
+      clickEffectsSection.id = `${arrayKey}-${index}-clickEffects`;
+      const clickEffectsTitle = document.createElement('div');
+      clickEffectsTitle.className = 'form-section-title';
+      clickEffectsTitle.style.fontSize = '14px';
+      clickEffectsTitle.style.marginBottom = '10px';
+      clickEffectsTitle.textContent = '点击特效';
+      clickEffectsSection.appendChild(clickEffectsTitle);
+      const clickEffectsContainer = document.createElement('div');
+      clickEffectsContainer.id = `clickEffects-${arrayKey}-${index}`;
+      (mesh?.clickEffects || []).forEach((effect, effectIndex) => {
+        clickEffectsContainer.appendChild(createClickEffectItem(arrayKey, index, effectIndex, effect));
+      });
+      const addClickEffectBtn = document.createElement('button');
+      addClickEffectBtn.type = 'button';
+      addClickEffectBtn.className = 'btn-add';
+      addClickEffectBtn.textContent = '添加点击特效';
+      addClickEffectBtn.onclick = () => {
+        clickEffectsContainer.appendChild(createClickEffectItem(arrayKey, index, clickEffectsContainer.children.length, {}));
+        updateFormData();
+        updateNavigation();
+      };
+      clickEffectsSection.appendChild(clickEffectsContainer);
+      clickEffectsSection.appendChild(addClickEffectBtn);
+      container.appendChild(clickEffectsSection);
+
+      // Slot Click Effects（插槽专属点击特效）
+      const slotClickEffectsSection = document.createElement('div');
+      slotClickEffectsSection.className = 'nested-section';
+      slotClickEffectsSection.id = `${arrayKey}-${index}-slotClickEffects`;
+
+      const slotClickEffectsTitle = document.createElement('div');
+      slotClickEffectsTitle.className = 'form-section-title';
+      slotClickEffectsTitle.style.fontSize = '14px';
+      slotClickEffectsTitle.style.marginBottom = '10px';
+      slotClickEffectsTitle.textContent = '插槽专属点击特效';
+      slotClickEffectsSection.appendChild(slotClickEffectsTitle);
+
+      const slotClickEffectsContainer = document.createElement('div');
+      slotClickEffectsContainer.id = `slotClickEffects-${arrayKey}-${index}`;
+
+      (mesh?.slotClickEffects || []).forEach((item, itemIndex) => {
+        slotClickEffectsContainer.appendChild(
+          createSlotClickEffectItem(arrayKey, index, itemIndex, item)
+        );
+      });
+
+      const addSlotClickEffectBtn = document.createElement('button');
+      addSlotClickEffectBtn.type = 'button';
+      addSlotClickEffectBtn.className = 'btn-add';
+      addSlotClickEffectBtn.textContent = '添加插槽点击特效';
+      addSlotClickEffectBtn.onclick = () => {
+        slotClickEffectsContainer.appendChild(
+          createSlotClickEffectItem(
+            arrayKey,
+            index,
+            slotClickEffectsContainer.children.length,
+            {}
+          )
+        );
+        updateFormData();
+        updateNavigation();
+      };
+
+      slotClickEffectsSection.appendChild(slotClickEffectsContainer);
+      slotClickEffectsSection.appendChild(addSlotClickEffectBtn);
+      container.appendChild(slotClickEffectsSection);
+
+
+      // Overlay Media
+      const overlaySection = document.createElement('div');
+      overlaySection.className = 'nested-section';
+      overlaySection.id = `${arrayKey}-${index}-overlayMedia`;
+      const overlayTitle = document.createElement('div');
+      overlayTitle.className = 'form-section-title';
+      overlayTitle.style.fontSize = '14px';
+      overlayTitle.style.marginBottom = '10px';
+      overlayTitle.textContent = '覆盖媒体';
+      overlaySection.appendChild(overlayTitle);
+      const overlayContainer = document.createElement('div');
+      overlayContainer.id = `overlayMedia-${arrayKey}-${index}`;
+      const overlayArray = Array.isArray(mesh?.overlayMedia) ? mesh.overlayMedia : (mesh?.overlayMedia ? [mesh.overlayMedia] : []);
+      overlayArray.forEach((overlay, overlayIndex) => {
+        overlayContainer.appendChild(createOverlayMediaItem(arrayKey, index, overlayIndex, overlay));
+      });
+      const addOverlayBtn = document.createElement('button');
+      addOverlayBtn.type = 'button';
+      addOverlayBtn.className = 'btn-add';
+      addOverlayBtn.textContent = '添加覆盖媒体';
+      addOverlayBtn.onclick = () => {
+        overlayContainer.appendChild(createOverlayMediaItem(arrayKey, index, overlayContainer.children.length, {}));
+        updateFormData();
+        updateNavigation();
+      };
+      overlaySection.appendChild(overlayContainer);
+      overlaySection.appendChild(addOverlayBtn);
+      container.appendChild(overlaySection);
+
+      // Special Effect Triggers
+      const specialEffectSection = document.createElement('div');
+      specialEffectSection.className = 'nested-section';
+      specialEffectSection.id = `${arrayKey}-${index}-specialEffectTriggers`;
+      const specialEffectTitle = document.createElement('div');
+      specialEffectTitle.className = 'form-section-title';
+      specialEffectTitle.style.fontSize = '14px';
+      specialEffectTitle.style.marginBottom = '10px';
+      specialEffectTitle.textContent = '特殊特效触发';
+      specialEffectSection.appendChild(specialEffectTitle);
+      const specialEffectContainer = document.createElement('div');
+      specialEffectContainer.id = `specialEffectTriggers-${arrayKey}-${index}`;
+      const specialEffectArray = Array.isArray(mesh?.specialEffectTriggers) ? mesh.specialEffectTriggers : (mesh?.specialEffectTriggers ? [mesh.specialEffectTriggers] : []);
+      specialEffectArray.forEach((trigger, triggerIndex) => {
+        specialEffectContainer.appendChild(createSpecialEffectTriggerItem(arrayKey, index, triggerIndex, trigger));
+      });
+      const addSpecialEffectBtn = document.createElement('button');
+      addSpecialEffectBtn.type = 'button';
+      addSpecialEffectBtn.className = 'btn-add';
+      addSpecialEffectBtn.textContent = '添加特殊特效触发';
+      addSpecialEffectBtn.onclick = () => {
+        specialEffectContainer.appendChild(createSpecialEffectTriggerItem(arrayKey, index, specialEffectContainer.children.length, {}));
+        updateFormData();
+        updateNavigation();
+      };
+      specialEffectSection.appendChild(specialEffectContainer);
+      specialEffectSection.appendChild(addSpecialEffectBtn);
+      container.appendChild(specialEffectSection);
+
+      // Slot Hide Rules
+      const slotHideRulesSection = document.createElement('div');
+      slotHideRulesSection.className = 'nested-section';
+      slotHideRulesSection.id = `${arrayKey}-${index}-slotHideRules`;
+      const slotHideRulesTitle = document.createElement('div');
+      slotHideRulesTitle.className = 'form-section-title';
+      slotHideRulesTitle.style.fontSize = '14px';
+      slotHideRulesTitle.style.marginBottom = '10px';
+      slotHideRulesTitle.textContent = '插槽隐藏规则';
+      slotHideRulesSection.appendChild(slotHideRulesTitle);
+      const slotHideRulesContainer = document.createElement('div');
+      slotHideRulesContainer.id = `slotHideRules-${arrayKey}-${index}`;
+      (mesh?.slotHideRules || []).forEach((rule, ruleIndex) => {
+        slotHideRulesContainer.appendChild(createSlotHideRuleItem(arrayKey, index, ruleIndex, rule));
+      });
+      const addSlotHideRuleBtn = document.createElement('button');
+      addSlotHideRuleBtn.type = 'button';
+      addSlotHideRuleBtn.className = 'btn-add';
+      addSlotHideRuleBtn.textContent = '添加插槽隐藏规则';
+      addSlotHideRuleBtn.onclick = () => {
+        slotHideRulesContainer.appendChild(createSlotHideRuleItem(arrayKey, index, slotHideRulesContainer.children.length, {}));
+        updateFormData();
+        updateNavigation();
+      };
+      slotHideRulesSection.appendChild(slotHideRulesContainer);
+      slotHideRulesSection.appendChild(addSlotHideRuleBtn);
+      container.appendChild(slotHideRulesSection);
+
+      return container;
+    }
+
+    // 创建动画项
+    function createAnimationItem(arrayKey, meshIndex, animIndex, anim) {
+      const item = document.createElement('div');
+      item.className = 'array-item';
+
+      const header = document.createElement('div');
+      header.className = 'array-item-header';
+      header.innerHTML = `
+        <div class="array-item-title">动画 #${animIndex + 1}</div>
+        <button type="button" class="btn-remove" onclick="this.closest('.array-item').remove(); updateFormData(); updateNavigation();">删除</button>
+      `;
+      item.appendChild(header);
+
+      item.appendChild(createFieldGroup(`${arrayKey}[${meshIndex}].animations[${animIndex}].name`, '动画名称', 'string', anim?.name));
+      item.appendChild(createFieldGroup(`${arrayKey}[${meshIndex}].animations[${animIndex}].weight`, '权重 (0-100)', 'number', anim?.weight));
+      item.appendChild(createFieldGroup(`${arrayKey}[${meshIndex}].animations[${animIndex}].audioFileName`, '音频文件名', 'string', anim?.audioFileName));
+
+      return item;
+    }
+
+    // 创建点击特效项
+    function createClickEffectItem(arrayKey, meshIndex, effectIndex, effect) {
+      const item = document.createElement('div');
+      item.className = 'array-item';
+
+      const header = document.createElement('div');
+      header.className = 'array-item-header';
+      header.innerHTML = `
+        <div class="array-item-title">点击特效 #${effectIndex + 1}</div>
+        <button type="button" class="btn-remove" onclick="this.closest('.array-item').remove(); updateFormData(); updateNavigation();">删除</button>
+      `;
+      item.appendChild(header);
+
+      item.appendChild(createFieldGroup(`${arrayKey}[${meshIndex}].clickEffects[${effectIndex}].imageFileName`, '图片文件名', 'string', effect?.imageFileName));
+      item.appendChild(createFieldGroup(`${arrayKey}[${meshIndex}].clickEffects[${effectIndex}].weight`, '权重 (0-100)', 'number', effect?.weight));
+      item.appendChild(createFieldGroup(`${arrayKey}[${meshIndex}].clickEffects[${effectIndex}].duration`, '持续时间（毫秒）', 'number', effect?.duration));
+      item.appendChild(createFieldGroup(`${arrayKey}[${meshIndex}].clickEffects[${effectIndex}].scale`, '缩放比例', 'number', effect?.scale));
+      item.appendChild(createFieldGroup(`${arrayKey}[${meshIndex}].clickEffects[${effectIndex}].effect`, '动画效果 (0=无,1=摇晃,2=放大缩小)', 'number', effect?.effect));
+
+      return item;
+    }
+
+    // 创建覆盖媒体项
+    function createOverlayMediaItem(arrayKey, meshIndex, overlayIndex, overlay) {
+      const item = document.createElement('div');
+      item.className = 'array-item';
+
+      const header = document.createElement('div');
+      header.className = 'array-item-header';
+      header.innerHTML = `
+        <div class="array-item-title">覆盖媒体 #${overlayIndex + 1}</div>
+        <button type="button" class="btn-remove" onclick="this.closest('.array-item').remove(); updateFormData(); updateNavigation();">删除</button>
+      `;
+      item.appendChild(header);
+
+      item.appendChild(createFieldGroup(`${arrayKey}[${meshIndex}].overlayMedia[${overlayIndex}].triggerSlot`, '触发插槽（字符串或数组）', 'stringOrArray', overlay?.triggerSlot));
+      item.appendChild(createFieldGroup(`${arrayKey}[${meshIndex}].overlayMedia[${overlayIndex}].triggerSlotsWhenHidden`, '隐藏时触发插槽（字符串或数组）', 'stringOrArray', overlay?.triggerSlotsWhenHidden));
+      item.appendChild(createFieldGroup(`${arrayKey}[${meshIndex}].overlayMedia[${overlayIndex}].triggerEffectsWhenActive`, '激活时触发特效（字符串或数组）', 'stringOrArray', overlay?.triggerEffectsWhenActive));
+      item.appendChild(createFieldGroup(`${arrayKey}[${meshIndex}].overlayMedia[${overlayIndex}].videoFileName`, '视频文件名（字符串或数组）', 'stringOrArray', overlay?.videoFileName));
+      item.appendChild(createFieldGroup(`${arrayKey}[${meshIndex}].overlayMedia[${overlayIndex}].audioFileName`, '音频文件名', 'string', overlay?.audioFileName));
+      item.appendChild(createFieldGroup(`${arrayKey}[${meshIndex}].overlayMedia[${overlayIndex}].muteVideo`, '静音视频', 'boolean', overlay?.muteVideo));
+      item.appendChild(createFieldGroup(`${arrayKey}[${meshIndex}].overlayMedia[${overlayIndex}].closeOnClick`, '点击关闭', 'boolean', overlay?.closeOnClick));
+      item.appendChild(createFieldGroup(`${arrayKey}[${meshIndex}].overlayMedia[${overlayIndex}].pauseBackgroundMusic`, '暂停背景音乐', 'boolean', overlay?.pauseBackgroundMusic));
+      item.appendChild(createFieldGroup(`${arrayKey}[${meshIndex}].overlayMedia[${overlayIndex}].videoVolume`, '视频音量 (0-1)', 'number', overlay?.videoVolume));
+      item.appendChild(createFieldGroup(`${arrayKey}[${meshIndex}].overlayMedia[${overlayIndex}].audioVolume`, '音频音量 (0-1)', 'number', overlay?.audioVolume));
+      item.appendChild(createFieldGroup(`${arrayKey}[${meshIndex}].overlayMedia[${overlayIndex}].loopVideo`, '循环视频', 'boolean', overlay?.loopVideo));
+      item.appendChild(createFieldGroup(`${arrayKey}[${meshIndex}].overlayMedia[${overlayIndex}].switchToMeshIndex`, '切换到 Mesh 索引', 'number', overlay?.switchToMeshIndex));
+
+      return item;
+    }
+
+    // 创建特殊特效触发项
+    function createSpecialEffectTriggerItem(arrayKey, meshIndex, triggerIndex, trigger) {
+      const item = document.createElement('div');
+      item.className = 'array-item';
+
+      const header = document.createElement('div');
+      header.className = 'array-item-header';
+      header.innerHTML = `
+        <div class="array-item-title">特殊特效触发 #${triggerIndex + 1}</div>
+        <button type="button" class="btn-remove" onclick="this.closest('.array-item').remove(); updateFormData(); updateNavigation();">删除</button>
+      `;
+      item.appendChild(header);
+
+      item.appendChild(createFieldGroup(`${arrayKey}[${meshIndex}].specialEffectTriggers[${triggerIndex}].triggerSlot`, '触发插槽（字符串或数组）', 'stringOrArray', trigger?.triggerSlot));
+      item.appendChild(createFieldGroup(`${arrayKey}[${meshIndex}].specialEffectTriggers[${triggerIndex}].triggerSlotsWhenHidden`, '隐藏时触发插槽（字符串或数组）', 'stringOrArray', trigger?.triggerSlotsWhenHidden));
+      item.appendChild(createFieldGroup(`${arrayKey}[${meshIndex}].specialEffectTriggers[${triggerIndex}].triggerEffectsWhenActive`, '激活时触发特效（字符串或数组）', 'stringOrArray', trigger?.triggerEffectsWhenActive));
+      // 当特效图片数量达到时触发
+      item.appendChild(
+        createArrayFieldInline(
+          `${arrayKey}[${meshIndex}].specialEffectTriggers[${triggerIndex}].triggerEffectsWhenCountReached`,
+          '特效数量触发',
+          [
+            { key: 'imageFileName', label: '特效图片文件名', type: 'string' },
+            { key: 'count', label: '需要达到的个数', type: 'number' }
+          ],
+          trigger?.triggerEffectsWhenCountReached
+        )
+      );
+      // 累计次数触发
+      item.appendChild(
+        createArrayFieldInline(
+          `${arrayKey}[${meshIndex}].specialEffectTriggers[${triggerIndex}].triggerEffectsWhenTotalCountReached`,
+          '特效累计触发',
+          [
+            {
+              key: 'effectIdentifier',
+              label: '特效标识（image 或 effect:索引）',
+              type: 'string'
+            },
+            { key: 'count', label: '累计次数', type: 'number' }
+          ],
+          trigger?.triggerEffectsWhenTotalCountReached
+        )
+      );
+
+      item.appendChild(createFieldGroup(`${arrayKey}[${meshIndex}].specialEffectTriggers[${triggerIndex}].effectIndices`, '特效索引（数组或二维数组）', 'stringOrArray', trigger?.effectIndices));
+      item.appendChild(createFieldGroup(`${arrayKey}[${meshIndex}].specialEffectTriggers[${triggerIndex}].random`, '随机选择', 'boolean', trigger?.random));
+
+      return item;
+    }
+
+    // 创建插槽隐藏规则项
+    function createSlotHideRuleItem(arrayKey, meshIndex, ruleIndex, rule) {
+      const item = document.createElement('div');
+      item.className = 'array-item';
+
+      const header = document.createElement('div');
+      header.className = 'array-item-header';
+      header.innerHTML = `
+        <div class="array-item-title">插槽隐藏规则 #${ruleIndex + 1}</div>
+        <button type="button" class="btn-remove" onclick="this.closest('.array-item').remove(); updateFormData(); updateNavigation();">删除</button>
+      `;
+      item.appendChild(header);
+
+      item.appendChild(createFieldGroup(`${arrayKey}[${meshIndex}].slotHideRules[${ruleIndex}].triggerSlots`, '触发插槽（字符串或数组）', 'stringOrArray', rule?.triggerSlots));
+      item.appendChild(createFieldGroup(`${arrayKey}[${meshIndex}].slotHideRules[${ruleIndex}].hideSlots`, '隐藏插槽（字符串或数组）', 'stringOrArray', rule?.hideSlots));
+      item.appendChild(createFieldGroup(`${arrayKey}[${meshIndex}].slotHideRules[${ruleIndex}].hideDuration`, '隐藏持续时间（毫秒）', 'number', rule?.hideDuration));
+
+      return item;
+    }
+
+    // 创建特殊特效字段
+    function createSpecialEffectFields(arrayKey, index, effect) {
+      const container = document.createElement('div');
+
+      const typeGroup = createFieldGroup(`${arrayKey}[${index}].type`, '特效类型', 'select', effect?.type, [1, 2, 3, 4, 5]);
+      container.appendChild(typeGroup);
+
+      const type = effect?.type || 1;
+
+      if (type === 1) {
+        container.appendChild(createFieldGroup(`${arrayKey}[${index}].image1FileName`, '第一张图片文件名', 'string', effect?.image1FileName));
+        container.appendChild(createFieldGroup(`${arrayKey}[${index}].image1Duration`, '第一张图片持续时间（毫秒）', 'number', effect?.image1Duration));
+        container.appendChild(createFieldGroup(`${arrayKey}[${index}].image1Scale`, '第一张图片缩放比例', 'number', effect?.image1Scale));
+        container.appendChild(createFieldGroup(`${arrayKey}[${index}].fadeOutDuration`, '渐隐消失持续时间（毫秒）', 'number', effect?.fadeOutDuration));
+        container.appendChild(createFieldGroup(`${arrayKey}[${index}].audioFileName`, '音频文件名', 'string', effect?.audioFileName));
+        container.appendChild(createFieldGroup(`${arrayKey}[${index}].animationName`, '动画名称', 'string', effect?.animationName));
+      } else if (type === 2) {
+        container.appendChild(createFieldGroup(`${arrayKey}[${index}].image1FileName`, '第一张图片文件名', 'string', effect?.image1FileName));
+        container.appendChild(createFieldGroup(`${arrayKey}[${index}].image2FileName`, '第二张图片文件名', 'string', effect?.image2FileName));
+        container.appendChild(createFieldGroup(`${arrayKey}[${index}].image3FileName`, '第三张图片文件名', 'string', effect?.image3FileName));
+        container.appendChild(createFieldGroup(`${arrayKey}[${index}].image1Duration`, '第一张图片持续时间（毫秒）', 'number', effect?.image1Duration));
+        container.appendChild(createFieldGroup(`${arrayKey}[${index}].image1Scale`, '第一张图片缩放比例', 'number', effect?.image1Scale));
+        container.appendChild(createFieldGroup(`${arrayKey}[${index}].scaleDuration`, '缩放动画持续时间（毫秒）', 'number', effect?.scaleDuration));
+        container.appendChild(createFieldGroup(`${arrayKey}[${index}].fadeOutDuration`, '渐隐消失持续时间（毫秒）', 'number', effect?.fadeOutDuration));
+        container.appendChild(createFieldGroup(`${arrayKey}[${index}].image2InitialScale`, '第二张图片初始缩放比例', 'number', effect?.image2InitialScale));
+        container.appendChild(createFieldGroup(`${arrayKey}[${index}].image2FinalScale`, '第二张图片最终缩放比例', 'number', effect?.image2FinalScale));
+        container.appendChild(createFieldGroup(`${arrayKey}[${index}].image3InitialScale`, '第三张图片初始缩放比例', 'number', effect?.image3InitialScale));
+        container.appendChild(createFieldGroup(`${arrayKey}[${index}].image3FinalScale`, '第三张图片最终缩放比例', 'number', effect?.image3FinalScale));
+        container.appendChild(createFieldGroup(`${arrayKey}[${index}].image2AlignPercent`, '第二张图片对齐位置（百分比）', 'number', effect?.image2AlignPercent));
+        container.appendChild(createFieldGroup(`${arrayKey}[${index}].audioFileName`, '音频文件名', 'string', effect?.audioFileName));
+        container.appendChild(createFieldGroup(`${arrayKey}[${index}].animationName`, '动画名称', 'string', effect?.animationName));
+      } else if (type === 3) {
+        container.appendChild(createFieldGroup(`${arrayKey}[${index}].image1FileName`, '图片文件名', 'string', effect?.image1FileName));
+        container.appendChild(createFieldGroup(`${arrayKey}[${index}].initialScale`, '初始缩放比例', 'number', effect?.initialScale));
+        container.appendChild(createFieldGroup(`${arrayKey}[${index}].finalScale`, '最终缩放比例', 'number', effect?.finalScale));
+        container.appendChild(createFieldGroup(`${arrayKey}[${index}].enterDuration`, '进入时间（毫秒）', 'number', effect?.enterDuration));
+        container.appendChild(createFieldGroup(`${arrayKey}[${index}].stayDuration`, '停留时间（毫秒）', 'number', effect?.stayDuration));
+        container.appendChild(createFieldGroup(`${arrayKey}[${index}].fadeOutDuration`, '渐隐消失持续时间（毫秒）', 'number', effect?.fadeOutDuration));
+        container.appendChild(createFieldGroup(`${arrayKey}[${index}].displayWidthRatio`, '显示宽度比例 (0-1)', 'number', effect?.displayWidthRatio));
+        container.appendChild(createFieldGroup(`${arrayKey}[${index}].audioFileName`, '音频文件名', 'string', effect?.audioFileName));
+        container.appendChild(createFieldGroup(`${arrayKey}[${index}].animationName`, '动画名称', 'string', effect?.animationName));
+      } else if (type === 4) {
+        container.appendChild(createFieldGroup(`${arrayKey}[${index}].image1FileName`, '图片文件名', 'string', effect?.image1FileName));
+        container.appendChild(createFieldGroup(`${arrayKey}[${index}].initialScale`, '初始缩放比例', 'number', effect?.initialScale));
+        container.appendChild(createFieldGroup(`${arrayKey}[${index}].finalScale`, '最终缩放比例', 'number', effect?.finalScale));
+        container.appendChild(createFieldGroup(`${arrayKey}[${index}].scaleDuration`, '缩放动画持续时间（毫秒）', 'number', effect?.scaleDuration));
+        container.appendChild(createFieldGroup(`${arrayKey}[${index}].fadeOutDuration`, '渐隐消失持续时间（毫秒）', 'number', effect?.fadeOutDuration));
+        container.appendChild(createFieldGroup(`${arrayKey}[${index}].alignPercent`, '垂直对齐位置（百分比）', 'number', effect?.alignPercent));
+        container.appendChild(createFieldGroup(`${arrayKey}[${index}].audioFileName`, '音频文件名', 'string', effect?.audioFileName));
+        container.appendChild(createFieldGroup(`${arrayKey}[${index}].animationName`, '动画名称', 'string', effect?.animationName));
+      } else if (type === 5) {
+        container.appendChild(createFieldGroup(`${arrayKey}[${index}].duration`, '持续时间（毫秒）', 'number', effect?.duration));
+        container.appendChild(createFieldGroup(`${arrayKey}[${index}].audioFileName`, '音频文件名（字符串或数组）', 'stringOrArray', effect?.audioFileName));
+        container.appendChild(createFieldGroup(`${arrayKey}[${index}].slotNames`, '插槽名称（字符串或数组）', 'stringOrArray', effect?.slotNames));
+        container.appendChild(createFieldGroup(`${arrayKey}[${index}].toggleIntervalRange`, '切换间隔范围 [min, max]（毫秒）', 'stringOrArray', effect?.toggleIntervalRange));
+        container.appendChild(createFieldGroup(`${arrayKey}[${index}].showDelayRange`, '显示延迟范围 [min, max]（毫秒）', 'stringOrArray', effect?.showDelayRange));
+        container.appendChild(createFieldGroup(`${arrayKey}[${index}].animationName`, '动画名称', 'string', effect?.animationName));
+      }
+
+      return container;
+    }
+
+    // 创建字段组
+    function createFieldGroup(fullKey, label, type, value, options) {
+      const group = document.createElement('div');
+      group.className = 'form-group';
+
+      const labelEl = document.createElement('label');
+      labelEl.textContent = label;
+      labelEl.setAttribute('for', fullKey);
+      group.appendChild(labelEl);
+
+      let input;
+
+      if (type === 'select') {
+        input = document.createElement('select');
+        input.id = fullKey;
+        options.forEach(opt => {
+          const option = document.createElement('option');
+          option.value = opt;
+          option.textContent = opt;
+          if (value === opt) option.selected = true;
+          input.appendChild(option);
+        });
+      } else if (type === 'boolean') {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'checkbox-group';
+        input = document.createElement('input');
+        input.type = 'checkbox';
+        input.id = fullKey;
+        input.checked = value === true;
+        wrapper.appendChild(input);
+        wrapper.appendChild(document.createTextNode('启用'));
+        group.appendChild(wrapper);
+        input.addEventListener('change', () => updateFormData());
+        return group;
+      } else if (type === 'stringOrArray') {
+        input = document.createElement('textarea');
+        input.id = fullKey;
+        input.placeholder = '输入字符串或 JSON 数组，例如: "image.png" 或 ["img1.png", "img2.png"]';
+        if (value !== undefined) {
+          if (Array.isArray(value)) {
+            input.value = JSON.stringify(value);
+          } else {
+            input.value = value;
+          }
+        }
+      } else {
+        input = document.createElement('input');
+        input.id = fullKey;
+        input.type = type === 'number' ? 'number' : 'text';
+        if (value !== undefined && value !== null) input.value = value;
+      }
+
+      input.addEventListener('input', () => updateFormData());
+      if (type === 'select') {
+        input.addEventListener('change', () => {
+          updateFormData();
+          // 如果是特殊特效类型改变，重新渲染
+          if (fullKey.includes('.type') && fullKey.includes('specialEffectLibrary')) {
+            const index = parseInt(fullKey.match(/\[(\d+)\]/)[1]);
+            const arrayKey = fullKey.split('[')[0];
+            const container = document.getElementById(`array-${arrayKey}`);
+            if (container) {
+              const itemDiv = container.children[index];
+              if (itemDiv) {
+                const content = itemDiv.querySelector('.array-item > div:last-child');
+                if (content) {
+                  const newType = parseInt(input.value);
+                  const oldContent = content.innerHTML;
+                  content.innerHTML = '';
+                  const newFields = createSpecialEffectFields(arrayKey, index, { type: newType });
+                  content.appendChild(newFields);
+                }
+              }
+            }
+          }
+        });
+      }
+      group.appendChild(input);
+
+      return group;
+    }
+
+    // 获取类型的默认值
+    function getDefaultValueForType(type) {
+      if (type === 'mesh') {
+        return { type: 'spine', scale: 1, position: { x: 0, y: 0, z: 0 } };
+      } else if (type === 'specialEffect') {
+        return { type: 1 };
+      }
+      return {};
+    }
+
+    function createSlotClickEffectItem(arrayKey, meshIndex, itemIndex, item) {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'array-item';
+
+      const header = document.createElement('div');
+      header.className = 'array-item-header';
+      header.innerHTML = `
+    <div class="array-item-title">插槽点击特效 #${itemIndex + 1}</div>
+    <button type="button" class="btn-remove"
+      onclick="this.closest('.array-item').remove(); updateFormData(); updateNavigation();">
+      删除
+    </button>
+  `;
+      wrapper.appendChild(header);
+
+      // 触发插槽
+      wrapper.appendChild(
+        createFieldGroup(
+          `${arrayKey}[${meshIndex}].slotClickEffects[${itemIndex}].triggerSlots`,
+          '触发插槽（字符串或数组）',
+          'stringOrArray',
+          item?.triggerSlots
+        )
+      );
+
+      // effects
+      const effectsContainer = document.createElement('div');
+      effectsContainer.className = 'nested-section';
+
+      const effectsTitle = document.createElement('div');
+      effectsTitle.className = 'form-section-title';
+      effectsTitle.style.fontSize = '13px';
+      effectsTitle.style.marginBottom = '8px';
+      effectsTitle.textContent = '特效配置';
+      effectsContainer.appendChild(effectsTitle);
+
+      const effectsList = document.createElement('div');
+
+      (item?.effects || []).forEach((effect, effectIndex) => {
+        effectsList.appendChild(
+          createClickEffectItem(
+            `${arrayKey}[${meshIndex}].slotClickEffects[${itemIndex}].effects`,
+            '',
+            effectIndex,
+            effect
+          )
+        );
+      });
+
+      const addEffectBtn = document.createElement('button');
+      addEffectBtn.type = 'button';
+      addEffectBtn.className = 'btn-add';
+      addEffectBtn.textContent = '添加特效';
+      addEffectBtn.onclick = () => {
+        effectsList.appendChild(
+          createClickEffectItem(
+            `${arrayKey}[${meshIndex}].slotClickEffects[${itemIndex}].effects`,
+            '',
+            effectsList.children.length,
+            {}
+          )
+        );
+        updateFormData();
+        updateNavigation();
+      };
+
+      effectsContainer.appendChild(effectsList);
+      effectsContainer.appendChild(addEffectBtn);
+
+      wrapper.appendChild(effectsContainer);
+      return wrapper;
+    }
+
+    function createArrayFieldInline(baseKey, title, fields, valueArray = []) {
+      const section = document.createElement('div');
+      section.className = 'nested-section';
+
+      const titleEl = document.createElement('div');
+      titleEl.className = 'form-section-title';
+      titleEl.style.fontSize = '13px';
+      titleEl.style.marginBottom = '8px';
+      titleEl.textContent = title;
+      section.appendChild(titleEl);
+
+      const container = document.createElement('div');
+
+      (valueArray || []).forEach((item, index) => {
+        container.appendChild(
+          createInlineArrayItem(baseKey, index, fields, item)
+        );
+      });
+
+      const addBtn = document.createElement('button');
+      addBtn.type = 'button';
+      addBtn.className = 'btn-add';
+      addBtn.textContent = '添加';
+      addBtn.onclick = () => {
+        container.appendChild(
+          createInlineArrayItem(
+            baseKey,
+            container.children.length,
+            fields,
+            {}
+          )
+        );
+        updateFormData();
+        updateNavigation();
+      };
+
+      section.appendChild(container);
+      section.appendChild(addBtn);
+      return section;
+    }
+
+    function createInlineArrayItem(baseKey, index, fields, value) {
+      const item = document.createElement('div');
+      item.className = 'array-item';
+
+      const header = document.createElement('div');
+      header.className = 'array-item-header';
+      header.innerHTML = `
+    <div class="array-item-title">项 #${index + 1}</div>
+    <button type="button" class="btn-remove"
+      onclick="this.closest('.array-item').remove(); updateFormData(); updateNavigation();">
+      删除
+    </button>
+  `;
+      item.appendChild(header);
+
+      fields.forEach(field => {
+        item.appendChild(
+          createFieldGroup(
+            `${baseKey}[${index}].${field.key}`,
+            field.label,
+            field.type,
+            value?.[field.key]
+          )
+        );
+      });
+
+      return item;
+    }
+
+
+
+    // 更新表单数据
+    function updateFormData() {
+      formData = {};
+
+      // 收集所有输入值
+      document.querySelectorAll('input, select, textarea').forEach(input => {
+        if (!input.id) return;
+
+        const id = input.id;
+        let value;
+
+        if (input.type === 'checkbox') {
+          value = input.checked ? true : undefined;
+        } else if (input.type === 'number') {
+          value = input.value === '' ? undefined : parseFloat(input.value);
+        } else if (input.tagName === 'SELECT') {
+          const selectValue = input.value;
+          if (selectValue === '') {
+            value = undefined;
+          } else {
+            // 尝试解析为数字
+            const numValue = parseFloat(selectValue);
+            value = isNaN(numValue) ? selectValue : numValue;
+          }
+        } else {
+          const strValue = input.value.trim();
+          if (strValue === '') {
+            value = undefined;
+          } else {
+            // 尝试解析为 JSON（用于数组和对象）
+            try {
+              value = JSON.parse(strValue);
+            } catch {
+              value = strValue;
+            }
+          }
+        }
+
+        if (value === undefined || value === '') return;
+
+        // 解析 ID 路径
+        setNestedValue(formData, id, value);
+      });
+    }
+
+    // 设置嵌套值
+    function setNestedValue(obj, path, value) {
+      // 处理数组索引，如 meshes[0].scale 或 meshes[0].animations[1].name
+      const parts = [];
+      let current = '';
+      let bracketMode = false;
+
+      for (let i = 0; i < path.length; i++) {
+        const char = path[i];
+        if (char === '[') {
+          if (current) {
+            parts.push({ type: 'key', value: current });
+            current = '';
+          }
+          bracketMode = true;
+        } else if (char === ']') {
+          parts.push({ type: 'index', value: parseInt(current) });
+          current = '';
+          bracketMode = false;
+        } else if (char === '.' && !bracketMode) {
+          if (current) {
+            parts.push({ type: 'key', value: current });
+            current = '';
+          }
+        } else {
+          current += char;
+        }
+      }
+      if (current) {
+        parts.push({ type: 'key', value: current });
+      }
+
+      // 构建嵌套对象
+      let currentObj = obj;
+      for (let i = 0; i < parts.length - 1; i++) {
+        const part = parts[i];
+        const nextPart = parts[i + 1];
+
+        if (part.type === 'key') {
+          if (!currentObj[part.value]) {
+            currentObj[part.value] = nextPart.type === 'index' ? [] : {};
+          }
+          currentObj = currentObj[part.value];
+        } else if (part.type === 'index') {
+          if (!Array.isArray(currentObj)) {
+            currentObj = [];
+          }
+          while (currentObj.length <= part.value) {
+            currentObj.push({});
+          }
+          if (!currentObj[part.value]) {
+            currentObj[part.value] = nextPart.type === 'index' ? [] : {};
+          }
+          currentObj = currentObj[part.value];
+        }
+      }
+
+      // 设置最终值
+      const lastPart = parts[parts.length - 1];
+      if (lastPart.type === 'key') {
+        currentObj[lastPart.value] = value;
+      } else if (lastPart.type === 'index') {
+        if (!Array.isArray(currentObj)) {
+          currentObj = [];
+        }
+        while (currentObj.length <= lastPart.value) {
+          currentObj.push(undefined);
+        }
+        currentObj[lastPart.value] = value;
+      }
+    }
+
+
+    // 导出配置
+    function exportConfig() {
+      updateFormData();
+
+      // 清理空值（遵循最简原则）
+      const cleaned = cleanEmptyValues(formData);
+
+      const json = JSON.stringify(cleaned, null, 2);
+      const blob = new Blob([json], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'config.json';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    // 清理空值（遵循最简原则：只保留有值的字段）
+    function cleanEmptyValues(obj) {
+      if (obj === null || obj === undefined) return undefined;
+
+      // 保留 boolean 类型的 false 值
+      if (typeof obj === 'boolean') return obj;
+
+      // 保留数字 0
+      if (typeof obj === 'number') return obj;
+
+      if (Array.isArray(obj)) {
+        const cleaned = obj.map(cleanEmptyValues).filter(v => v !== undefined);
+        return cleaned.length > 0 ? cleaned : undefined;
+      }
+
+      if (typeof obj === 'object') {
+        const cleaned = {};
+        Object.keys(obj).forEach(key => {
+          const value = cleanEmptyValues(obj[key]);
+          if (value !== undefined) {
+            cleaned[key] = value;
+          }
+        });
+        return Object.keys(cleaned).length > 0 ? cleaned : undefined;
+      }
+
+      // 字符串：空字符串视为 undefined
+      if (typeof obj === 'string' && obj.trim() === '') return undefined;
+
+      return obj;
+    }
+
+    // 导入配置
+    document.getElementById('importFile').addEventListener('change', function (e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        try {
+          const imported = JSON.parse(e.target.result);
+          formData = imported;
+          initForm(); // initForm 会自动调用 updateNavigation 和 initNavigationControls
+        } catch (error) {
+          alert('导入失败：' + error.message);
+        }
+      };
+      reader.readAsText(file);
+    });
+
+    // 初始化
+    initForm();
+  </script>
+</body>
+
+</html>

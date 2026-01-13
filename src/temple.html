@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<title>Canvas 内凹圆角双层画框（同半径）</title>
+
+<style>
+html, body {
+    margin: 0;
+    height: 100%;
+}
+
+body {
+    background: #ccc;
+}
+
+.container {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+canvas {
+    height: 100%;
+    aspect-ratio: 3 / 4;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+    <canvas id="canvas"></canvas>
+</div>
+
+<script>
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+
+function resize() {
+    const h = canvas.clientHeight;
+    canvas.width = h * 0.75;
+    canvas.height = h;
+    draw();
+}
+
+/**
+ * 内凹圆角矩形
+ * r：凹角半径（内外框必须一致）
+ */
+function concaveRectPath(x, y, w, h, r) {
+    ctx.beginPath();
+
+    // 上
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + w - r, y);
+    ctx.arc(x + w, y, r, Math.PI, Math.PI / 2, true);
+
+    // 右
+    ctx.lineTo(x + w, y + h - r);
+    ctx.arc(x + w, y + h, r, -Math.PI / 2, Math.PI, true);
+
+    // 下
+    ctx.lineTo(x + r, y + h);
+    ctx.arc(x, y + h, r, 0, -Math.PI / 2, true);
+
+    // 左
+    ctx.lineTo(x, y + r);
+    ctx.arc(x, y, r, Math.PI / 2, 0, true);
+
+    ctx.closePath();
+}
+
+function draw() {
+    const w = canvas.width;
+    const h = canvas.height;
+
+    ctx.clearRect(0, 0, w, h);
+
+    const outerMargin = 12;
+    const frameGap    = 8;   // 外框 → 次框 的间距
+    const radius      = 28;   // ★ 内外框统一凹角半径
+
+    // ===== 1️⃣ 裁剪区域（最外框） =====
+    concaveRectPath(
+        outerMargin,
+        outerMargin,
+        w - outerMargin * 2,
+        h - outerMargin * 2,
+        radius
+    );
+    ctx.save();
+    ctx.clip();
+
+    // ===== 2️⃣ Canvas 内容 =====
+    ctx.fillStyle = '#f6f1e8';
+    ctx.fillRect(0, 0, w, h);
+
+    // 示例内容
+    ctx.fillStyle = '#333';
+    ctx.font = '48px serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('Canvas', w / 2, h / 2);
+
+    ctx.restore();
+
+    // ===== 3️⃣ 外框 =====
+    ctx.strokeStyle = '#111';
+    ctx.lineWidth = 2;
+    concaveRectPath(
+        outerMargin,
+        outerMargin,
+        w - outerMargin * 2,
+        h - outerMargin * 2,
+        radius
+    );
+    ctx.stroke();
+
+    // ===== 4️⃣ 次框（同半径，只内缩） =====
+    ctx.lineWidth = 1;
+    concaveRectPath(
+        outerMargin + frameGap,
+        outerMargin + frameGap,
+        w - (outerMargin + frameGap) * 2,
+        h - (outerMargin + frameGap) * 2,
+        radius
+    );
+    ctx.stroke();
+}
+
+window.addEventListener('resize', resize);
+resize();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,188 @@
+{
+  "width": 1900,
+  "height": 1920,
+  "backgroundImage": [
+    "bg.png"
+  ],
+  "animationMix": {
+    "enabled": false,
+    "duration": 0.2
+  },
+  "backgroundImageFit": "auto",
+  "canvasAlignLeftPercent": -1,
+  "canvasAlignRightPercent": 0,
+  "backgroundMusic": {
+    "fileName": "bg.flac",
+    "volume": 0.2
+  },
+  "specialEffectLibrary": [
+    {
+      "image1FileName": "p1.png",
+      "image2FileName": "t0.png",
+      "image3FileName": "t1.png",
+      "audioFileName": "p1.mp3",
+      "animationName": "casting1",
+      "image1Duration": 400,
+      "scaleDuration": 100,
+      "fadeOutDuration": 1500,
+      "image1Scale": 0.7,
+      "image2InitialScale": 2.0,
+      "image2FinalScale": 0.55,
+      "image3InitialScale": 0.5,
+      "image3FinalScale": 1.2,
+      "image2AlignPercent": 57
+    },
+    {
+      "image1FileName": "z1.png",
+      "image2FileName": "t0.png",
+      "image3FileName": "t2.png",
+      "audioFileName": "z1.mp3",
+      "animationName": "casting1",
+      "image1Duration": 400,
+      "scaleDuration": 100,
+      "fadeOutDuration": 1500,
+      "image1Scale": 0.7,
+      "image2InitialScale": 2.0,
+      "image2FinalScale": 0.55,
+      "image3InitialScale": 0.5,
+      "image3FinalScale": 1.2,
+      "image2AlignPercent": 57
+    },
+    {
+      "image1FileName": "z2.png",
+      "image2FileName": "t0.png",
+      "image3FileName": "t2.png",
+      "audioFileName": "z2.mp3",
+      "animationName": "casting1",
+      "image1Duration": 400,
+      "scaleDuration": 100,
+      "fadeOutDuration": 1500,
+      "image1Scale": 0.7,
+      "image2InitialScale": 2.0,
+      "image2FinalScale": 0.55,
+      "image3InitialScale": 0.5,
+      "image3FinalScale": 1.2,
+      "image2AlignPercent": 57
+    },
+    {
+      "image1FileName": "e1.png",
+      "image1Duration": 2000,
+      "image1Scale": 1
+    },
+    {
+      "image1FileName": "e2.png",
+      "image1Duration": 2000,
+      "image1Scale": 1
+    }
+  ],
+  "meshes": [
+    {
+      "type": "spine",
+      "skeletonFileName": "25205.skel",
+      "atlasFileName": "25205.atlas",
+      "animations": [
+        {
+          "name": "battlestand",
+          "weight": 80
+        },
+        {
+          "name": "casting1",
+          "weight": 2,
+          "audioFileName": "3.mp3"
+        },
+        {
+          "name": "born_break",
+          "weight": 3,
+          "audioFileName": "2.mp3"
+        },
+        {
+          "name": "idle1",
+          "weight": 15,
+          "audioFileName": "1.mp3"
+        }
+      ],
+      "scale": 7,
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": -1200
+      },
+      "hiddenSlots": [],
+      "controlSlots": {
+        "backgroundMusic": [
+          "sanmu_12"
+        ],
+        "voiceAnimation": ["sanmu_1"]
+      },
+      "clickEffects": [
+        {
+          "imageFileName": "1.png",
+          "weight": 40,
+          "duration": 500,
+          "scale": 0.15,
+          "effect": 0
+        },
+        {
+          "imageFileName": "2.png",
+          "weight": 40,
+          "duration": 500,
+          "scale": 0.15,
+          "effect": 0
+        },
+        {
+          "imageFileName": "3.png",
+          "weight": 10,
+          "duration": 10000,
+          "scale": 0.4,
+          "effect": 2
+        },
+        {
+          "imageFileName": "4.png",
+          "weight": 5,
+          "duration": 10000,
+          "scale": 0.4,
+          "effect": 2
+        },
+        {
+          "imageFileName": "5.png",
+          "weight": 5,
+          "duration": 10000,
+          "scale": 0.4,
+          "effect": 2
+        }
+      ],
+      "specialEffectTriggers": [
+        {
+          "triggerEffectsWhenActive": [
+            "3.png",
+            "4.png"
+          ],
+          "effectIndices": [2,0,1,3]
+        },
+        {
+          "triggerEffectsWhenActive": [
+            "3.png",
+            "5.png"
+          ],
+          "effectIndices": [2,0,1,4]
+        }
+      ],
+      "overlayMedia": [
+        {
+          "triggerSlot": [
+            "wuwan_39",
+            "wuwan_40"
+          ],
+          "videoFileName": "full.webm",
+          "audioFileName": "full.mp3",
+          "pauseBackgroundMusic": false,
+          "closeOnClick": false,
+          "videoVolume": 1.0,
+          "audioVolume": 1.0,
+          "loopVideo": false
+        }
+      ]
+    }
+  ],
+  "activeMeshIndex": 0
+}

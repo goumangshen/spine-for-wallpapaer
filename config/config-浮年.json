@@ -1,0 +1,220 @@
+{
+  "width": 1450,
+  "height": 1920,
+  "backgroundImage": [
+    "bg.png"
+  ],
+  "animationMix": {
+    "enabled": false,
+    "duration": 0.2
+  },
+  "backgroundImageFit": "auto",
+  "canvasAlignLeftPercent": 0.05,
+  "canvasAlignRightPercent": -1,
+  "canvasEdgeTransition": 3,
+  "canvasEdgeBorderColor": "#c0a062",
+  "backgroundMusic": {
+    "fileName": "bg.flac",
+    "volume": 0.2
+  },
+  "specialEffectLibrary":[
+    {
+      "type":3,
+      "image1FileName":"r1.png",
+      "initialScale":0.7,
+      "audioFileName":"e.mp3"
+    },
+    {
+      "type":3,
+      "image1FileName":"r2.png",
+      "initialScale":0.7,
+      "audioFileName":"e.mp3"
+    },
+    {
+      "type":3,
+      "image1FileName":"r3.png",
+      "initialScale":0.7,
+      "audioFileName":"e.mp3"
+    },
+    {
+      "type":3,
+      "image1FileName":"r4.png",
+      "initialScale":0.7,
+      "audioFileName":"e.mp3"
+    },
+    {
+      "type":3,
+      "image1FileName":"r5.png",
+      "initialScale":0.5,
+      "audioFileName":"e.mp3"
+    },
+    {
+      "type":3,
+      "image1FileName":"r6.png",
+      "initialScale":0.7,
+      "audioFileName":"e.mp3"
+    },
+    {
+      "type":3,
+      "image1FileName":"r7.png",
+      "initialScale":0.7,
+      "audioFileName":"e.mp3"
+    },
+    {
+      "type":3,
+        "image1FileName":"r8.png",
+      "initialScale":0.7,
+      "audioFileName":"e.mp3"
+    },
+    {
+      "type":3,
+      "image1FileName":"r9.png",
+      "initialScale":0.7,
+      "audioFileName":"e.mp3"
+    },
+    {
+      "type":3,
+      "image1FileName":"r10.png",
+      "audioFileName":"e.mp3"
+    },
+    {
+      "type":3,
+      "image1FileName":"r11.png",
+      "initialScale":0.7,
+      "audioFileName":"e.mp3"
+    },
+    {
+      "type":3,
+      "image1FileName":"r12.png",
+      "audioFileName":"e.mp3"
+    },
+    {
+      "type":3,
+      "image1FileName":"r13.png",
+      "initialScale":0.7,
+      "audioFileName":"e.mp3"
+    },
+    {
+      "type":3,
+      "image1FileName":"r14.png",
+      "initialScale":0.7,
+      "audioFileName":"e.mp3"
+    },
+    {
+      "type":3,
+      "image1FileName":"r15.png",
+      "initialScale":0.7,
+      "audioFileName":"e.mp3"
+    },
+    {
+      "type":3,
+      "image1FileName":"r16.png",
+      "initialScale":0.7,
+      "audioFileName":"e.mp3"
+    },
+    {
+      "type":3,
+      "image1FileName":"r17.png",
+      "initialScale":0.7,
+      "audioFileName":"e.mp3"
+    },
+    {
+      "type":3,
+      "image1FileName":"r18.png",
+      "initialScale":0.7,
+      "audioFileName":"e.mp3"
+    },
+    {
+      "type":3,
+      "image1FileName":"r19.png",
+      "initialScale":0.7,
+      "audioFileName":"e.mp3"
+    }
+  ],
+  "meshes": [
+    {
+      "type": "spine",
+      "jsonFileName":"2910001.json",
+      "atlasFileName": "2910001.atlas",
+      "animations": [
+        {
+          "name": "battlestand",
+          "weight": 85
+        },
+        {
+          "name": "casting1",
+          "weight": 5,
+          "audioFileName": "3.mp3"
+        },
+        {
+          "name": "born_break",
+          "weight": 5,
+          "audioFileName": "2.mp3"
+        },
+        {
+          "name": "idle1",
+          "weight": 5,
+          "audioFileName": "1.mp3"
+        }
+      ],
+      "scale": 5.3,
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": -1200
+      },
+      "controlSlots": {
+        "backgroundMusic": [
+          "deng2"
+        ],
+        "voiceAnimation": [
+          "juese25","juese33"
+        ]
+      },
+      "clickEffects": [
+        {
+          "imageFileName": "d1.png",
+          "weight": 45,
+          "duration": 500,
+          "scale": 0.2,
+          "effect": 0
+        },
+        {
+          "imageFileName": "d2.png",
+          "weight": 45,
+          "duration": 500,
+          "scale": 0.2,
+          "effect": 0
+        },
+        {
+          "imageFileName": "d3.png",
+          "weight": 10,
+          "duration": 500,
+          "scale": 0.3,
+          "effect": 0
+        }
+      ],
+      "hiddenSlots":["beijing7"],
+      "specialEffectTriggers":[{
+        "triggerSlot":"deng3",
+        "effectIndices":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18],
+        "random":true
+      }],
+      "overlayMedia": [
+        {
+          "triggerSlot": [
+            "qianzhuozi9"
+          ],
+          "videoFileName": "full.webm",
+          "audioFileName": "",
+          "pauseBackgroundMusic": true,
+          "closeOnClick": false,
+          "videoVolume": 1.0,
+          "audioVolume": 1.0,
+          "loopVideo": false
+        }
+      ]
+    }
+  ],
+  "activeMeshIndex": 0
+}

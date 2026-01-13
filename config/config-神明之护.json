@@ -1,0 +1,154 @@
+{
+  "width": 3600,
+  "height": 1920,
+  "backgroundImage": [
+    "bg.png"
+  ],
+  "animationMix": {
+    "enabled": false,
+    "duration": 0.2
+  },
+  "backgroundImageFit": "auto",
+  "canvasAlignLeftPercent": -1,
+  "canvasAlignRightPercent": 0,
+  "canvasEdgeTransition": 1,
+  "backgroundMusic": {
+    "fileName": "bg.flac",
+    "volume": 0.1
+  },
+  "specialEffectLibrary":[
+    {
+      "type":2,
+      "image1FileName": "28101.webp",
+      "image2FileName": "t0.png",
+      "image3FileName": "t1.png",
+      "audioFileName": "11.mp3",
+      "animationName": "casting1",
+      "image1Duration": 400,
+      "scaleDuration": 100,
+      "fadeOutDuration": 1500
+    },
+    {
+      "type":2,
+      "image1FileName": "28102.webp",
+      "image2FileName": "t0.png",
+      "image3FileName": "t1.png",
+      "audioFileName": "12.mp3",
+      "animationName": "casting1",
+      "image1Duration": 400,
+      "scaleDuration": 100,
+      "fadeOutDuration": 1500
+    },
+    {
+      "type":2,
+      "image1FileName": "28104.webp",
+      "image2FileName": "t0.png",
+      "image3FileName": "t1.png",
+      "audioFileName": "21.mp3",
+      "animationName": "casting1",
+      "image1Duration": 400,
+      "scaleDuration": 100,
+      "fadeOutDuration": 1500
+    },
+    {
+      "type":2,
+      "image1FileName": "28107.webp",
+      "image2FileName": "t0.png",
+      "image3FileName": "t1.png",
+      "audioFileName": "31.mp3",
+      "animationName": "casting1",
+      "image1Duration": 400,
+      "scaleDuration": 100,
+      "fadeOutDuration": 1500
+    },
+    {
+      "type":1,
+      "image1FileName": "l.png",
+      "image1Scale": 0.5,
+      "audioFileName": "l.mp3",
+      "image1Duration":1000
+    }
+  ],
+  "meshes": [
+    {
+      "type": "spine",
+      "jsonFileName":"28105.json",
+      "atlasFileName": "28105.atlas",
+      "animations": [
+        {
+          "name": "battlestand",
+          "weight": 95
+        },
+        {
+          "name": "casting1",
+          "weight": 3,
+          "audioFileName": "1.mp3"
+        },
+        {
+          "name": "born_break",
+          "weight": 2,
+          "audioFileName": "2.mp3"
+        }
+      ],
+      "scale": 6.5,
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": -1200
+      },
+      "controlSlots": {
+        "backgroundMusic": [
+          "ren42","ren82"
+        ],
+        "voiceAnimation": [
+          "qian9"
+        ]
+      },
+      "clickEffects": [
+        {
+          "imageFileName": "d1.png",
+          "weight": 47,
+          "duration": 500,
+          "scale": 0.25,
+          "effect": 0
+        },
+        {
+          "imageFileName": "d2.png",
+          "weight": 48,
+          "duration": 500,
+          "scale": 0.2,
+          "effect": 0
+        },
+        {
+          "imageFileName": "d3.png",
+          "weight": 5,
+          "duration": 500,
+          "scale": 0.3,
+          "effect": 0
+        }
+      ],
+      "specialEffectTriggers":[{
+        "triggerSlot":[
+          "ren3","ren4"
+        ],
+        "effectIndices":[[0],[1,4],[2,4],[3,4]],
+        "random":true
+      }],
+      "overlayMedia": [
+        {
+          "triggerSlot": [
+            "ren7","ren23","ren24","ren123","ren11"
+          ],
+          "videoFileName": "full.webm",
+          "audioFileName": "xt.mp3",
+          "pauseBackgroundMusic": false,
+          "closeOnClick": false,
+          "videoVolume": 1.0,
+          "audioVolume": 1.0,
+          "loopVideo": false
+        }
+      ]
+    }
+  ],
+  "activeMeshIndex": 0
+}

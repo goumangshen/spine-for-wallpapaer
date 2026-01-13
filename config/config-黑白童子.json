@@ -1,11 +1,6 @@
 {
   "width": 3000,
   "height": 1920,
-  "backgroundColor": {
-    "r": 248,
-    "g": 244,
-    "b": 241
-  },
   "backgroundImage": [
     "bg.png"
   ],
@@ -16,16 +11,6 @@
   "backgroundImageFit": "width",
   "canvasAlignLeftPercent": -1,
   "canvasAlignRightPercent": -1,
-  "responsiveLayout": {
-    "enabled": false,
-    "mode": "height",
-    "baseCanvasHeight": 700,
-    "positionEnabled": true,
-    "scaleEnabled": true,
-    "invertPosition": false,
-    "invertScale": true,
-    "scaleDamp": 0.3
-  },
   "backgroundMusic": {
     "fileName": "bg.flac",
     "volume": 0.2

@@ -17,15 +17,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import * as THREE from 'three';
 import * as threejsSpine from 'threejs-spine-3.8-runtime-es6';
 import { SpineAnimator } from './animator';
-import { Configs, SpineMeshConfig, OverlayMediaItem, SlotHideRule, SpecialEffectItem } from './config.type';
+import { Configs, SpineMeshConfig, OverlayMediaItem, SlotHideRule, SpecialEffectDefinition, SpecialEffectTrigger } from './config.type';
 import { ASSET_PATH } from './constants';
 import * as Scene from './initScene';
-import { switchBackgroundImage, setMeshBackgroundImage, setMeshCanvasAlignment } from './initScene';
+import { switchBackgroundImage, setMeshBackgroundImage, setMeshCanvasAlignment, setMeshCanvasEdgeTransition, updateCanvasSize, getCanvasSize } from './initScene';
 import { playOverlayMediaItem, setOverlayMediaEndCallback, setOverlayMediaStartCallback } from './overlayMedia';
-import { handleClickEffect, preloadClickEffectImages, areClickEffectsActive, clearAllClickEffects } from './clickEffect';
-import { playSpecialEffect } from './specialEffect';
+import { handleClickEffect, preloadClickEffectImages, areClickEffectsActive, areClickEffectsCountReached, clearAllClickEffects, setClickEffectCompleteCallback } from './clickEffect';
+import { playSpecialEffectsSequence, setSpecialEffectCompleteCallback } from './specialEffect';
 
 const main = async () => {
   const configs: Configs = await (await fetch('./assets/config.json')).json();
@@ -79,9 +80,16 @@ const main = async () => {
   let conditionalOverlayMediaItems: OverlayMediaItem[] = [];
   const triggeredConditionalVideos: Set<OverlayMediaItem> = new Set();
   
-  // 条件触发的 specialEffects 相关变量（需要在 render 函数中访问）
-  let conditionalSpecialEffectItems: SpecialEffectItem[] = [];
-  const triggeredSpecialEffects: Set<SpecialEffectItem> = new Set();
+  // 条件触发的 specialEffectTriggers 相关变量（需要在 render 函数中访问）
+  let conditionalSpecialEffectTriggers: SpecialEffectTrigger[] = [];
+  const triggeredSpecialEffectTriggers: Set<SpecialEffectTrigger> = new Set();
+  
+  // 累计计数触发的 specialEffectTriggers 相关变量
+  let totalCountSpecialEffectTriggers: SpecialEffectTrigger[] = [];
+  // 累计计数器：key 为 effectIdentifier，value 为当前计数
+  const totalCounters = new Map<string, number>();
+  // 累计计数触发的触发器映射：key 为 effectIdentifier，value 为包含该标识符的触发器数组
+  const totalCountTriggerMap = new Map<string, SpecialEffectTrigger[]>();
   
   // 当前活动的 mesh 索引和配置
   let currentActiveMeshIndex = configs.activeMeshIndex ?? 0;
@@ -117,8 +125,19 @@ const main = async () => {
         assetManager.loadTextureAtlas(
           meshConfig.atlasFileName,
           // onLoad callback
-          () => {
-            // skip
+          (atlas: any) => {
+            // 配置纹理优化设置
+            if (atlas && atlas.pages) {
+              atlas.pages.forEach((page: any) => {
+                if (page.texture) {
+                  page.texture.encoding = THREE.LinearEncoding;
+                  page.texture.generateMipmaps = false;
+                  page.texture.minFilter = THREE.LinearFilter;
+                  page.texture.magFilter = THREE.LinearFilter;
+                  page.texture.premultipliedAlpha = false;
+                }
+              });
+            }
           },
           // onError callback
           (path: string, error: string) => {
@@ -258,7 +277,9 @@ const main = async () => {
     // 清空条件触发视频标记
     triggeredConditionalVideos.clear();
     // 清空条件触发特效标记
-    triggeredSpecialEffects.clear();
+    triggeredSpecialEffectTriggers.clear();
+    // 重置累计计数器
+    totalCounters.clear();
     
     // 使用预加载的资源管理器
     spineAssetManager = assetManager;
@@ -282,6 +303,74 @@ const main = async () => {
         conditionalOverlayMediaItems = allOverlayMediaItemsForConditional.filter((it: OverlayMediaItem) => 
           !!it?.triggerSlotsWhenHidden || !!it?.triggerEffectsWhenActive
         );
+        
+        // 从生效的 mesh 配置中获取条件触发的 specialEffectTriggers
+        const allSpecialEffectTriggers = currentActiveMeshConfig!.specialEffectTriggers
+          ? (Array.isArray(currentActiveMeshConfig!.specialEffectTriggers)
+              ? currentActiveMeshConfig!.specialEffectTriggers
+              : [currentActiveMeshConfig!.specialEffectTriggers])
+          : [];
+        conditionalSpecialEffectTriggers = allSpecialEffectTriggers.filter((it: SpecialEffectTrigger) => 
+          !!it?.triggerSlotsWhenHidden || !!it?.triggerEffectsWhenActive || !!it?.triggerEffectsWhenCountReached
+        );
+        
+        // 从生效的 mesh 配置中获取累计计数触发的 specialEffectTriggers
+        totalCountSpecialEffectTriggers = allSpecialEffectTriggers.filter((it: SpecialEffectTrigger) => 
+          !!it?.triggerEffectsWhenTotalCountReached && it.triggerEffectsWhenTotalCountReached.length > 0
+        );
+        
+        // 初始化累计计数器和触发器映射
+        totalCounters.clear();
+        totalCountTriggerMap.clear();
+        for (const trigger of totalCountSpecialEffectTriggers) {
+          if (trigger.triggerEffectsWhenTotalCountReached) {
+            for (const config of trigger.triggerEffectsWhenTotalCountReached) {
+              const identifier = config.effectIdentifier;
+              // 初始化计数器
+              if (!totalCounters.has(identifier)) {
+                totalCounters.set(identifier, 0);
+              }
+              // 建立映射关系
+              if (!totalCountTriggerMap.has(identifier)) {
+                totalCountTriggerMap.set(identifier, []);
+              }
+              totalCountTriggerMap.get(identifier)!.push(trigger);
+            }
+          }
+        }
+        
+        // 设置点击特效完成计数回调
+        setClickEffectCompleteCallback((imageFileName: string) => {
+          const identifier = imageFileName;
+          const currentCount = totalCounters.get(identifier) || 0;
+          totalCounters.set(identifier, currentCount + 1);
+          
+          // 检查是否有触发器需要检查
+          const triggers = totalCountTriggerMap.get(identifier);
+          if (triggers) {
+            for (const trigger of triggers) {
+              checkAndTriggerTotalCount(trigger);
+            }
+          }
+        });
+        
+        // 设置特殊特效完成计数回调
+        setSpecialEffectCompleteCallback((effectIndices: number[]) => {
+          // 为每个特效索引计数
+          for (const effectIndex of effectIndices) {
+            const identifier = `effect:${effectIndex}`;
+            const currentCount = totalCounters.get(identifier) || 0;
+            totalCounters.set(identifier, currentCount + 1);
+            
+            // 检查是否有触发器需要检查
+            const triggers = totalCountTriggerMap.get(identifier);
+            if (triggers) {
+              for (const trigger of triggers) {
+                checkAndTriggerTotalCount(trigger);
+              }
+            }
+          }
+        });
         
         // 性能优化：预加载点击特效图片
         if (currentActiveMeshConfig!.clickEffects) {
@@ -311,12 +400,29 @@ const main = async () => {
           true // 使用过渡效果
         );
         
+        // 设置 mesh 的 canvas 尺寸（优先使用 mesh 配置的尺寸，否则使用全局尺寸）
+        const meshWidth = currentActiveMeshConfig!.width;
+        const meshHeight = currentActiveMeshConfig!.height;
+        const targetWidth = meshWidth !== undefined ? meshWidth : configs.width;
+        const targetHeight = meshHeight !== undefined ? meshHeight : configs.height;
+        updateCanvasSize(targetWidth, targetHeight);
+        
         // 设置 mesh 的 canvas 对齐（优先使用 mesh 配置的对齐值，否则使用全局对齐值）
         setMeshCanvasAlignment(
           currentActiveMeshConfig!.canvasAlignLeftPercent,
           currentActiveMeshConfig!.canvasAlignRightPercent,
           configs.canvasAlignLeftPercent,
           configs.canvasAlignRightPercent
+        );
+
+        // 设置 mesh 的 canvas 边缘过渡（优先使用 mesh 配置的边缘过渡值，否则使用全局边缘过渡值）
+        setMeshCanvasEdgeTransition(
+          currentActiveMeshConfig!.canvasEdgeTransition,
+          currentActiveMeshConfig!.canvasEdgeTransitionImage,
+          currentActiveMeshConfig!.canvasEdgeBorderColor,
+          configs.canvasEdgeTransition,
+          configs.canvasEdgeTransitionImage,
+          configs.canvasEdgeBorderColor
         );
         
         // 清除待切换标记
@@ -347,6 +453,107 @@ const main = async () => {
   };
   (window as any).__overlayMediaStartCallback = meshSwitchStartCallback;
   setOverlayMediaStartCallback(meshSwitchStartCallback);
+
+  /**
+   * 检查累计计数是否达到阈值，如果达到则触发特效并重置计数器
+   */
+  const checkAndTriggerTotalCount = (trigger: SpecialEffectTrigger) => {
+    if (!trigger.triggerEffectsWhenTotalCountReached || trigger.triggerEffectsWhenTotalCountReached.length === 0) {
+      return;
+    }
+    
+    // 检查所有配置的特效是否都达到对应的累计次数
+    let allReached = true;
+    for (const config of trigger.triggerEffectsWhenTotalCountReached) {
+      const identifier = config.effectIdentifier;
+      const currentCount = totalCounters.get(identifier) || 0;
+      if (currentCount < config.count) {
+        allReached = false;
+        break;
+      }
+    }
+    
+    // 如果所有条件都满足，触发特效
+    if (allReached) {
+      // 重置所有相关的计数器
+      for (const config of trigger.triggerEffectsWhenTotalCountReached) {
+        const identifier = config.effectIdentifier;
+        totalCounters.set(identifier, 0);
+      }
+      
+      // 从特效库中获取特效定义并播放
+      if (configs.specialEffectLibrary && trigger.effectIndices && trigger.effectIndices.length > 0) {
+        const effectDefinitions: SpecialEffectDefinition[] = [];
+        let actualEffectIndices: number[] = [];
+        
+        // 判断是一维数组还是二维数组
+        const isTwoDimensional = trigger.effectIndices.length > 0 && Array.isArray(trigger.effectIndices[0]);
+        
+        if (isTwoDimensional) {
+          // 二维数组模式
+          const effectGroups = trigger.effectIndices as number[][];
+          
+          if (trigger.random) {
+            // 随机模式：随机选择一个一维数组，然后按顺序播放该数组内的特效
+            const randomGroup = effectGroups[Math.floor(Math.random() * effectGroups.length)];
+            actualEffectIndices = randomGroup || [];
+            if (randomGroup && randomGroup.length > 0) {
+              for (const index of randomGroup) {
+                if (index >= 0 && index < configs.specialEffectLibrary.length) {
+                  effectDefinitions.push(configs.specialEffectLibrary[index]);
+                } else {
+                  console.warn(`Special effect index ${index} is out of range. Library size: ${configs.specialEffectLibrary.length}`);
+                }
+              }
+            }
+          } else {
+            // 顺序模式：按一维数组顺序播放，每个一维数组内的特效按顺序播放
+            for (const group of effectGroups) {
+              if (group && group.length > 0) {
+                actualEffectIndices = actualEffectIndices.concat(group);
+                for (const index of group) {
+                  if (index >= 0 && index < configs.specialEffectLibrary.length) {
+                    effectDefinitions.push(configs.specialEffectLibrary[index]);
+                  } else {
+                    console.warn(`Special effect index ${index} is out of range. Library size: ${configs.specialEffectLibrary.length}`);
+                  }
+                }
+              }
+            }
+          }
+        } else {
+          // 一维数组模式（向后兼容）
+          const effectIndices = trigger.effectIndices as number[];
+          actualEffectIndices = [...effectIndices];
+        
+          if (trigger.random) {
+            // 随机选择：从 effectIndices 中随机选取一个索引
+            const randomIndex = effectIndices[Math.floor(Math.random() * effectIndices.length)];
+            actualEffectIndices = [randomIndex];
+            if (randomIndex >= 0 && randomIndex < configs.specialEffectLibrary.length) {
+              effectDefinitions.push(configs.specialEffectLibrary[randomIndex]);
+            } else {
+              console.warn(`Special effect index ${randomIndex} is out of range. Library size: ${configs.specialEffectLibrary.length}`);
+            }
+          } else {
+            // 顺序播放：遍历所有索引
+            for (const index of effectIndices) {
+              if (index >= 0 && index < configs.specialEffectLibrary.length) {
+                effectDefinitions.push(configs.specialEffectLibrary[index]);
+              } else {
+                console.warn(`Special effect index ${index} is out of range. Library size: ${configs.specialEffectLibrary.length}`);
+              }
+            }
+          }
+        }
+        
+        if (effectDefinitions.length > 0) {
+          playSpecialEffectsSequence(effectDefinitions, spineAnimatorInstance, actualEffectIndices);
+          console.log(`Total count special effect triggered, effects: [${actualEffectIndices.join(', ')}]`);
+        }
+      }
+    }
+  };
 
   // 设置视频结束回调（需要在 completeMeshSwitch 定义之后）
   setOverlayMediaEndCallback((item: OverlayMediaItem | null) => {
@@ -392,15 +599,98 @@ const main = async () => {
         !!it?.triggerSlotsWhenHidden || !!it?.triggerEffectsWhenActive
       );
       
-      // 从生效的 mesh 配置中获取条件触发的 specialEffects
-      const allSpecialEffectItems = currentActiveMeshConfig!.specialEffects
-        ? (Array.isArray(currentActiveMeshConfig!.specialEffects)
-            ? currentActiveMeshConfig!.specialEffects
-            : [currentActiveMeshConfig!.specialEffects])
+      // 从生效的 mesh 配置中获取条件触发的 specialEffectTriggers
+      const allSpecialEffectTriggers = currentActiveMeshConfig!.specialEffectTriggers
+        ? (Array.isArray(currentActiveMeshConfig!.specialEffectTriggers)
+            ? currentActiveMeshConfig!.specialEffectTriggers
+            : [currentActiveMeshConfig!.specialEffectTriggers])
         : [];
-      conditionalSpecialEffectItems = allSpecialEffectItems.filter((it: SpecialEffectItem) => 
-        !!it?.triggerSlotsWhenHidden || !!it?.triggerEffectsWhenActive
+      conditionalSpecialEffectTriggers = allSpecialEffectTriggers.filter((it: SpecialEffectTrigger) => 
+        !!it?.triggerSlotsWhenHidden || !!it?.triggerEffectsWhenActive || !!it?.triggerEffectsWhenCountReached
       );
+      
+      // 从生效的 mesh 配置中获取累计计数触发的 specialEffectTriggers
+      totalCountSpecialEffectTriggers = allSpecialEffectTriggers.filter((it: SpecialEffectTrigger) => 
+        !!it?.triggerEffectsWhenTotalCountReached && it.triggerEffectsWhenTotalCountReached.length > 0
+      );
+      
+      // 初始化累计计数器和触发器映射
+      totalCounters.clear();
+      totalCountTriggerMap.clear();
+      for (const trigger of totalCountSpecialEffectTriggers) {
+        if (trigger.triggerEffectsWhenTotalCountReached) {
+          for (const config of trigger.triggerEffectsWhenTotalCountReached) {
+            const identifier = config.effectIdentifier;
+            // 初始化计数器
+            if (!totalCounters.has(identifier)) {
+              totalCounters.set(identifier, 0);
+            }
+            // 建立映射关系
+            if (!totalCountTriggerMap.has(identifier)) {
+              totalCountTriggerMap.set(identifier, []);
+            }
+            totalCountTriggerMap.get(identifier)!.push(trigger);
+          }
+        }
+      }
+      
+      // 从生效的 mesh 配置中获取累计计数触发的 specialEffectTriggers
+      totalCountSpecialEffectTriggers = allSpecialEffectTriggers.filter((it: SpecialEffectTrigger) => 
+        !!it?.triggerEffectsWhenTotalCountReached && it.triggerEffectsWhenTotalCountReached.length > 0
+      );
+      
+      // 初始化累计计数器和触发器映射
+      totalCounters.clear();
+      totalCountTriggerMap.clear();
+      for (const trigger of totalCountSpecialEffectTriggers) {
+        if (trigger.triggerEffectsWhenTotalCountReached) {
+          for (const config of trigger.triggerEffectsWhenTotalCountReached) {
+            const identifier = config.effectIdentifier;
+            // 初始化计数器
+            if (!totalCounters.has(identifier)) {
+              totalCounters.set(identifier, 0);
+            }
+            // 建立映射关系
+            if (!totalCountTriggerMap.has(identifier)) {
+              totalCountTriggerMap.set(identifier, []);
+            }
+            totalCountTriggerMap.get(identifier)!.push(trigger);
+          }
+        }
+      }
+      
+      // 设置点击特效完成计数回调
+      setClickEffectCompleteCallback((imageFileName: string) => {
+        const identifier = imageFileName;
+        const currentCount = totalCounters.get(identifier) || 0;
+        totalCounters.set(identifier, currentCount + 1);
+        
+        // 检查是否有触发器需要检查
+        const triggers = totalCountTriggerMap.get(identifier);
+        if (triggers) {
+          for (const trigger of triggers) {
+            checkAndTriggerTotalCount(trigger);
+          }
+        }
+      });
+      
+      // 设置特殊特效完成计数回调
+      setSpecialEffectCompleteCallback((effectIndices: number[]) => {
+        // 为每个特效索引计数
+        for (const effectIndex of effectIndices) {
+          const identifier = `effect:${effectIndex}`;
+          const currentCount = totalCounters.get(identifier) || 0;
+          totalCounters.set(identifier, currentCount + 1);
+          
+          // 检查是否有触发器需要检查
+          const triggers = totalCountTriggerMap.get(identifier);
+          if (triggers) {
+            for (const trigger of triggers) {
+              checkAndTriggerTotalCount(trigger);
+            }
+          }
+        }
+      });
       
       // 性能优化：预加载点击特效图片
       if (currentActiveMeshConfig!.clickEffects) {
@@ -430,12 +720,29 @@ const main = async () => {
         false // 初始化时不使用过渡效果
       );
 
+      // 设置 mesh 的 canvas 尺寸（优先使用 mesh 配置的尺寸，否则使用全局尺寸）
+      const meshWidth = currentActiveMeshConfig!.width;
+      const meshHeight = currentActiveMeshConfig!.height;
+      const targetWidth = meshWidth !== undefined ? meshWidth : configs.width;
+      const targetHeight = meshHeight !== undefined ? meshHeight : configs.height;
+      updateCanvasSize(targetWidth, targetHeight);
+      
       // 设置 mesh 的 canvas 对齐（优先使用 mesh 配置的对齐值，否则使用全局对齐值）
       setMeshCanvasAlignment(
         currentActiveMeshConfig!.canvasAlignLeftPercent,
         currentActiveMeshConfig!.canvasAlignRightPercent,
         configs.canvasAlignLeftPercent,
         configs.canvasAlignRightPercent
+      );
+
+      // 设置 mesh 的 canvas 边缘过渡（优先使用 mesh 配置的边缘过渡值，否则使用全局边缘过渡值）
+      setMeshCanvasEdgeTransition(
+        currentActiveMeshConfig!.canvasEdgeTransition,
+        currentActiveMeshConfig!.canvasEdgeTransitionImage,
+        currentActiveMeshConfig!.canvasEdgeBorderColor,
+        configs.canvasEdgeTransition,
+        configs.canvasEdgeTransitionImage,
+        configs.canvasEdgeBorderColor
       );
 
       requestAnimationFrame(render);
@@ -516,10 +823,10 @@ const main = async () => {
         }
       }
       
-      // 检查条件触发的 specialEffects
-      for (const item of conditionalSpecialEffectItems) {
+      // 检查条件触发的 specialEffectTriggers
+      for (const trigger of conditionalSpecialEffectTriggers) {
         // 如果已经触发过，跳过（避免同一帧重复触发）
-        if (triggeredSpecialEffects.has(item)) {
+        if (triggeredSpecialEffectTriggers.has(trigger)) {
           continue;
         }
         
@@ -528,11 +835,11 @@ const main = async () => {
         let isEffectTriggered = false; // 标记是否由点触特效触发
         
         // 检查插槽隐藏条件
-        if (item.triggerSlotsWhenHidden) {
+        if (trigger.triggerSlotsWhenHidden) {
           if (spineAnimatorInstance && spineAnimatorInstance.slotController) {
-            const triggerSlots = Array.isArray(item.triggerSlotsWhenHidden)
-              ? item.triggerSlotsWhenHidden
-              : [item.triggerSlotsWhenHidden];
+            const triggerSlots = Array.isArray(trigger.triggerSlotsWhenHidden)
+              ? trigger.triggerSlotsWhenHidden
+              : [trigger.triggerSlotsWhenHidden];
             
             // 检查所有插槽是否都隐藏
             const allSlotsHidden = triggerSlots.every(slotName => 
@@ -547,10 +854,10 @@ const main = async () => {
         }
         
         // 检查点击特效活跃条件
-        if (!shouldTrigger && item.triggerEffectsWhenActive) {
-          const triggerEffects = Array.isArray(item.triggerEffectsWhenActive)
-            ? item.triggerEffectsWhenActive
-            : [item.triggerEffectsWhenActive];
+        if (!shouldTrigger && trigger.triggerEffectsWhenActive) {
+          const triggerEffects = Array.isArray(trigger.triggerEffectsWhenActive)
+            ? trigger.triggerEffectsWhenActive
+            : [trigger.triggerEffectsWhenActive];
           
           // 检查所有特效是否都活跃
           if (areClickEffectsActive(triggerEffects)) {
@@ -559,10 +866,19 @@ const main = async () => {
           }
         }
         
-        // 如果满足触发条件，播放特效
+        // 检查点击特效数量条件
+        if (!shouldTrigger && trigger.triggerEffectsWhenCountReached) {
+          // 检查所有特效是否都达到对应的个数
+          if (areClickEffectsCountReached(trigger.triggerEffectsWhenCountReached)) {
+            shouldTrigger = true;
+            isEffectTriggered = true; // 标记为由点触特效触发
+          }
+        }
+        
+        // 如果满足触发条件，播放特效序列
         if (shouldTrigger) {
           // 标记为已触发（避免同一帧重复触发）
-          triggeredSpecialEffects.add(item);
+          triggeredSpecialEffectTriggers.add(trigger);
           
           // 如果是由插槽隐藏触发的，恢复所有隐藏的插槽
           if (isSlotTriggered && spineAnimatorInstance && spineAnimatorInstance.slotController) {
@@ -574,11 +890,85 @@ const main = async () => {
             clearAllClickEffects();
           }
           
-          playSpecialEffect(item, spineAnimatorInstance);
+          // 从特效库中获取特效定义
+          if (configs.specialEffectLibrary && trigger.effectIndices && trigger.effectIndices.length > 0) {
+            const effectDefinitions: SpecialEffectDefinition[] = [];
+            
+            // 判断是一维数组还是二维数组
+            const isTwoDimensional = trigger.effectIndices.length > 0 && Array.isArray(trigger.effectIndices[0]);
+            
+            if (isTwoDimensional) {
+              // 二维数组模式
+              const effectGroups = trigger.effectIndices as number[][];
+              let actualEffectIndices: number[] = [];
+              
+              if (trigger.random) {
+                // 随机模式：随机选择一个一维数组，然后按顺序播放该数组内的特效
+                const randomGroup = effectGroups[Math.floor(Math.random() * effectGroups.length)];
+                actualEffectIndices = randomGroup || [];
+                if (randomGroup && randomGroup.length > 0) {
+                  for (const index of randomGroup) {
+                    if (index >= 0 && index < configs.specialEffectLibrary.length) {
+                      effectDefinitions.push(configs.specialEffectLibrary[index]);
+                    } else {
+                      console.warn(`Special effect index ${index} is out of range. Library size: ${configs.specialEffectLibrary.length}`);
+                    }
+                  }
+                }
+              } else {
+                // 顺序模式：按一维数组顺序播放，每个一维数组内的特效按顺序播放
+                for (const group of effectGroups) {
+                  if (group && group.length > 0) {
+                    actualEffectIndices = actualEffectIndices.concat(group);
+                    for (const index of group) {
+                      if (index >= 0 && index < configs.specialEffectLibrary.length) {
+                        effectDefinitions.push(configs.specialEffectLibrary[index]);
+                      } else {
+                        console.warn(`Special effect index ${index} is out of range. Library size: ${configs.specialEffectLibrary.length}`);
+                      }
+                    }
+                  }
+                }
+              }
+              
+              if (effectDefinitions.length > 0) {
+                playSpecialEffectsSequence(effectDefinitions, spineAnimatorInstance, actualEffectIndices);
+              }
+            } else {
+              // 一维数组模式（向后兼容）
+              const effectIndices = trigger.effectIndices as number[];
+              let actualEffectIndices: number[] = [];
+            
+            if (trigger.random) {
+              // 随机选择：从 effectIndices 中随机选取一个索引
+                const randomIndex = effectIndices[Math.floor(Math.random() * effectIndices.length)];
+                actualEffectIndices = [randomIndex];
+              if (randomIndex >= 0 && randomIndex < configs.specialEffectLibrary.length) {
+                effectDefinitions.push(configs.specialEffectLibrary[randomIndex]);
+              } else {
+                console.warn(`Special effect index ${randomIndex} is out of range. Library size: ${configs.specialEffectLibrary.length}`);
+              }
+            } else {
+              // 顺序播放：遍历所有索引
+                actualEffectIndices = [...effectIndices];
+                for (const index of effectIndices) {
+                if (index >= 0 && index < configs.specialEffectLibrary.length) {
+                  effectDefinitions.push(configs.specialEffectLibrary[index]);
+                } else {
+                  console.warn(`Special effect index ${index} is out of range. Library size: ${configs.specialEffectLibrary.length}`);
+                  }
+                }
+              }
+              
+              if (effectDefinitions.length > 0) {
+                playSpecialEffectsSequence(effectDefinitions, spineAnimatorInstance, actualEffectIndices);
+              }
+            }
+          }
           
           // 在下一帧清除触发标记，允许再次触发
           requestAnimationFrame(() => {
-            triggeredSpecialEffects.delete(item);
+            triggeredSpecialEffectTriggers.delete(trigger);
           });
         }
       }
@@ -629,8 +1019,11 @@ function setupCanvasClickHandlers(
     return;
   }
 
-  const canvasWidth = configs.width ?? 2048;
-  const canvasHeight = configs.height ?? 2048;
+  // 优先使用 mesh 的 canvas 尺寸，否则使用全局的尺寸
+  const meshWidth = activeMeshConfig.width;
+  const meshHeight = activeMeshConfig.height;
+  const canvasWidth = meshWidth !== undefined ? meshWidth : (configs.width ?? 2048);
+  const canvasHeight = meshHeight !== undefined ? meshHeight : (configs.height ?? 2048);
   
   // 从生效的 mesh 配置中获取控制插槽名称（支持数组格式）
   const backgroundMusicSlots = activeMeshConfig.controlSlots?.backgroundMusic 
@@ -654,13 +1047,13 @@ function setupCanvasClickHandlers(
   // 分离点击触发的和条件触发的 overlayMedia
   const overlayMediaItems = allOverlayMediaItems.filter((it: OverlayMediaItem) => !!it?.triggerSlot);
   
-  // 从生效的 mesh 配置中获取点击触发的 specialEffects
-  const allSpecialEffectItems = activeMeshConfig.specialEffects
-    ? (Array.isArray(activeMeshConfig.specialEffects)
-        ? activeMeshConfig.specialEffects
-        : [activeMeshConfig.specialEffects])
+  // 从生效的 mesh 配置中获取点击触发的 specialEffectTriggers
+  const allSpecialEffectTriggers = activeMeshConfig.specialEffectTriggers
+    ? (Array.isArray(activeMeshConfig.specialEffectTriggers)
+        ? activeMeshConfig.specialEffectTriggers
+        : [activeMeshConfig.specialEffectTriggers])
     : [];
-  const clickTriggerSpecialEffectItems = allSpecialEffectItems.filter((it: SpecialEffectItem) => !!it?.triggerSlot);
+  const clickTriggerSpecialEffectTriggers = allSpecialEffectTriggers.filter((it: SpecialEffectTrigger) => !!it?.triggerSlot);
   
   // 从生效的 mesh 配置中获取插槽隐藏规则
   const slotHideRules = activeMeshConfig.slotHideRules || [];
@@ -744,13 +1137,13 @@ function setupCanvasClickHandlers(
         }
       }
 
-      // 检查是否点击在特殊特效触发插槽上（支持多个插槽）
-      for (const item of clickTriggerSpecialEffectItems) {
-        if (!item.triggerSlot) continue;
+      // 检查是否点击在特殊特效触发插槽上
+      for (const trigger of clickTriggerSpecialEffectTriggers) {
+        if (!trigger.triggerSlot) continue;
         
-        const triggerSlots = Array.isArray(item.triggerSlot) 
-          ? item.triggerSlot 
-          : [item.triggerSlot];
+        const triggerSlots = Array.isArray(trigger.triggerSlot) 
+          ? trigger.triggerSlot 
+          : [trigger.triggerSlot];
         
         for (const triggerSlot of triggerSlots) {
           if (
@@ -762,8 +1155,86 @@ function setupCanvasClickHandlers(
               triggerSlot
             )
           ) {
-            playSpecialEffect(item, spineAnimator);
-            console.log(`Special effect triggered for slot: ${triggerSlot}`);
+            // 从特效库中获取特效定义
+            if (configs.specialEffectLibrary && trigger.effectIndices && trigger.effectIndices.length > 0) {
+              const effectDefinitions: SpecialEffectDefinition[] = [];
+              let selectedIndices: number[] | null = null;
+              
+              // 判断是一维数组还是二维数组
+              const isTwoDimensional = trigger.effectIndices.length > 0 && Array.isArray(trigger.effectIndices[0]);
+              
+              if (isTwoDimensional) {
+                // 二维数组模式
+                const effectGroups = trigger.effectIndices as number[][];
+                
+                if (trigger.random) {
+                  // 随机模式：随机选择一个一维数组，然后按顺序播放该数组内的特效
+                  const randomGroup = effectGroups[Math.floor(Math.random() * effectGroups.length)];
+                  selectedIndices = randomGroup;
+                  if (randomGroup && randomGroup.length > 0) {
+                    for (const index of randomGroup) {
+                      if (index >= 0 && index < configs.specialEffectLibrary.length) {
+                        effectDefinitions.push(configs.specialEffectLibrary[index]);
+                      } else {
+                        console.warn(`Special effect index ${index} is out of range. Library size: ${configs.specialEffectLibrary.length}`);
+                      }
+                    }
+                  }
+                } else {
+                  // 顺序模式：按一维数组顺序播放，每个一维数组内的特效按顺序播放
+                  selectedIndices = [];
+                  for (const group of effectGroups) {
+                    if (group && group.length > 0) {
+                      selectedIndices = selectedIndices.concat(group);
+                      for (const index of group) {
+                        if (index >= 0 && index < configs.specialEffectLibrary.length) {
+                          effectDefinitions.push(configs.specialEffectLibrary[index]);
+                        } else {
+                          console.warn(`Special effect index ${index} is out of range. Library size: ${configs.specialEffectLibrary.length}`);
+                        }
+                      }
+                    }
+                  }
+                }
+              } else {
+                // 一维数组模式（向后兼容）
+                const effectIndices = trigger.effectIndices as number[];
+              
+              if (trigger.random) {
+                // 随机选择：从 effectIndices 中随机选取一个索引
+                  const randomIndex = effectIndices[Math.floor(Math.random() * effectIndices.length)];
+                  selectedIndices = [randomIndex];
+                if (randomIndex >= 0 && randomIndex < configs.specialEffectLibrary.length) {
+                  effectDefinitions.push(configs.specialEffectLibrary[randomIndex]);
+                } else {
+                  console.warn(`Special effect index ${randomIndex} is out of range. Library size: ${configs.specialEffectLibrary.length}`);
+                }
+              } else {
+                // 顺序播放：遍历所有索引
+                  selectedIndices = [...effectIndices];
+                  for (const index of effectIndices) {
+                  if (index >= 0 && index < configs.specialEffectLibrary.length) {
+                    effectDefinitions.push(configs.specialEffectLibrary[index]);
+                  } else {
+                    console.warn(`Special effect index ${index} is out of range. Library size: ${configs.specialEffectLibrary.length}`);
+                    }
+                  }
+                }
+              }
+              
+              if (effectDefinitions.length > 0) {
+                const actualIndices = selectedIndices || (isTwoDimensional ? [] : (trigger.effectIndices as number[]));
+                playSpecialEffectsSequence(effectDefinitions, spineAnimator, actualIndices);
+                if (trigger.random && selectedIndices !== null) {
+                  console.log(`Special effect sequence triggered for slot: ${triggerSlot}, effects: [random: ${selectedIndices.join(', ')}]`);
+                } else {
+                  const indicesStr = isTwoDimensional 
+                    ? (trigger.effectIndices as number[][]).map(group => `[${group.join(', ')}]`).join(', ')
+                    : (trigger.effectIndices as number[]).join(', ');
+                  console.log(`Special effect sequence triggered for slot: ${triggerSlot}, effects: ${indicesStr}`);
+                }
+              }
+            }
             return;
           }
         }
@@ -922,10 +1393,13 @@ function setupCanvasClickHandlers(
       // 如果点击在配置的插槽上，不触发全局特效
       if (spineAnimator && spineAnimator.slotController) {
         const rect = canvas.getBoundingClientRect();
-        const canvasWidth = configs.width ?? 2048;
-        const canvasHeight = configs.height ?? 2048;
-        const x = ((clientX - rect.left) / rect.width) * canvasWidth;
-        const y = ((clientY - rect.top) / rect.height) * canvasHeight;
+        // 使用与 setupCanvasClickHandlers 相同的 canvas 尺寸逻辑
+        const meshWidth = activeMeshConfig.width;
+        const meshHeight = activeMeshConfig.height;
+        const canvasWidthForClick = meshWidth !== undefined ? meshWidth : (configs.width ?? 2048);
+        const canvasHeightForClick = meshHeight !== undefined ? meshHeight : (configs.height ?? 2048);
+        const x = ((clientX - rect.left) / rect.width) * canvasWidthForClick;
+        const y = ((clientY - rect.top) / rect.height) * canvasHeightForClick;
         
         // 检查是否点击在配置了专属特效的插槽上
         for (const slotEffectConfig of slotClickEffects) {
@@ -934,7 +1408,7 @@ function setupCanvasClickHandlers(
             : [slotEffectConfig.triggerSlots];
           
           for (const triggerSlot of triggerSlots) {
-            if (spineAnimator.slotController.checkSlotClick(x, y, canvasWidth, canvasHeight, triggerSlot)) {
+            if (spineAnimator.slotController.checkSlotClick(x, y, canvasWidthForClick, canvasHeightForClick, triggerSlot)) {
               // 点击在配置的插槽上，不触发全局特效
               return;
             }

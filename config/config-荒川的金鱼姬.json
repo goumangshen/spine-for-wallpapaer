@@ -1,0 +1,192 @@
+{
+  "width": 2000,
+  "height": 1920,
+  "backgroundImage": [
+    "bg.jpg"
+  ],
+  "animationMix": {
+    "enabled": false,
+    "duration": 0.2
+  },
+  "backgroundImageFit": "auto",
+  "canvasAlignLeftPercent": -1,
+  "canvasAlignRightPercent": 0,
+  "canvasEdgeTransition": 1,
+  "backgroundMusic": {
+    "fileName": "bg.mp3",
+    "volume": 0.4
+  },
+  "specialEffectLibrary":[
+    {
+      "type":2,
+      "image1FileName": "22701.webp",
+      "image2FileName": "t0.png",
+      "image3FileName": "tf.png",
+      "audioFileName": "yinyuan.mp3",
+      "animationName": "casting1",
+      "image1Duration": 400,
+      "scaleDuration": 100,
+      "fadeOutDuration": 1500,
+      "image1Scale": 0.82,
+      "image2InitialScale": 2.0,
+      "image2FinalScale": 0.45,
+      "image3InitialScale": 0.5,
+      "image3FinalScale": 1,
+      "image2AlignPercent": 60
+    },
+    {
+      "type":2,
+      "image1FileName": "22702.webp",
+      "image2FileName": "t0.png",
+      "image3FileName": "tz.png",
+      "audioFileName": "xiuxing.mp3",
+      "animationName": "casting1",
+      "image1Duration": 400,
+      "scaleDuration": 100,
+      "fadeOutDuration": 1500,
+      "image1Scale": 0.82,
+      "image2InitialScale": 2.0,
+      "image2FinalScale": 0.45,
+      "image3InitialScale": 0.5,
+      "image3FinalScale": 1,
+      "image2AlignPercent": 60
+    },
+    {
+      "type":2,
+      "image1FileName": "22703.webp",
+      "image2FileName": "t0.png",
+      "image3FileName": "tf.png",
+      "audioFileName": "xiuqi.mp3",
+      "animationName": "casting1",
+      "image1Duration": 400,
+      "scaleDuration": 100,
+      "fadeOutDuration": 1500,
+      "image1Scale": 0.82,
+      "image2InitialScale": 2.0,
+      "image2FinalScale": 0.45,
+      "image3InitialScale": 0.5,
+      "image3FinalScale": 1,
+      "image2AlignPercent": 60
+    }
+  ],
+  "meshes": [
+    {
+      "type": "spine",
+      "skeletonFileName": "2270801.skel",
+      "atlasFileName": "2270801.atlas",
+      "animations": [
+        {
+          "name": "battlestand",
+          "weight": 95
+        },
+        {
+          "name": "casting1",
+          "weight": 3,
+          "audioFileName": "1.mp3"
+        },
+        {
+          "name": "born_break",
+          "weight": 2,
+          "audioFileName": "2.mp3"
+        }
+      ],
+      "scale": 5.5,
+      "position": {
+        "x": 200,
+        "y": 0,
+        "z": -1200
+      },
+      "controlSlots": {
+        "backgroundMusic": [
+          "xinggui2"
+        ],
+        "voiceAnimation": [
+          "#ren78"
+        ]
+      },
+      "clickEffects": [
+        {
+          "imageFileName": "d1.png",
+          "weight": 32,
+          "duration": 500,
+          "scale": 0.6,
+          "effect": 0
+        },
+        {
+          "imageFileName": "d2.png",
+          "weight": 32,
+          "duration": 500,
+          "scale": 0.2,
+          "effect": 0
+        },
+        {
+          "imageFileName": "d3.png",
+          "weight": 32,
+          "duration": 500,
+          "scale": 0.4,
+          "effect": 0
+        },
+        {
+          "imageFileName": "e.png",
+          "weight": 4,
+          "duration": 500,
+          "scale": 0.4,
+          "effect": 0
+        }
+      ],
+      "specialEffectTriggers":[{
+        "triggerEffectsWhenActive":"e.png",
+        "effectIndices":[0,1,2],
+        "random":true
+      }],
+      "slotHideRules": [
+        {
+          "triggerSlots": [
+            "qianxingqiu8"
+          ],
+          "hideSlots": [
+            "qianxingqiu8"
+          ],
+          "hideDuration": 5000
+        },
+        {
+          "triggerSlots": [
+            "qianxingqiu5"
+          ],
+          "hideSlots": [
+            "qianxingqiu5"
+          ],
+          "hideDuration": 5000
+        }
+      ],
+      "overlayMedia": [
+        {
+          "triggerSlot": [
+            "yu6"
+          ],
+          "videoFileName": "r.webm",
+          "audioFileName": "3.mp3",
+          "pauseBackgroundMusic": false,
+          "closeOnClick": false,
+          "videoVolume": 1.0,
+          "audioVolume": 1.0,
+          "loopVideo": false
+        },
+        {
+          "triggerSlotsWhenHidden": [
+            "qianxingqiu8",
+            "qianxingqiu5"
+          ],
+          "videoFileName": "full.webm",
+          "audioFileName": "",
+          "pauseBackgroundMusic": true,
+          "closeOnClick": false,
+          "videoVolume": 1.0,
+          "audioVolume": 1.0,
+          "loopVideo": false
+        }
+      ]
+    }
+  ],
+  "activeMeshIndex": 0
+}

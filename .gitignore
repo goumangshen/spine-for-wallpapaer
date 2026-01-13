@@ -1,4 +1,6 @@
 dist
 node_modules
+re
+食用说明.txt
 public/assets/*
 !public/assets/*.json

@@ -28,6 +28,14 @@ const MAX_POOL_SIZE = 10; // 对象池最大大小
 // 跟踪当前活跃的特效元素（用于条件触发）
 const activeEffectElements = new Map<string, Set<HTMLImageElement>>();
 
+// 跟踪每个特效元素关联的定时器（用于清除时取消定时器）
+const effectElementTimers = new Map<HTMLImageElement, { fadeOutTimer?: number; removeTimer?: number }>();
+
+// 点击特效完成计数回调（当特效消失时调用）
+// 参数：特效图片文件名
+type ClickEffectCompleteCallback = (imageFileName: string) => void;
+let clickEffectCompleteCallback: ClickEffectCompleteCallback | null = null;
+
 // 动画 keyframes 的创建标记
 let shakeKeyframesAdded = false;
 let pulseKeyframesAdded = false;
@@ -98,6 +106,18 @@ function getEffectElement(): HTMLImageElement {
  * 将特效元素回收到对象池
  */
 function recycleEffectElement(element: HTMLImageElement): void {
+  // 清除关联的定时器（如果还有的话）
+  const timers = effectElementTimers.get(element);
+  if (timers) {
+    if (timers.fadeOutTimer !== undefined) {
+      clearTimeout(timers.fadeOutTimer);
+    }
+    if (timers.removeTimer !== undefined) {
+      clearTimeout(timers.removeTimer);
+    }
+    effectElementTimers.delete(element);
+  }
+  
   // 重置元素状态
   element.style.opacity = '0';
   element.style.transform = '';
@@ -259,7 +279,15 @@ export function showClickEffect(
 
   // 设置持续时间并移除
   const duration = effectConfig.duration ?? 500;
-  setTimeout(() => {
+  const fadeOutTimer = window.setTimeout(() => {
+    // 检查元素是否还在活跃列表中（可能已被 clearAllClickEffects 清除）
+    const activeSet = activeEffectElements.get(imageFileName);
+    if (!activeSet || !activeSet.has(effectElement)) {
+      // 元素已被清除，不再处理
+      effectElementTimers.delete(effectElement);
+      return;
+    }
+
     effectElement.style.opacity = '0';
     // 停止附加动画效果
     if (effect !== 0) {
@@ -267,9 +295,16 @@ export function showClickEffect(
     }
     effectElement.style.transform = `translate(-50%, -50%) scale(${scale * 0.8})`;
     
-    setTimeout(() => {
-      // 从活跃特效中移除
+    const removeTimer = window.setTimeout(() => {
+      // 再次检查元素是否还在活跃列表中
       const activeSet = activeEffectElements.get(imageFileName);
+      if (!activeSet || !activeSet.has(effectElement)) {
+        // 元素已被清除，不再处理
+        effectElementTimers.delete(effectElement);
+        return;
+      }
+
+      // 从活跃特效中移除
       if (activeSet) {
         activeSet.delete(effectElement);
         if (activeSet.size === 0) {
@@ -277,10 +312,27 @@ export function showClickEffect(
         }
       }
       
+      // 清除定时器记录
+      effectElementTimers.delete(effectElement);
+      
+      // 触发完成计数回调（特效消失时计数）
+      if (clickEffectCompleteCallback) {
+        clickEffectCompleteCallback(imageFileName);
+      }
+      
       // 性能优化：回收到对象池而不是直接移除
       recycleEffectElement(effectElement);
     }, 300); // 等待淡出动画完成
+
+    // 更新定时器记录
+    const timers = effectElementTimers.get(effectElement);
+    if (timers) {
+      timers.removeTimer = removeTimer;
+    }
   }, duration);
+
+  // 记录定时器
+  effectElementTimers.set(effectElement, { fadeOutTimer });
 }
 
 /**
@@ -340,12 +392,71 @@ export function areClickEffectsActive(imageFileNames: string[]): boolean {
 }
 
 /**
+ * 检查指定的特效图片是否严格等于对应的个数
+ * @param countConfigs 配置数组，每个配置项包含特效图片文件名和需要严格等于的个数
+ * @returns 如果所有特效图片的数量都严格等于配置的个数，返回 true（大于或小于都不触发）
+ */
+export function areClickEffectsCountReached(
+  countConfigs: Array<{ imageFileName: string; count: number }>
+): boolean {
+  if (!countConfigs || countConfigs.length === 0) {
+    return false;
+  }
+
+  // 检查每个特效是否都严格等于配置的个数
+  for (const config of countConfigs) {
+    const activeSet = activeEffectElements.get(config.imageFileName);
+    if (!activeSet) {
+      return false;
+    }
+    
+    // 统计可见的元素数量
+    let visibleCount = 0;
+    for (const element of activeSet) {
+      if (element.parentNode && element.parentNode === document.body) {
+        const opacity = parseFloat(getComputedStyle(element).opacity);
+        if (opacity > 0) {
+          visibleCount++;
+        }
+      }
+    }
+    
+    // 如果当前特效的数量不等于配置的个数，返回 false（严格相等）
+    if (visibleCount !== config.count) {
+      return false;
+    }
+  }
+  
+  return true;
+}
+
+/**
+ * 设置点击特效完成计数回调
+ * @param callback 回调函数，当点击特效消失时调用，参数为特效图片文件名
+ */
+export function setClickEffectCompleteCallback(callback: ClickEffectCompleteCallback | null): void {
+  clickEffectCompleteCallback = callback;
+}
+
+/**
  * 清除所有当前活跃的点击特效
  */
 export function clearAllClickEffects(): void {
   // 遍历所有活跃的特效元素
   for (const [imageFileName, activeSet] of activeEffectElements.entries()) {
     for (const element of activeSet) {
+      // 清除关联的定时器
+      const timers = effectElementTimers.get(element);
+      if (timers) {
+        if (timers.fadeOutTimer !== undefined) {
+          clearTimeout(timers.fadeOutTimer);
+        }
+        if (timers.removeTimer !== undefined) {
+          clearTimeout(timers.removeTimer);
+        }
+        effectElementTimers.delete(element);
+      }
+      
       // 立即停止所有动画和过渡
       element.style.animation = '';
       element.style.transition = '';

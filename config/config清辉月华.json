@@ -1,0 +1,146 @@
+{
+  "width": 1650,
+  "height": 1920,
+  "backgroundImage": [
+    "bg.png"
+  ],
+  "animationMix": {
+    "enabled": false,
+    "duration": 0.2
+  },
+  "backgroundImageFit": "auto",
+  "canvasAlignLeftPercent": -1,
+  "canvasAlignRightPercent": -1,
+  "canvasEdgeTransition": 3,
+  "backgroundMusic": {
+    "fileName": "bg.mp3",
+    "volume": 0.2
+  },
+  "specialEffectLibrary": [
+    {
+      "type": 2,
+      "image1FileName": "s.png",
+      "image2FileName": "t0.png",
+      "image3FileName": "t1.png",
+      "audioFileName": "qhyh.mp3",
+      "animationName": "casting1",
+      "image2FinalScale": 0.8,
+      "image1Duration": 1,
+      "scaleDuration": 100,
+      "image2AlignPercent": 80,
+      "fadeOutDuration": 1500
+    },
+    {
+      "type": 2,
+      "image1FileName": "yueshi.webp",
+      "image2FileName": "0.png",
+      "image3FileName": "1.png",
+      "audioFileName": "yueshi.mp3",
+      "animationName": "casting1",
+      "image1Duration": 1500,
+      "scaleDuration": 100,
+      "fadeOutDuration": 1500
+    },
+    {
+      "type":1,
+      "image1FileName": "e1.png",
+      "image1Duration": 500,
+      "audioFileName": "e1.mp3",
+      "image1Scale": 1.8
+    }
+  ],
+  "meshes": [
+    {
+      "type": "spine",
+      "jsonFileName": "19707.json",
+      "atlasFileName": "19707.atlas",
+      "animations": [
+        {
+          "name": "battlestand",
+          "weight": 94
+        },
+        {
+          "name": "born_break",
+          "weight": 2,
+          "audioFileName": "zys1.mp3"
+        },
+        {
+          "name": "casting1",
+          "weight": 2,
+          "audioFileName": "zys2.mp3"
+        },
+        {
+          "name": "combat1",
+          "weight": 2,
+          "audioFileName": "zys3.mp3"
+        }
+      ],
+      "scale": 5.7,
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": -1200
+      },
+      "controlSlots": {
+        "backgroundMusic": [
+          "#gu1"
+        ],
+        "voiceAnimation": [
+          "#yer1",
+          "#zer1"
+        ]
+      },
+      "clickEffects": [
+        {
+          "imageFileName": "d1.png",
+          "weight": 48,
+          "duration": 500,
+          "scale": 0.25,
+          "effect": 0
+        },
+        {
+          "imageFileName": "d2.png",
+          "weight": 48,
+          "duration": 500,
+          "scale": 0.05,
+          "effect": 0
+        },
+        {
+          "imageFileName": "s.png",
+          "weight": 4,
+          "duration": 500,
+          "scale": 0.3,
+          "effect": 0
+        }
+      ],
+      "specialEffectTriggers": [
+        {
+          "triggerSlot": "#shanzi",
+          "effectIndices": [
+            0
+          ]
+        },
+        {
+          "triggerEffectsWhenActive": "s.png",
+          "effectIndices": [
+            2,1
+          ]
+        }
+      ],
+      "overlayMedia": [
+        {
+          "triggerSlot": [
+            "#tu_tu01_lian","#tu_tu01_qun","#tu_tu01_ling","#tu_tu01_yaodai","#tu_tu01_ye","#tu_tu01_ze"
+          ],
+          "videoFileName": "full.webm",
+          "pauseBackgroundMusic": true,
+          "closeOnClick": false,
+          "videoVolume": 1.0,
+          "audioVolume": 1.0,
+          "loopVideo": false
+        }
+      ]
+    }
+  ],
+  "activeMeshIndex": 0
+}

@@ -1,0 +1,108 @@
+{
+  "width": 2000,
+  "height": 1920,
+  "backgroundImage": "bg.jpg",
+  "backgroundImageFit": "auto",
+  "canvasAlignLeftPercent": -1,
+  "canvasAlignRightPercent": 0.10,
+  "backgroundMusic": {
+    "fileName": "bg.flac",
+    "volume": 0.5
+  },
+  "meshes": [ 
+    {
+      "type": "spine", 
+      "skeletonFileName": "2890001.skel", 
+      "atlasFileName": "2890001.atlas",
+      "animations": [
+        {
+          "name": "battlestand",
+          "weight": 88
+        },
+        {
+          "name": "idle1",
+          "weight": 5,
+          "audioFileName": "1.mp3"
+        },
+        {
+          "name": "casting1",
+          "weight": 2,
+          "audioFileName": "2.mp3"
+        },
+        {
+          "name": "born_break",
+          "weight": 5,
+          "audioFileName": "3.mp3"
+        }
+      ],
+      "scale": 5.8,
+      "position": { 
+        "x": 200,
+        "y": 0,
+        "z": -1200
+      },
+      "hiddenSlots": [
+"guangjian","r_dayi2"
+      ],
+"controlSlots": {
+    "backgroundMusic": "xiangzi",
+    "voiceAnimation": "r_wuqi2"
+  },
+  "clickEffects": [
+    {
+      "imageFileName": "1.png",
+      "weight": 50,
+      "duration": 500,
+      "scale": 0.3
+    },
+    {
+      "imageFileName": "2.png",
+      "weight": 50,
+      "duration": 500,
+      "scale": 0.2
+    }
+  ],
+  "overlayMedia": [{
+    "triggerSlot": "n1_4",
+    "videoFileName": "full.webm",
+    "audioFileName": "",
+    "pauseBackgroundMusic": true,
+    "closeOnClick": false,
+    "videoVolume": 1.0,
+    "audioVolume": 1.0,
+    "loopVideo": false
+  },
+{
+    "triggerSlot": "n1_5",
+    "videoFileName": "full.webm",
+    "audioFileName": "",
+    "pauseBackgroundMusic": true,
+    "closeOnClick": false,
+    "videoVolume": 1.0,
+    "audioVolume": 1.0,
+    "loopVideo": false
+  },
+{
+    "triggerSlot": "n1_6",
+    "videoFileName": "full.webm",
+    "audioFileName": "",
+    "pauseBackgroundMusic": true,
+    "closeOnClick": false,
+    "videoVolume": 1.0,
+    "audioVolume": 1.0,
+    "loopVideo": false
+  },
+{
+    "triggerSlot": "n2_16",
+    "videoFileName": "full.webm",
+    "audioFileName": "",
+    "pauseBackgroundMusic": true,
+    "closeOnClick": false,
+    "videoVolume": 1.0,
+    "audioVolume": 1.0,
+    "loopVideo": false
+  }
+]
+    }
+  ]
+}

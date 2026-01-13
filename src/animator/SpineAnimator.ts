@@ -24,7 +24,6 @@ import * as Scene from '@src/initScene';
 import { ASSET_PATH } from '@src/constants';
 import { SpineSlotController } from './SpineSlotController';
 import { isOverlayMediaActive, OVERLAY_MEDIA_ACTIVE_EVENT } from '@src/overlayMedia';
-import { getResponsiveLayoutParams } from '@src/responsiveLayout';
 
 export class SpineAnimator {
   public readonly skeletonMesh: threejsSpine.SkeletonMesh; // 公开 skeletonMesh 以便外部控制动画
@@ -32,9 +31,9 @@ export class SpineAnimator {
   private currentAnimationIndex: number = -1;
   private audioElements: Map<string, HTMLAudioElement> = new Map();
   private currentAudio: HTMLAudioElement | null = null;
-  private pendingVoiceAnimation: boolean = false; // 标记是否需要在当前动画结束后播放语音动画
   private isVoicePlaying: boolean = false; // 标记当前是否有语音正在播放且未完成
   private voiceAudioEndHandler: (() => void) | null = null; // 语音播放结束的回调
+  private pendingAudioAnimation: SpineAnimationConfig | null = null; // 待播放音频的动画（用于 addAnimation 时延迟播放）
   public readonly slotController: SpineSlotController; // 插槽控制器
   public readonly parentMesh: THREE.Mesh; // 父网格对象（用于从场景中移除）
   private baseParentX: number = 0;
@@ -84,24 +83,27 @@ export class SpineAnimator {
     );
 
     // Create a SkeletonMesh from the data and attach it to the scene
+    // 读取配置的 premultipliedAlpha 和 alphaTest，如果没有配置则使用默认值
+    const premultipliedAlpha = meshConfig.premultipliedAlpha ?? false;
+    const alphaTest = meshConfig.alphaTest ?? 0;
     this.skeletonMesh = new threejsSpine.SkeletonMesh(
       skeletonData,
       (parameters: any) => {
         parameters.depthTest = true;
         parameters.depthWrite = false;
-        // 修复纹理拼接黑边：使用“预乘Alpha”的混合方式，避免采样插值导致的“二次预乘”
-        // 说明：atlas PNG 常见为 straight alpha，但边缘透明像素 RGB 往往为黑色；
-        // 线性采样会产生类似 PMA 的颜色，再用 straight alpha 混合会导致暗边。
-        parameters.premultipliedAlpha = true;
+        parameters.premultipliedAlpha = premultipliedAlpha;
+        parameters.transparent = true;
+        parameters.blending = THREE.NormalBlending;
+        parameters.alphaTest = alphaTest;
       }
     );
-    // 记录基础缩放（后续响应式会在此基础上乘比例）
+    // 记录基础缩放
     this.baseSkeletonScaleX = this.skeletonMesh.skeleton.scaleX || 1;
     this.baseSkeletonScaleY = this.skeletonMesh.skeleton.scaleY || 1;
     
     // 设置动画混合时间，用于平滑过渡
-    // 如果配置了 animationMix，使用配置的值；否则使用默认值（启用，0.2秒）
-    const mixEnabled = animationMixConfig?.enabled !== false; // 默认启用
+    // 如果配置了 animationMix，使用配置的值；否则使用默认值（禁用，0.2秒）
+    const mixEnabled = animationMixConfig?.enabled === true; // 默认禁用
     const mixDuration = animationMixConfig?.duration ?? 0.2; // 默认0.2秒
     this.skeletonMesh.state.data.defaultMix = mixEnabled ? mixDuration : 0;
 
@@ -128,38 +130,51 @@ export class SpineAnimator {
 
     // 监听动画完成事件
     this.skeletonMesh.state.addListener({
-      start: () => {},
+      start: (entry: any) => {
+        // 当新动画真正开始时，播放待播放的音频（用于 addAnimation 的情况）
+        if (this.pendingAudioAnimation) {
+          const animationToPlay = this.pendingAudioAnimation;
+          // 检查动画名称是否匹配（确保是同一个动画）
+          if (entry.animation && entry.animation.name === animationToPlay.name) {
+            // 清除待播放标记
+            this.pendingAudioAnimation = null;
+            // 播放音频
+            this.playAudio(animationToPlay);
+          } else {
+            // 动画名称不匹配，可能是动画被跳过了，清除待播放标记
+            console.warn(`Pending audio animation "${animationToPlay.name}" does not match started animation "${entry.animation?.name || 'unknown'}", clearing pending audio`);
+            this.pendingAudioAnimation = null;
+          }
+        }
+      },
       interrupt: () => {},
       end: (entry: any) => {
         // end 回调在动画结束时触发（当动画被移除时）
         // 对于循环动画，end 回调不会在每次循环结束时触发
+        // 清除待播放的音频（如果动画被中断）
+        if (this.pendingAudioAnimation) {
+          this.pendingAudioAnimation = null;
+        }
       },
       dispose: () => {},
       complete: (entry: any) => {
         // complete 回调在每次循环完成时触发（包括循环动画的每次循环结束）
         // 根据 Spine 源码，对于循环动画，complete 会在每次循环结束时触发
-        // 如果用户请求了语音动画，优先播放语音动画
-        if (this.pendingVoiceAnimation) {
-          this.pendingVoiceAnimation = false;
-          this.playVoiceAnimation();
-        } else {
           // 动画播放完成后，随机选择下一个动画
           // 如果当前有语音正在播放，切换动画但不播放新动画的语音
           // 检查是否已经有下一个动画在队列中，避免重复添加
           const currentTrack = this.skeletonMesh.state.tracks[0];
           if (this.animations.length > 1 && (!currentTrack || !currentTrack.next)) {
             this.playRandomAnimation();
-          }
         }
       },
       event: () => {},
     });
 
-    // overlay 播放期间不允许播放“语音音频”：开始时立刻停掉当前语音，并清空待播标记
+    // overlay 播放期间不允许播放"语音音频"：开始时立刻停掉当前语音
     window.addEventListener(OVERLAY_MEDIA_ACTIVE_EVENT, ((e: Event) => {
       const active = (e as CustomEvent).detail?.active;
       if (active) {
-        this.pendingVoiceAnimation = false;
         this.stopCurrentAudio(true); // 强制停止语音
       }
     }) as EventListener);
@@ -231,31 +246,46 @@ export class SpineAnimator {
     // 停止当前播放的音频（如果语音未播放完，不会真正停止）
     this.stopCurrentAudio();
     
-    // 播放选中的动画（循环播放）
+    // 判断动画是否应该循环播放
+    // 如果动画有语音，则不循环（只播放一次，与音频同步结束）
+    // 如果动画没有语音，则循环播放
+    const shouldLoop = !selectedAnimation.audioFileName;
+    
+    // 播放选中的动画
     // 使用 addAnimation 而不是 setAnimation，实现平滑过渡，避免闪屏
     // 第一个动画使用 setAnimation，后续动画使用 addAnimation 进行平滑混合
     if (this.isFirstAnimation) {
-      // 第一个动画，使用 setAnimation
-    this.skeletonMesh.state.setAnimation(0, selectedAnimation.name, true);
+      // 第一个动画，使用 setAnimation（立即播放）
+      this.skeletonMesh.state.setAnimation(0, selectedAnimation.name, shouldLoop);
       this.isFirstAnimation = false;
+      
+      // 第一个动画立即播放，可以立即播放音频
+      if (!isRepeating && !hasVoicePlaying && selectedAnimation.audioFileName) {
+        this.playAudio(selectedAnimation);
+      }
     } else {
       // 后续动画，使用 addAnimation 进行平滑混合
       // addAnimation 会在当前动画结束后排队播放新动画，并使用混合时间平滑过渡
-      const trackEntry = this.skeletonMesh.state.addAnimation(0, selectedAnimation.name, true, 0);
+      const trackEntry = this.skeletonMesh.state.addAnimation(0, selectedAnimation.name, shouldLoop, 0);
       // 如果 trackEntry 存在，可以进一步配置混合时间
       if (trackEntry) {
         // 使用默认混合时间（已在初始化时设置）
         // 如果需要，可以在这里为特定动画设置不同的混合时间
       }
-    }
-    
-    // 如果动画重复，不播放音频
-    // 如果当前有语音正在播放，也不播放新动画的音频（让语音继续播放）
-    if (!isRepeating && !hasVoicePlaying) {
-      this.playAudio(selectedAnimation);
-    } else if (!isRepeating && hasVoicePlaying) {
-      // 有语音正在播放，不播放新动画的音频
-      console.log('Voice still playing, skipping audio for next animation');
+      
+      // 对于 addAnimation 的情况，音频应该在动画真正开始时播放（在 start 事件中）
+      // 如果动画重复，不播放音频
+      // 如果当前有语音正在播放，也不播放新动画的音频（让语音继续播放）
+      if (!isRepeating && !hasVoicePlaying && selectedAnimation.audioFileName) {
+        // 保存待播放的音频动画，等待动画真正开始时播放
+        this.pendingAudioAnimation = selectedAnimation;
+      } else if (!isRepeating && hasVoicePlaying) {
+        // 有语音正在播放，不播放新动画的音频
+        console.log('Voice still playing, skipping audio for next animation');
+        this.pendingAudioAnimation = null;
+      } else {
+        this.pendingAudioAnimation = null;
+      }
     }
   }
 
@@ -394,43 +424,55 @@ export class SpineAnimator {
       return;
     }
 
+    // 检查当前正在播放的动画是否已经是选中的语音动画
+    const currentTrack = this.skeletonMesh.state.tracks[0];
+    if (currentTrack && currentTrack.animation && currentTrack.animation.name === selectedVoiceAnimation.name) {
+      // 如果当前动画已经是选中的语音动画，只确保音频播放（如果还没有播放）
+      if (!this.isVoicePlaying) {
+        this.stopCurrentAudio(true);
+        this.playAudio(selectedVoiceAnimation);
+      }
+      return;
+    }
+
     this.currentAnimationIndex = selectedIndex;
     
     // 停止当前播放的音频（用户主动请求语音动画，强制停止当前音频）
     this.stopCurrentAudio(true);
     
-    // 播放选中的动画（循环播放）
-    // 语音动画切换也使用 addAnimation 实现平滑过渡
-    if (this.isFirstAnimation) {
-    this.skeletonMesh.state.setAnimation(0, selectedVoiceAnimation.name, true);
-      this.isFirstAnimation = false;
-    } else {
-      this.skeletonMesh.state.addAnimation(0, selectedVoiceAnimation.name, true, 0);
-    }
+    // 清除待播放的音频（因为这是立即切换，不需要延迟播放）
+    this.pendingAudioAnimation = null;
     
-    // 播放对应的音频
+    // 清除所有待播放的动画队列，确保只播放当前语音动画
+    this.skeletonMesh.state.clearTracks();
+    
+    // 立即停止当前动画并播放选中的语音动画（只播放一次，不循环）
+    // 使用 setAnimation 立即切换，不使用 addAnimation 平滑过渡
+    this.skeletonMesh.state.setAnimation(0, selectedVoiceAnimation.name, false);
+      this.isFirstAnimation = false;
+    
+    // 播放对应的音频（立即切换，可以立即播放）
     this.playAudio(selectedVoiceAnimation);
   }
 
   /**
-   * 请求在当前动画结束后播放语音动画
+   * 请求立即播放语音动画（立即停止当前动画并播放随机语音动画）
    */
   public requestVoiceAnimation() {
-    this.pendingVoiceAnimation = true;
+    // 立即播放语音动画，不再等待当前动画结束
+    this.playVoiceAnimation();
   }
 
   public update = (delta: number) => {
-    // 响应式：位置与缩放可分别开关；scale 支持平滑
-    const { positionRatio, scaleTargetRatio } = getResponsiveLayoutParams();
     if (this.parentMesh) {
-      this.parentMesh.position.x = this.baseParentX * positionRatio;
-      this.parentMesh.position.y = this.baseParentY * positionRatio;
+      this.parentMesh.position.x = this.baseParentX;
+      this.parentMesh.position.y = this.baseParentY;
     }
 
     if (this.skeletonMesh?.skeleton) {
       // 使用 skeleton.scaleX/scaleY，确保插槽点击计算也能正确跟随缩放
-      this.skeletonMesh.skeleton.scaleX = this.baseSkeletonScaleX * scaleTargetRatio;
-      this.skeletonMesh.skeleton.scaleY = this.baseSkeletonScaleY * scaleTargetRatio;
+      this.skeletonMesh.skeleton.scaleX = this.baseSkeletonScaleX;
+      this.skeletonMesh.skeleton.scaleY = this.baseSkeletonScaleY;
     }
     // the rest bone animation updates
     this.skeletonMesh.update(delta);

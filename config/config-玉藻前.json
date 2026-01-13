@@ -1,11 +1,6 @@
 {
   "width": 2000,
   "height": 1920,
-  "backgroundColor": {
-    "r": 248,
-    "g": 244,
-    "b": 241
-  },
   "backgroundImage": [
     "bg2.png",
     "bg.png",
@@ -15,16 +10,6 @@
   "backgroundImageFit": "width",
   "canvasAlignLeftPercent": -1,
   "canvasAlignRightPercent": -1,
-  "responsiveLayout": {
-    "enabled": false,
-    "mode": "height",
-    "baseCanvasHeight": 700,
-    "positionEnabled": true,
-    "scaleEnabled": true,
-    "invertPosition": false,
-    "invertScale": true,
-    "scaleDamp": 0.3
-  },
   "backgroundMusic": {
     "fileName": "bg.mp3",
     "volume": 0.2

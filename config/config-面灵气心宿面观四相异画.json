@@ -1,27 +1,12 @@
 {
   "width": 3800,
   "height": 1920,
-  "backgroundColor": {
-    "r": 248,
-    "g": 244,
-    "b": 241
-  },
   "backgroundImage": [
     "bg.jpg"
   ],
-  "backgroundImageFit": "width",
+  "backgroundImageFit": "auto",
   "canvasAlignLeftPercent": -1,
   "canvasAlignRightPercent": 0,
-  "responsiveLayout": {
-    "enabled": false,
-    "mode": "height",
-    "baseCanvasHeight": 700,
-    "positionEnabled": true,
-    "scaleEnabled": true,
-    "invertPosition": false,
-    "invertScale": true,
-    "scaleDamp": 0.3
-  },
   "backgroundMusic": {
     "fileName": "bg.mp3",
     "volume": 0.5
@@ -34,21 +19,21 @@
       "animations": [
         {
           "name": "battlestand",
-          "weight": 80
+          "weight": 90
         },
         {
           "name": "casting1",
-          "weight": 5,
+          "weight": 3,
           "audioFileName": "3.mp3"
         },
         {
           "name": "born_break",
-          "weight": 5,
+          "weight": 2,
           "audioFileName": "4.mp3"
         },
         {
           "name": "idle1",
-          "weight": 10,
+          "weight": 5,
           "audioFileName": "2.mp3"
         }
       ],

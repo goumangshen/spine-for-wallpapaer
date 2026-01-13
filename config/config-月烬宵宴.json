@@ -1,0 +1,134 @@
+{
+  "width": 2950,
+  "height": 1080,
+  "backgroundImage": [
+    "bg.png"
+  ],
+  "animationMix": {
+    "enabled": false,
+    "duration": 0.2
+  },
+  "backgroundImageFit": "width",
+  "canvasAlignLeftPercent": 0,
+  "canvasAlignRightPercent": -1,
+  "backgroundMusic": {
+    "fileName": "bg.mp3",
+    "volume": 0.5
+  },
+  "specialEffectLibrary": [
+    {
+      "image1FileName": "p1.png",
+      "image2FileName": "t0.png",
+      "image3FileName": "t1.png",
+      "audioFileName": "p1.mp3",
+      "animationName": "casting1",
+      "image1Duration": 400,
+      "scaleDuration": 100,
+      "fadeOutDuration": 1500,
+      "image1Scale": 0.82,
+      "image2InitialScale": 2.0,
+      "image2FinalScale": 0.45,
+      "image3InitialScale": 0.5,
+      "image3FinalScale": 1,
+      "image2AlignPercent": 60
+    },
+    {
+      "image1FileName": "e1.png",
+      "image1Duration": 500,
+      "audioFileName": "e1.mp3",
+      "image1Scale": 1.8
+    }
+  ],
+  "meshes": [
+    {
+      "type": "spine",
+      "skeletonFileName": "62206.skel",
+      "atlasFileName": "62206.atlas",
+      "animations": [
+        {
+          "name": "battlestand",
+          "weight": 80
+        },
+        {
+          "name": "casting1",
+          "weight": 2,
+          "audioFileName": "3.mp3"
+        },
+        {
+          "name": "born_break",
+          "weight": 3,
+          "audioFileName": "2.mp3"
+        },
+        {
+          "name": "idle",
+          "weight": 15,
+          "audioFileName": "1.mp3"
+        }
+      ],
+      "scale": 6.7,
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": -1200
+      },
+      "controlSlots": {
+        "backgroundMusic": [
+          "yuedu_75"
+        ],
+        "voiceAnimation": [
+          ""
+        ]
+      },
+      "hiddenSlots":["a1"],
+      "clickEffects": [
+        {
+          "imageFileName": "d1.png",
+          "weight": 49,
+          "duration": 500,
+          "scale": 0.1,
+          "effect": 0
+        },
+        {
+          "imageFileName": "d2.png",
+          "weight": 49,
+          "duration": 500,
+          "scale": 0.15,
+          "effect": 0
+        },
+        {
+          "imageFileName": "t.png",
+          "weight": 2,
+          "duration": 500,
+          "scale": 0.4,
+          "effect": 0
+        }
+      ],
+      "specialEffectTriggers": [
+        {
+          "triggerEffectsWhenActive": [
+            "t.png"
+          ],
+          "effectIndices": [
+            1,
+            0
+          ]
+        }
+      ],
+      "overlayMedia": [
+        {
+          "triggerSlot": [
+            "yuedu_97"
+          ],
+          "videoFileName": "full.webm",
+          "audioFileName": "",
+          "pauseBackgroundMusic": true,
+          "closeOnClick": false,
+          "videoVolume": 1.0,
+          "audioVolume": 1.0,
+          "loopVideo": false
+        }
+      ]
+    }
+  ],
+  "activeMeshIndex": 0
+}

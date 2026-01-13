@@ -3,7 +3,7 @@ import { ASSET_PATH } from './constants';
 import * as Scene from './initScene';
 import { clearAllClickEffects } from './clickEffect';
 
-type BackgroundImageFit = 'height' | 'width';
+type BackgroundImageFit = 'height' | 'width' | 'auto';
 
 export const OVERLAY_MEDIA_ACTIVE_EVENT = 'overlayMedia:active';
 
@@ -163,6 +163,15 @@ export function playOverlayMediaItem(
 ) {
   if (!item?.videoFileName) return;
 
+  // 处理视频文件名：如果是数组，随机选择一个
+  let selectedVideoFileName: string;
+  if (Array.isArray(item.videoFileName)) {
+    if (item.videoFileName.length === 0) return;
+    selectedVideoFileName = item.videoFileName[Math.floor(Math.random() * item.videoFileName.length)];
+  } else {
+    selectedVideoFileName = item.videoFileName;
+  }
+
   // 单实例：重复触发时重启
   stopOverlayMedia();
   
@@ -173,8 +182,8 @@ export function playOverlayMediaItem(
   currentOverlayMediaItem = item;
 
   const fit: BackgroundImageFit = configs.backgroundImageFit ?? 'height';
-  const closeOnClick = item.closeOnClick ?? true;
-  const pauseBgMusic = item.pauseBackgroundMusic ?? true;
+  const closeOnClick = item.closeOnClick ?? false;
+  const pauseBgMusic = item.pauseBackgroundMusic ?? false;
   const muteVideo = item.muteVideo ?? !!item.audioFileName;
 
   if (pauseBgMusic && backgroundMusic && !backgroundMusic.paused) {
@@ -201,7 +210,7 @@ export function playOverlayMediaItem(
 
   const video = document.createElement('video');
   overlayVideo = video;
-  video.src = ASSET_PATH + item.videoFileName;
+  video.src = ASSET_PATH + selectedVideoFileName;
   video.preload = 'auto';
   video.playsInline = true;
   video.autoplay = true;
@@ -218,7 +227,7 @@ export function playOverlayMediaItem(
   }
   video.volume = item.videoVolume ?? 1.0;
 
-  // 让 video 的高宽适配方式与背景图一致，并保持居中
+  // 让 video 的高宽适配方式统一使用 width 模式，并保持居中
   video.style.position = 'absolute';
   video.style.left = '50%';
   video.style.top = '50%';
@@ -230,13 +239,11 @@ export function playOverlayMediaItem(
   // 优化视频渲染质量
   video.style.imageRendering = 'auto';
   video.style.objectFit = 'contain';
-  // 关键：要与 CSS background-size 的行为一致：
-  // - "width": 100% auto  -> 允许高度超出视口并被裁切（不能用 max-height:100% 去“压缩”）
-  // - "height": auto 100% -> 允许宽度超出视口并被裁切（不能用 max-width:100% 去“压缩”）
-  video.style.width = fit === 'width' ? '100%' : 'auto';
-  video.style.height = fit === 'height' ? '100%' : 'auto';
-  video.style.maxWidth = fit === 'height' ? 'none' : '100%';
-  video.style.maxHeight = fit === 'width' ? 'none' : '100%';
+  // 统一使用 width 模式：宽度100%，高度自适应，允许高度超出视口并被裁切
+  video.style.width = '100%';
+  video.style.height = 'auto';
+  video.style.maxWidth = '100%';
+  video.style.maxHeight = 'none';
 
   const cleanup = () => {
     const item = currentOverlayMediaItem;

@@ -1,0 +1,237 @@
+{
+  "width": 1350,
+  "height": 1920,
+  "backgroundImage": [
+    "bg.png"
+  ],
+  "animationMix": {
+    "enabled": false,
+    "duration": 0.2
+  },
+  "backgroundImageFit": "auto",
+  "canvasAlignLeftPercent": -1,
+  "canvasAlignRightPercent": -1,
+  "canvasEdgeTransition": 3,
+  "backgroundMusic": {
+    "fileName": "bg.mp3",
+    "volume": 0.2
+  },
+  "specialEffectLibrary":[
+    {
+      "type":2,
+      "image1FileName": "1.png",
+      "image2FileName": "t0.png",
+      "image3FileName": "t1.png",
+      "audioFileName": "1.mp3",
+      "animationName": "casting1",
+      "image1Scale":0.6,
+      "image1Duration": 400,
+      "scaleDuration": 100,
+      "fadeOutDuration": 1500
+    },
+    {
+      "type":2,
+      "image1FileName": "2.png",
+      "image2FileName": "t0.png",
+      "image3FileName": "t1.png",
+      "audioFileName": "2.mp3",
+      "animationName": "casting1",
+      "image1Scale":0.6,
+      "image1Duration": 400,
+      "scaleDuration": 100,
+      "fadeOutDuration": 1500
+    },
+    {
+      "type":2,
+      "image1FileName": "3.png",
+      "image2FileName": "t0.png",
+      "image3FileName": "t1.png",
+      "audioFileName": "3.mp3",
+      "animationName": "casting1",
+      "image1Scale":0.6,
+      "image1Duration": 400,
+      "scaleDuration": 100,
+      "fadeOutDuration": 1500
+    },
+    {
+      "type":2,
+      "image1FileName": "4.png",
+      "image2FileName": "t0.png",
+      "image3FileName": "t1.png",
+      "audioFileName": "4.mp3",
+      "animationName": "casting1",
+      "image1Scale":0.6,
+      "image1Duration": 400,
+      "scaleDuration": 100,
+      "fadeOutDuration": 1500
+    },
+    {
+      "type":2,
+      "image1FileName": "5.png",
+      "image2FileName": "t0.png",
+      "image3FileName": "t1.png",
+      "audioFileName": "5.mp3",
+      "animationName": "casting1",
+      "image1Scale":0.6,
+      "image1Duration": 400,
+      "scaleDuration": 100,
+      "fadeOutDuration": 1500
+    },
+    {
+      "type":2,
+      "image1FileName": "6.png",
+      "image2FileName": "t0.png",
+      "image3FileName": "t1.png",
+      "audioFileName": "6.mp3",
+      "animationName": "casting1",
+      "image1Scale":0.6,
+      "image1Duration": 400,
+      "scaleDuration": 100,
+      "fadeOutDuration": 1500
+    }
+  ],
+  "meshes": [
+    {
+      "type": "spine",
+      "jsonFileName":"6210001.json",
+      "atlasFileName": "6210001.atlas",
+      "animations": [
+        {
+          "name": "battlestand",
+          "weight": 95
+        },
+        {
+          "name": "casting1",
+          "weight": 3,
+          "audioFileName": "d1.mp3"
+        },
+        {
+          "name": "born_break",
+          "weight": 2,
+          "audioFileName": "d2.mp3"
+        }
+      ],
+      "scale": 5.5,
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": -1200
+      },
+      "controlSlots": {
+        "backgroundMusic": [
+          "bgbx_10","bgbx_10"
+        ],
+        "voiceAnimation": [
+          "renwu_2"
+        ]
+      },
+      "clickEffects": [
+        {
+          "imageFileName": "d1.png",
+          "weight": 95,
+          "duration": 3000,
+          "scale": 0.25,
+          "effect": 1
+        },
+        {
+          "imageFileName": "d2.png",
+          "weight": 5,
+          "duration": 500,
+          "scale": 0.2,
+          "effect": 0
+        }
+      ],
+      "specialEffectTriggers":[
+        {
+        "triggerEffectsWhenCountReached":[
+          {"imageFileName":"e.png","count":1},
+          {"imageFileName":"d1.png","count":1}
+        ],
+        "effectIndices":[0]
+        },
+        {
+          "triggerEffectsWhenCountReached":[
+            {"imageFileName":"e.png","count":1},
+            {"imageFileName":"d1.png","count":2}
+          ],
+          "effectIndices":[1]
+        },
+        {
+          "triggerEffectsWhenCountReached":[
+            {"imageFileName":"e.png","count":1},
+            {"imageFileName":"d1.png","count":3}
+          ],
+          "effectIndices":[2]
+        },
+        {
+          "triggerEffectsWhenCountReached":[
+            {"imageFileName":"e.png","count":1},
+            {"imageFileName":"d1.png","count":4}
+          ],
+          "effectIndices":[3]
+        },
+        {
+          "triggerEffectsWhenCountReached":[
+            {"imageFileName":"e.png","count":1},
+            {"imageFileName":"d1.png","count":5}
+          ],
+          "effectIndices":[4]
+        },
+        {
+          "triggerEffectsWhenCountReached":[
+            {"imageFileName":"e.png","count":1},
+            {"imageFileName":"d1.png","count":6}
+          ],
+          "effectIndices":[5]
+        }
+    ],
+      "slotHideRules":[
+        {
+          "triggerSlots":["qianjingbx_23"],
+          "hideSlots":["qianjingbx_23"],
+          "hideDuration":10000
+        },
+        {
+          "triggerSlots":["qianjingbx_28"],
+          "hideSlots":["qianjingbx_28"],
+          "hideDuration":10000
+        },
+        {
+          "triggerSlots":["qianjingbx_29"],
+          "hideSlots":["qianjingbx_29"],
+          "hideDuration":10000
+        },
+        {
+          "triggerSlots":["qianjingbx_38"],
+          "hideSlots":["qianjingbx_38"],
+          "hideDuration":10000
+        }
+      ],
+      "slotClickEffects":[
+        {
+          "triggerSlots":["qianjingbx_15"],
+          "effects":[
+            {
+              "imageFileName":"e.png"
+            }
+          ]
+        }
+      ],
+      "overlayMedia": [
+        {
+          "triggerSlotsWhenHidden": [
+            "qianjingbx_23","qianjingbx_28","qianjingbx_29","qianjingbx_38"
+          ],
+          "videoFileName": "full.webm",
+          "audioFileName": "",
+          "pauseBackgroundMusic": true,
+          "closeOnClick": false,
+          "videoVolume": 1.0,
+          "audioVolume": 1.0,
+          "loopVideo": false
+        }
+      ]
+    }
+  ],
+  "activeMeshIndex": 0
+}

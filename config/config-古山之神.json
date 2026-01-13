@@ -1,0 +1,147 @@
+{
+  "width": 1650,
+  "height": 1920,
+  "backgroundImage": [
+    "bg.png"
+  ],
+  "animationMix": {
+    "enabled": false,
+    "duration": 0.2
+  },
+  "backgroundImageFit": "auto",
+  "canvasAlignLeftPercent": -1,
+  "canvasAlignRightPercent": -1,
+  "canvasEdgeTransition": 3,
+  "backgroundMusic": {
+    "fileName": "bg.flac",
+    "volume": 0.2
+  },
+  "specialEffectLibrary": [
+    {
+      "type": 2,
+      "image1FileName": "s.png",
+      "image2FileName": "t0.png",
+      "image3FileName": "t1.png",
+      "audioFileName": "gushan.mp3",
+      "animationName": "casting1",
+      "image1Duration": 1,
+      "scaleDuration": 100,
+      "fadeOutDuration": 1500
+    },
+    {
+      "type": 1,
+      "image1FileName": "sl.png",
+      "audioFileName": "sl.mp3",
+      "image1Scale": 0.6,
+      "image1Duration": 2000,
+      "fadeOutDuration": 1000
+    }
+  ],
+  "meshes": [
+    {
+      "type": "spine",
+      "jsonFileName": "280051.json",
+      "atlasFileName": "280051.atlas",
+      "animations": [
+        {
+          "name": "battlestand",
+          "weight": 94
+        },
+        {
+          "name": "born_break",
+          "weight": 2,
+          "audioFileName": "bjy1.mp3"
+        },
+        {
+          "name": "casting1",
+          "weight": 2,
+          "audioFileName": "bjy2.mp3"
+        },
+        {
+          "name": "combat1",
+          "weight": 2,
+          "audioFileName": "bjy3.mp3"
+        }
+      ],
+      "scale": 5.5,
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": -1200
+      },
+      "controlSlots": {
+        "backgroundMusic": [
+          "beijing_115"
+        ],
+        "voiceAnimation": "da_21"
+      },
+      "clickEffects": [
+        {
+          "imageFileName": "d1.png",
+          "weight": 47,
+          "duration": 500,
+          "scale": 0.15,
+          "effect": 0
+        },
+        {
+          "imageFileName": "d2.png",
+          "weight": 48,
+          "duration": 500,
+          "scale": 0.3,
+          "effect": 0
+        },
+        {
+          "imageFileName": "d3.png",
+          "weight": 5,
+          "duration": 500,
+          "scale": 0.25,
+          "effect": 0
+        }
+      ],
+      "specialEffectTriggers": [
+        {
+          "triggerSlot": "xiao_56",
+          "effectIndices": [
+            0
+          ]
+        },
+        {
+          "triggerEffectsWhenTotalCountReached": [
+            {
+              "effectIdentifier": "effect:0",
+              "count": 6
+            }
+          ],
+          "effectIndices": [
+            1
+          ]
+        }
+      ],
+      "slotHideRules": [
+        {
+          "triggerSlots": [
+            "qianjing_111"
+          ],
+          "hideSlots": [
+            "qianjing_1"
+          ],
+          "hideDuration": -1
+        }
+      ],
+      "overlayMedia": [
+        {
+          "triggerSlot": [
+            "beijing_111"
+          ],
+          "videoFileName": "full.webm",
+          "pauseBackgroundMusic": true,
+          "closeOnClick": false,
+          "videoVolume": 1.0,
+          "audioVolume": 1.0,
+          "loopVideo": false
+        }
+      ]
+    }
+  ],
+  "activeMeshIndex": 0
+}

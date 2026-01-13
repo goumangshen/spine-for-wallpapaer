@@ -1,0 +1,193 @@
+{
+  "width": 2400,
+  "height": 1920,
+  "backgroundImage": [
+    "bg.png"
+  ],
+  "animationMix": {
+    "enabled": false,
+    "duration": 0.2
+  },
+  "backgroundImageFit": "auto",
+  "canvasAlignLeftPercent": -1,
+  "canvasAlignRightPercent": 0,
+  "canvasEdgeTransition": 1,
+  "backgroundMusic": {
+    "fileName": "bg.flac",
+    "volume": 0.1
+  },
+  "specialEffectLibrary":[
+    {
+      "type":2,
+      "image1FileName": "27101.webp",
+      "image2FileName": "t0.png",
+      "image3FileName": "tf.png",
+      "audioFileName": "11.mp3",
+      "animationName": "casting1",
+      "image1Duration": 400,
+      "scaleDuration": 100,
+      "fadeOutDuration": 1500,
+      "image1Scale": 0.82,
+      "image2InitialScale": 2.0,
+      "image2FinalScale": 0.45,
+      "image3InitialScale": 0.5,
+      "image3FinalScale": 1,
+      "image2AlignPercent": 60
+    },
+    {
+      "type":2,
+      "image1FileName": "27102.webp",
+      "image2FileName": "t0.png",
+      "image3FileName": "tf.png",
+      "audioFileName": "12.mp3",
+      "animationName": "casting1",
+      "image1Duration": 400,
+      "scaleDuration": 100,
+      "fadeOutDuration": 1500,
+      "image1Scale": 0.82,
+      "image2InitialScale": 2.0,
+      "image2FinalScale": 0.45,
+      "image3InitialScale": 0.5,
+      "image3FinalScale": 1,
+      "image2AlignPercent": 60
+    },
+    {
+      "type":2,
+      "image1FileName": "27106.webp",
+      "image2FileName": "t0.png",
+      "image3FileName": "tf.png",
+      "audioFileName": "21.mp3",
+      "animationName": "casting1",
+      "image1Duration": 400,
+      "scaleDuration": 100,
+      "fadeOutDuration": 1500,
+      "image1Scale": 0.82,
+      "image2InitialScale": 2.0,
+      "image2FinalScale": 0.45,
+      "image3InitialScale": 0.5,
+      "image3FinalScale": 1,
+      "image2AlignPercent": 60
+    },
+    {
+      "type":2,
+      "image1FileName": "27107.webp",
+      "image2FileName": "t0.png",
+      "image3FileName": "tf.png",
+      "audioFileName": "31.mp3",
+      "animationName": "casting1",
+      "image1Duration": 400,
+      "scaleDuration": 100,
+      "fadeOutDuration": 1500,
+      "image1Scale": 0.82,
+      "image2InitialScale": 2.0,
+      "image2FinalScale": 0.45,
+      "image3InitialScale": 0.5,
+      "image3FinalScale": 1,
+      "image2AlignPercent": 60
+    },
+    {
+      "type":4,
+      "image1FileName": "q.png",
+      "initialScale": 2.0,
+      "finalScale": 0.5,
+      "audioFileName": "qijue.mp3",
+      "scaleDuration": 200,
+      "fadeOutDuration":1000
+    }
+  ],
+  "meshes": [
+    {
+      "type": "spine",
+      "jsonFileName":"2710501.json",
+      "atlasFileName": "2710501.atlas",
+      "animations": [
+        {
+          "name": "battlestand",
+          "weight": 95
+        },
+        {
+          "name": "casting1",
+          "weight": 3,
+          "audioFileName": "1.mp3"
+        },
+        {
+          "name": "born_break",
+          "weight": 2,
+          "audioFileName": "2.mp3"
+        }
+      ],
+      "scale": 5.5,
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": -1200
+      },
+      "controlSlots": {
+        "backgroundMusic": [
+          "tou2"
+        ],
+        "voiceAnimation": [
+          "ren3"
+        ]
+      },
+      "clickEffects": [
+        {
+          "imageFileName": "d1.png",
+          "weight": 85,
+          "duration": 500,
+          "scale": 0.2,
+          "effect": 0
+        },
+        {
+          "imageFileName": "d2.png",
+          "weight": 15,
+          "duration": 500,
+          "scale": 0.2,
+          "effect": 0
+        },
+        {
+          "imageFileName": "d3.png",
+          "weight": 5,
+          "duration": 500,
+          "scale": 0.35,
+          "effect": 0
+        }
+      ],
+      "hiddenSlots":["ren32","bu_14","bu_16"],
+      "specialEffectTriggers":[{
+        "triggerSlot":"qianpi12",
+        "effectIndices":[[0],[0,4],[1],[1,4],[2],[2,4],[3],[3,4]],
+        "random":true
+      }],
+      "overlayMedia": [
+        {
+          "triggerSlot": [
+            "ren12"
+          ],
+          "videoFileName": "r.webm",
+          "audioFileName": "r.mp3",
+          "pauseBackgroundMusic": true,
+          "closeOnClick": false,
+          "videoVolume": 1.0,
+          "audioVolume": 1.0,
+          "loopVideo": false
+        },
+        {
+          "triggerSlot": [
+            "n1_4",
+            "n1_5",
+            "n2_6"
+          ],
+          "videoFileName": "full.webm",
+          "audioFileName": "",
+          "pauseBackgroundMusic": true,
+          "closeOnClick": false,
+          "videoVolume": 1.0,
+          "audioVolume": 1.0,
+          "loopVideo": false
+        }
+      ]
+    }
+  ],
+  "activeMeshIndex": 0
+}
