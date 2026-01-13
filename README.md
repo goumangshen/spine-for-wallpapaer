@@ -11,7 +11,7 @@ This is a [Spine](https://esotericsoftware.com) animation player for wallpaper e
 1. Download the latest release
 2. Unzip the release and nagivate into the "assets" folder
 3. Put all relative spine files (\*.altas, \*.png, \*.skel, etc) into the "assets" folder.
-4. Add a config.json into the "assets" folder and please see [this doc](https://github.com/spicy-wolf/spine-wallpaper-engine/blob/main/public/assets/README.md) for the config.json file structure.
+4. Add a config.json into the "assets" folder and please see Configuration Guide for the config.json file structure.
 5. You can open the index.html to preview the animation.
 6. If everything looks good, then import your project into Wallpaper Engine. see [offical tutorial](https://docs.wallpaperengine.io/en/web/first/gettingstarted.html)
 
