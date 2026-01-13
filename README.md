@@ -1,6 +1,6 @@
 # Spine on Wallpaper Engine
 
-[中文](https://github.com/spicy-wolf/spine-wallpaper-engine/blob/main/README.zh.md)
+This project is a secondary development based on the project at https://github.com/spicy-wolf/spine-wallpaper-engine
 
 ## What is it?
 
