@@ -27,10 +27,14 @@ import { switchBackgroundImage, setMeshBackgroundImage, setMeshCanvasAlignment, 
 import { playOverlayMediaItem, setOverlayMediaEndCallback, setOverlayMediaStartCallback } from './overlayMedia';
 import { handleClickEffect, preloadClickEffectImages, areClickEffectsActive, areClickEffectsCountReached, clearAllClickEffects, setClickEffectCompleteCallback } from './clickEffect';
 import { playSpecialEffectsSequence, setSpecialEffectCompleteCallback } from './specialEffect';
+import { initNotes } from './note';
 
 const main = async () => {
   const configs: Configs = await (await fetch('./assets/config.json')).json();
   Scene.initScene(configs);
+  
+  // 初始化便签功能（全局配置，不与 mesh 绑定）
+  initNotes(configs.notes);
 
   /**
    * 初始化背景音乐
@@ -83,6 +87,8 @@ const main = async () => {
   // 条件触发的 specialEffectTriggers 相关变量（需要在 render 函数中访问）
   let conditionalSpecialEffectTriggers: SpecialEffectTrigger[] = [];
   const triggeredSpecialEffectTriggers: Set<SpecialEffectTrigger> = new Set();
+  // 时间触发的触发器：记录每天已触发的日期（格式：YYYY-MM-DD）
+  const timeTriggeredDates = new Map<SpecialEffectTrigger, string>();
   
   // 累计计数触发的 specialEffectTriggers 相关变量
   let totalCountSpecialEffectTriggers: SpecialEffectTrigger[] = [];
@@ -278,6 +284,8 @@ const main = async () => {
     triggeredConditionalVideos.clear();
     // 清空条件触发特效标记
     triggeredSpecialEffectTriggers.clear();
+    // 清空时间触发记录（切换 mesh 后重新开始计时）
+    timeTriggeredDates.clear();
     // 重置累计计数器
     totalCounters.clear();
     
@@ -311,8 +319,24 @@ const main = async () => {
               : [currentActiveMeshConfig!.specialEffectTriggers])
           : [];
         conditionalSpecialEffectTriggers = allSpecialEffectTriggers.filter((it: SpecialEffectTrigger) => 
-          !!it?.triggerSlotsWhenHidden || !!it?.triggerEffectsWhenActive || !!it?.triggerEffectsWhenCountReached
+          !!it?.triggerSlotsWhenHidden || !!it?.triggerEffectsWhenActive || !!it?.triggerEffectsWhenCountReached || (it?.triggerAtSecondOfDay !== undefined && it.triggerAtSecondOfDay >= 0)
         );
+        
+        // 初始化时间触发检查：如果当前时间已经超过目标时间+60秒，标记为已触发
+        const now = new Date();
+        const currentSecondOfDay = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+        const todayDateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+        const EXPIRED_THRESHOLD = 60; // 过期阈值（秒）
+        
+        for (const trigger of conditionalSpecialEffectTriggers) {
+          if (trigger.triggerAtSecondOfDay !== undefined && trigger.triggerAtSecondOfDay >= 0) {
+            const targetSecond = Number(trigger.triggerAtSecondOfDay); // 确保是数字类型
+            // 如果当前时间已经超过目标时间+60秒，标记为已触发（今天不再触发）
+            if (currentSecondOfDay > targetSecond + EXPIRED_THRESHOLD) {
+              timeTriggeredDates.set(trigger, todayDateStr);
+            }
+          }
+        }
         
         // 从生效的 mesh 配置中获取累计计数触发的 specialEffectTriggers
         totalCountSpecialEffectTriggers = allSpecialEffectTriggers.filter((it: SpecialEffectTrigger) => 
@@ -606,8 +630,24 @@ const main = async () => {
             : [currentActiveMeshConfig!.specialEffectTriggers])
         : [];
       conditionalSpecialEffectTriggers = allSpecialEffectTriggers.filter((it: SpecialEffectTrigger) => 
-        !!it?.triggerSlotsWhenHidden || !!it?.triggerEffectsWhenActive || !!it?.triggerEffectsWhenCountReached
+        !!it?.triggerSlotsWhenHidden || !!it?.triggerEffectsWhenActive || !!it?.triggerEffectsWhenCountReached || (it?.triggerAtSecondOfDay !== undefined && it.triggerAtSecondOfDay >= 0)
       );
+      
+      // 初始化时间触发检查：如果当前时间已经超过目标时间+60秒，标记为已触发
+      const now = new Date();
+      const currentSecondOfDay = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+      const todayDateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+      const EXPIRED_THRESHOLD = 60; // 过期阈值（秒）
+      
+      for (const trigger of conditionalSpecialEffectTriggers) {
+        if (trigger.triggerAtSecondOfDay !== undefined && trigger.triggerAtSecondOfDay >= 0) {
+          const targetSecond = Number(trigger.triggerAtSecondOfDay); // 确保是数字类型
+          // 如果当前时间已经超过目标时间+60秒，标记为已触发（今天不再触发）
+          if (currentSecondOfDay > targetSecond + EXPIRED_THRESHOLD) {
+            timeTriggeredDates.set(trigger, todayDateStr);
+          }
+        }
+      }
       
       // 从生效的 mesh 配置中获取累计计数触发的 specialEffectTriggers
       totalCountSpecialEffectTriggers = allSpecialEffectTriggers.filter((it: SpecialEffectTrigger) => 
@@ -872,6 +912,33 @@ const main = async () => {
           if (areClickEffectsCountReached(trigger.triggerEffectsWhenCountReached)) {
             shouldTrigger = true;
             isEffectTriggered = true; // 标记为由点触特效触发
+          }
+        }
+        
+        // 检查时间触发条件
+        if (!shouldTrigger && trigger.triggerAtSecondOfDay !== undefined && trigger.triggerAtSecondOfDay >= 0) {
+          const now = new Date();
+          const currentSecondOfDay = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+          const targetSecond = Number(trigger.triggerAtSecondOfDay); // 确保是数字类型
+          
+          // 获取今天的日期字符串（用于判断是否已经触发过）
+          const todayDateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+          const lastTriggeredDate = timeTriggeredDates.get(trigger);
+          
+          // 如果当前时间已经超过目标时间+60秒，即使今天还没触发过，也不触发
+          const EXPIRED_THRESHOLD = 60; // 过期阈值（秒）
+          if (currentSecondOfDay > targetSecond + EXPIRED_THRESHOLD) {
+            // 已经过期，标记为已触发（避免后续检查）
+            if (lastTriggeredDate !== todayDateStr) {
+              timeTriggeredDates.set(trigger, todayDateStr);
+            }
+            // 不触发
+          } else if (currentSecondOfDay >= targetSecond - 1 && currentSecondOfDay <= targetSecond + 1 && lastTriggeredDate !== todayDateStr) {
+            // 检查是否到达目标秒数，且今天还没有触发过
+            // 允许在目标秒数前后1秒内触发（避免因为检查频率问题错过）
+            shouldTrigger = true;
+            // 记录今天已触发
+            timeTriggeredDates.set(trigger, todayDateStr);
           }
         }
         

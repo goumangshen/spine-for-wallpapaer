@@ -36,6 +36,44 @@ export function setSpecialEffectCompleteCallback(callback: SpecialEffectComplete
 }
 
 /**
+ * 为容器添加点击关闭功能（当 fadeOutDuration === -1 时使用）
+ * @param container 容器元素
+ * @param fadeOutDuration 渐隐时间（默认 500ms）
+ */
+function setupClickToClose(container: HTMLElement, fadeOutDuration: number = 500): void {
+  container.style.pointerEvents = 'auto'; // 允许点击
+  container.style.cursor = 'pointer'; // 显示手型光标
+  
+  const handleClick = () => {
+    container.style.pointerEvents = 'none'; // 防止重复点击
+    container.style.cursor = 'default';
+    
+    // 查找所有需要渐隐的子元素（包括图片和所有 div）
+    const elementsToFade = container.querySelectorAll('img, div');
+    elementsToFade.forEach((el) => {
+      const htmlEl = el as HTMLElement;
+      // 只处理有 opacity 样式的元素，避免影响布局
+      const currentOpacity = getComputedStyle(htmlEl).opacity;
+      if (currentOpacity !== '0') {
+        htmlEl.style.transition = `opacity ${fadeOutDuration}ms ease-out`;
+        htmlEl.style.opacity = '0';
+      }
+    });
+    
+    // 容器本身也需要渐隐
+    container.style.transition = `opacity ${fadeOutDuration}ms ease-out`;
+    container.style.opacity = '0';
+    
+    // 等待渐隐完成后移除
+    setTimeout(() => {
+      container.remove();
+    }, fadeOutDuration);
+  };
+  
+  container.addEventListener('click', handleClick, { once: true });
+}
+
+/**
  * 播放单个特殊特效（三图片特效）
  * @param definition 特效定义
  * @param spineAnimator Spine 动画控制器
@@ -45,6 +83,11 @@ export function playSingleSpecialEffect(
   definition: SpecialEffectDefinition,
   spineAnimator: SpineAnimator | null = null
 ): { audioElement: HTMLAudioElement | null; totalDuration: number } {
+  // 处理 type 6 特效：单图片 + 文本，从小到大缩放并旋转（带回弹）
+  if (definition.type === 6) {
+    return playType6Effect(definition, spineAnimator);
+  }
+
   // 处理 type 5 特效：插槽随机隐藏显示切换特效（不需要 image1FileName）
   if (definition.type === 5) {
     return playType5Effect(definition, spineAnimator);
@@ -68,6 +111,8 @@ export function playSingleSpecialEffect(
   const image1Duration = definition.image1Duration ?? 500;
   const image1Scale = definition.image1Scale ?? 0.8;
   const fadeOutDuration = definition.fadeOutDuration ?? 500;
+  const isClickToClose = fadeOutDuration === -1;
+  const actualFadeOutDuration = isClickToClose ? 500 : fadeOutDuration; // 点击关闭时使用默认渐隐时间
   
   // 根据 type 字段判断特效类型，如果没有 type 字段则使用旧的逻辑（向后兼容）
   // 使用类型守卫来安全访问可能不存在的属性
@@ -75,9 +120,11 @@ export function playSingleSpecialEffect(
   const hasImage2 = definition.type === 2 ? true : (definition.type === undefined ? !!('image2FileName' in definition && (definition as any).image2FileName) : false);
   const hasImage3 = definition.type === 2 ? true : (definition.type === undefined ? !!('image3FileName' in definition && (definition as any).image3FileName) : false);
 
-  // 计算特效总时长
+  // 计算特效总时长（如果点击关闭，则不考虑渐隐时间，返回一个很大的值表示需要用户交互）
   let totalDuration: number;
-  if (isSimpleEffect) {
+  if (isClickToClose) {
+    totalDuration = 999999999; // 表示需要用户点击关闭
+  } else if (isSimpleEffect) {
     // 只有 image1：显示时间 + 淡出时间
     totalDuration = image1Duration + fadeOutDuration;
   } else {
@@ -90,20 +137,38 @@ export function playSingleSpecialEffect(
 
   // 播放语音（如果配置了）
   if (definition.audioFileName) {
-    audioElement = new Audio(ASSET_PATH + definition.audioFileName);
-    audioElement.preload = 'auto';
-    audioElement.volume = 1.0;
+    // 处理 type 1 特效的多个语音文件（随机选择）
+    let selectedAudioFileName: string | null = null;
+    if (definition.type === 1 && Array.isArray(definition.audioFileName)) {
+      // type 1 且是数组：随机选择一个
+      const audioFileNames = definition.audioFileName;
+      if (audioFileNames.length > 0) {
+        selectedAudioFileName = audioFileNames[Math.floor(Math.random() * audioFileNames.length)];
+      } else {
+        // 空数组，跳过播放
+        selectedAudioFileName = null;
+      }
+    } else {
+      // type 2 或其他情况：直接使用字符串
+      selectedAudioFileName = definition.audioFileName as string;
+    }
     
-    // 添加错误处理
-    audioElement.addEventListener('error', (e) => {
-      console.error(`Failed to load special effect audio: ${ASSET_PATH + definition.audioFileName}`, e);
-    });
-    
-    // 播放语音（不等待加载完成，让浏览器自动处理）
-    // 语音会一直播放到结束，不会在特效结束时停止
-    audioElement.play().catch((error) => {
-      console.warn('Special effect audio autoplay blocked:', error);
-    });
+    if (selectedAudioFileName) {
+      audioElement = new Audio(ASSET_PATH + selectedAudioFileName);
+      audioElement.preload = 'auto';
+      audioElement.volume = 1.0;
+      
+      // 添加错误处理
+      audioElement.addEventListener('error', (e) => {
+        console.error(`Failed to load special effect audio: ${ASSET_PATH + selectedAudioFileName}`, e);
+      });
+      
+      // 播放语音（不等待加载完成，让浏览器自动处理）
+      // 语音会一直播放到结束，不会在特效结束时停止
+      audioElement.play().catch((error) => {
+        console.warn('Special effect audio autoplay blocked:', error);
+      });
+    }
   }
 
   // 播放 Spine 动画（如果配置了）
@@ -207,16 +272,24 @@ export function playSingleSpecialEffect(
 
     if (isSimpleEffect) {
       // 简单特效：只显示 image1，然后淡出
-      setTimeout(() => {
-        // 更新 transition 以确保淡出动画正确
-        image1.style.transition = `opacity ${fadeOutDuration}ms ease-out`;
-        image1.style.opacity = '0';
-        
-        // 等待淡出完成后移除
+      if (isClickToClose) {
+        // 点击关闭模式：等待显示完成后添加点击关闭功能
         setTimeout(() => {
-          container.remove();
-        }, fadeOutDuration);
-      }, image1Duration);
+          setupClickToClose(container, actualFadeOutDuration);
+        }, image1Duration);
+      } else {
+        // 自动淡出模式
+        setTimeout(() => {
+          // 更新 transition 以确保淡出动画正确
+          image1.style.transition = `opacity ${fadeOutDuration}ms ease-out`;
+          image1.style.opacity = '0';
+          
+          // 等待淡出完成后移除
+          setTimeout(() => {
+            container.remove();
+          }, fadeOutDuration);
+        }, image1Duration);
+      }
     } else {
       // 复杂特效：第一张图片显示后消失，转为第二、三张图片
       const scaleDuration = definition.scaleDuration ?? 800;
@@ -337,20 +410,394 @@ export function playSingleSpecialEffect(
         }, 100); // 等待第一张图片淡出
       }, image1Duration);
 
-      // 缩放动画完成后渐隐消失
+      // 缩放动画完成后处理
       setTimeout(() => {
-        if (image2) image2.style.opacity = '0';
-        if (image3) image3.style.opacity = '0';
-        
-        // 等待渐隐完成后移除
-        setTimeout(() => {
-          container.remove();
-        }, fadeOutDuration);
+        if (isClickToClose) {
+          // 点击关闭模式：添加点击关闭功能
+          setupClickToClose(container, actualFadeOutDuration);
+        } else {
+          // 自动渐隐模式
+          if (image2) image2.style.opacity = '0';
+          if (image3) image3.style.opacity = '0';
+          
+          // 等待渐隐完成后移除
+          setTimeout(() => {
+            container.remove();
+          }, fadeOutDuration);
+        }
       }, image1Duration + 100 + (definition.scaleDuration ?? 800));
     }
   };
 
   waitForImage1();
+
+  return { audioElement, totalDuration };
+}
+
+type BackgroundRenderedRect = {
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+};
+
+function normalizePercentToRatio(value: number): number | null {
+  const v = Number(value);
+  if (!Number.isFinite(v)) return null;
+  if (v < 0 || v > 100) return null;
+  return v > 1 ? v / 100 : v;
+}
+
+function extractUrlFromCssBackgroundImage(value: string): string | null {
+  if (!value || value === 'none') return null;
+  const match = value.match(/url\((['"]?)(.*?)\1\)/i);
+  return match?.[2] ?? null;
+}
+
+const naturalSizeCache = new Map<string, Promise<{ w: number; h: number }>>();
+
+function getImageNaturalSize(url: string): Promise<{ w: number; h: number }> {
+  const cached = naturalSizeCache.get(url);
+  if (cached) return cached;
+  const promise = new Promise<{ w: number; h: number }>((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve({ w: img.naturalWidth, h: img.naturalHeight });
+    img.onerror = () => reject(new Error(`Failed to load image: ${url}`));
+    img.src = url;
+  });
+  naturalSizeCache.set(url, promise);
+  return promise;
+}
+
+function inferBackgroundFitFromComputedStyle(style: CSSStyleDeclaration): 'height' | 'width' {
+  const bgSize = (style.backgroundSize || '').trim().toLowerCase();
+  // 常见：'auto 100%' 或 '100% auto'（也可能包含像素值，但本项目主要是这两种）
+  if (bgSize.startsWith('100%')) return 'width';
+  return 'height';
+}
+
+async function getBackgroundRenderedRect(): Promise<BackgroundRenderedRect> {
+  const viewportW = window.innerWidth;
+  const viewportH = window.innerHeight;
+  if (!viewportW || !viewportH) {
+    return { left: 0, top: 0, width: viewportW, height: viewportH };
+  }
+
+  // 优先从背景层（zIndex=-1）取 backgroundImage
+  const bgLayer = document.querySelector('div[style*="z-index: -1"]') as HTMLElement | null;
+  const layerStyle = bgLayer ? getComputedStyle(bgLayer) : null;
+
+  let bgUrl: string | null = null;
+  let fit: 'height' | 'width' = 'height';
+  if (layerStyle) {
+    bgUrl = extractUrlFromCssBackgroundImage(layerStyle.backgroundImage);
+    fit = inferBackgroundFitFromComputedStyle(layerStyle);
+  }
+  if (!bgUrl) {
+    const bodyStyle = getComputedStyle(document.body);
+    bgUrl = extractUrlFromCssBackgroundImage(bodyStyle.backgroundImage);
+    fit = inferBackgroundFitFromComputedStyle(bodyStyle);
+  }
+
+  if (!bgUrl) {
+    return { left: 0, top: 0, width: viewportW, height: viewportH };
+  }
+
+  let natural: { w: number; h: number };
+  try {
+    natural = await getImageNaturalSize(bgUrl);
+  } catch {
+    return { left: 0, top: 0, width: viewportW, height: viewportH };
+  }
+
+  if (!natural.w || !natural.h) {
+    return { left: 0, top: 0, width: viewportW, height: viewportH };
+  }
+
+  if (fit === 'width') {
+    const drawW = viewportW;
+    const drawH = (natural.h / natural.w) * drawW;
+    const top = (viewportH - drawH) / 2;
+    return { left: 0, top, width: drawW, height: drawH };
+  }
+
+  // fit === 'height'
+  const drawH = viewportH;
+  const drawW = (natural.w / natural.h) * drawH;
+  const left = (viewportW - drawW) / 2;
+  return { left, top: 0, width: drawW, height: drawH };
+}
+
+function clamp(n: number, min: number, max: number): number {
+  return Math.max(min, Math.min(max, n));
+}
+
+/**
+ * 根据容器尺寸自动调整字体大小，保证有边距并尽量填充。
+ */
+function autoFitText(
+  textEl: HTMLElement,
+  boxEl: HTMLElement,
+  minPx: number,
+  maxPx: number,
+  paddingPx: number
+) {
+  const boxRect = boxEl.getBoundingClientRect();
+  const targetW = Math.max(0, boxRect.width - paddingPx * 2);
+  const targetH = Math.max(0, boxRect.height - paddingPx * 2);
+
+  let fontSize = maxPx;
+  textEl.style.fontSize = `${fontSize}px`;
+
+  // 简单迭代缩小，避免复杂测量逻辑
+  for (let i = 0; i < 24; i++) {
+    const w = textEl.scrollWidth;
+    const h = textEl.scrollHeight;
+    if (w <= targetW && h <= targetH) break;
+    fontSize = Math.max(minPx, Math.floor(fontSize * 0.9));
+    textEl.style.fontSize = `${fontSize}px`;
+    if (fontSize <= minPx) break;
+  }
+}
+
+/**
+ * 播放 type 6 特效：单图片 + 文本，从小到大缩放并旋转（带回弹），结束后渐隐消失
+ */
+function playType6Effect(
+  definition: Extract<SpecialEffectDefinition, { type: 6 }>,
+  spineAnimator: SpineAnimator | null = null
+): { audioElement: HTMLAudioElement | null; totalDuration: number } {
+  const {
+    image1FileName,
+    initialScale,
+    finalScale,
+    initialRotation,
+    finalRotation,
+    alignLeftPercent,
+    alignRightPercent,
+    verticalFromBottomPercent,
+    scaleDuration,
+    fadeOutDuration,
+    text,
+  } = definition;
+
+  const isClickToClose = fadeOutDuration === -1;
+  const actualFadeOutDuration = isClickToClose ? 500 : fadeOutDuration;
+  const totalDuration = isClickToClose ? 999999999 : (scaleDuration + fadeOutDuration);
+
+  let audioElement: HTMLAudioElement | null = null;
+  if (definition.audioFileName) {
+    audioElement = new Audio(ASSET_PATH + definition.audioFileName);
+    audioElement.preload = 'auto';
+    audioElement.volume = 1.0;
+    // 如果设置了 loop，则循环播放
+    if (definition.loop === true) {
+      audioElement.loop = true;
+    }
+    audioElement.addEventListener('error', (e) => {
+      console.error(`Failed to load special effect audio: ${ASSET_PATH + definition.audioFileName}`, e);
+    });
+    audioElement.play().catch((error) => {
+      console.warn('Special effect audio autoplay blocked:', error);
+    });
+  }
+
+  if (definition.animationName && spineAnimator?.skeletonMesh) {
+    spineAnimator.skeletonMesh.state.setAnimation(0, definition.animationName, false);
+  }
+
+  // 预加载图片
+  const img = new Image();
+  img.src = ASSET_PATH + image1FileName;
+
+  // 异步获取背景实际显示区域 + 等待图片加载，然后再创建与播放
+  void Promise.all([
+    getBackgroundRenderedRect(),
+    new Promise<void>((resolve, reject) => {
+      if (img.complete && img.naturalWidth > 0) resolve();
+      img.addEventListener('load', () => resolve(), { once: true });
+      img.addEventListener('error', () => reject(new Error(`Failed to load image: ${image1FileName}`)), { once: true });
+    }),
+  ])
+    .then(([bgRect]) => {
+      const leftRatio = alignLeftPercent !== undefined ? normalizePercentToRatio(alignLeftPercent) : null;
+      const rightRatio = alignRightPercent !== undefined ? normalizePercentToRatio(alignRightPercent) : null;
+      const vRatio = normalizePercentToRatio(verticalFromBottomPercent) ?? 0.5;
+
+      const bgLeft = bgRect.left;
+      const bgTop = bgRect.top;
+      const bgW = bgRect.width;
+      const bgH = bgRect.height;
+
+      const bgRight = bgLeft + bgW;
+
+      // 计算图片边缘对齐位置（左边缘或右边缘）
+      let anchorX: number;
+      let transformX: string;
+      if (leftRatio !== null) {
+        // 左边缘对齐：从背景图左边缘向右偏移 leftRatio 比例
+        anchorX = bgLeft + bgW * leftRatio;
+        transformX = 'translate(0, -50%)'; // 左边缘对齐，垂直居中
+      } else if (rightRatio !== null) {
+        // 右边缘对齐：从背景图右边缘向左偏移 rightRatio 比例
+        anchorX = bgRight - bgW * rightRatio;
+        transformX = 'translate(-100%, -50%)'; // 右边缘对齐，垂直居中
+      } else {
+        // 默认居中
+        anchorX = bgLeft + bgW / 2;
+        transformX = 'translate(-50%, -50%)';
+      }
+
+      const anchorY = bgTop + bgH * (1 - vRatio);
+
+      // 容器：固定定位到背景图区域坐标
+      const container = document.createElement('div');
+      container.style.position = 'fixed';
+      container.style.left = `${anchorX}px`;
+      container.style.top = `${anchorY}px`;
+      container.style.pointerEvents = 'none';
+      container.style.zIndex = '10000';
+      container.style.transform = transformX;
+      container.style.willChange = 'transform, opacity';
+
+      // 舞台：负责缩放+旋转（包含文字）
+      const stage = document.createElement('div');
+      stage.style.position = 'relative';
+      stage.style.display = 'inline-block';
+      stage.style.transformOrigin = 'center center';
+      stage.style.willChange = 'transform, opacity';
+
+      // 图片
+      const imageEl = document.createElement('img');
+      imageEl.src = img.src;
+      imageEl.style.display = 'block';
+      imageEl.style.width = `${img.naturalWidth}px`;
+      imageEl.style.height = `${img.naturalHeight}px`;
+      imageEl.style.userSelect = 'none';
+      (imageEl.style as any).webkitUserSelect = 'none';
+
+      // 文字层（覆盖在图片上）
+      const textBox = document.createElement('div');
+      textBox.style.position = 'absolute';
+      textBox.style.left = '50%';
+      textBox.style.top = '50%';
+      textBox.style.transform = 'translate(-50%, -50%)';
+      textBox.style.width = '100%';
+      textBox.style.height = '100%';
+      textBox.style.display = 'flex';
+      textBox.style.alignItems = 'center';
+      textBox.style.justifyContent = 'center';
+      textBox.style.textAlign = 'center';
+      textBox.style.pointerEvents = 'none';
+
+      const textEl = document.createElement('div');
+      textEl.textContent = text ?? '';
+      textEl.style.maxWidth = '100%';
+      textEl.style.maxHeight = '100%';
+      textEl.style.whiteSpace = 'pre-wrap';
+      textEl.style.wordBreak = 'break-word';
+      textEl.style.lineHeight = '1.2';
+      textEl.style.fontWeight = '700';
+      textEl.style.color = '#000';
+      textEl.style.fontFamily = '楷体, KaiTi, STKaiti, serif';
+      textEl.style.textShadow = '0 1px 2px rgba(255,255,255,0.5)'; // 白色阴影，黑色文字更清晰
+      textEl.style.padding = '6%'; // 与图片边缘留一点距离（随尺寸变化）
+      textEl.style.boxSizing = 'border-box';
+
+      textBox.appendChild(textEl);
+      stage.appendChild(imageEl);
+      stage.appendChild(textBox);
+      container.appendChild(stage);
+      document.body.appendChild(container);
+
+      // 设置初始状态（先隐藏，等动画准备好再显示）
+      stage.style.opacity = '0';
+
+      // 动态 keyframes：旋转到略超出，再回到最终角度；缩放同步完成
+      const delta = finalRotation - initialRotation;
+      const overshoot = Math.sign(delta || 1) * clamp(Math.abs(delta) * 0.12, 3, 12);
+      const overshootRotation = finalRotation + overshoot;
+
+      const animName = `se6_${Date.now()}_${Math.floor(Math.random() * 1e6)}`;
+      const style = document.createElement('style');
+      style.textContent = `
+@keyframes ${animName} {
+  from { 
+    transform: scale(${initialScale}) rotate(${initialRotation}deg); 
+  }
+  70% { 
+    transform: scale(${finalScale}) rotate(${overshootRotation}deg); 
+  }
+  80% { 
+    transform: scale(${finalScale}) rotate(${overshootRotation}deg); 
+  }
+  to { 
+    transform: scale(${finalScale}) rotate(${finalRotation}deg); 
+  }
+}`;
+      document.head.appendChild(style);
+
+      // 字体自适应：按“最终缩放后的图片尺寸”来估算，再做一次实际 fit
+      requestAnimationFrame(() => {
+        const base = Math.min(img.naturalWidth, img.naturalHeight) * finalScale;
+        const maxPx = clamp(Math.floor(base / 4), 16, 120);
+        const minPx = 10;
+        autoFitText(textEl, imageEl, minPx, maxPx, 8);
+
+        // 确保样式已应用，然后启动动画
+        requestAnimationFrame(() => {
+          // 先清除任何现有的 transform，让动画完全控制
+          stage.style.transform = '';
+          stage.style.opacity = '1';
+          
+          // 强制重绘，然后应用动画
+          void stage.offsetHeight; // 触发重绘
+          
+          requestAnimationFrame(() => {
+            // 应用动画（动画会设置 transform）
+            // 使用 backwards 确保动画开始前就应用初始状态，forwards 确保动画结束后保持最终状态
+            stage.style.animation = `${animName} ${scaleDuration}ms ease-out both`;
+            stage.style.animationFillMode = 'both';
+
+            // 创建清理函数：停止语音循环并移除样式
+            const cleanup = () => {
+              // 如果语音在循环播放，停止它
+              if (audioElement && definition.loop === true) {
+                audioElement.pause();
+                audioElement.currentTime = 0;
+              }
+              style.remove();
+            };
+
+            // 动画结束后处理
+            window.setTimeout(() => {
+              if (isClickToClose) {
+                // 点击关闭模式：添加点击关闭功能
+                // 重写 container.remove 方法，在移除时执行清理
+                const originalRemove = container.remove.bind(container);
+                container.remove = () => {
+                  cleanup();
+                  originalRemove();
+                };
+                setupClickToClose(container, actualFadeOutDuration);
+              } else {
+                // 自动渐隐模式
+                stage.style.transition = `opacity ${fadeOutDuration}ms ease-out`;
+                stage.style.opacity = '0';
+
+                window.setTimeout(() => {
+                  cleanup();
+                  container.remove();
+                }, fadeOutDuration);
+              }
+            }, scaleDuration);
+          });
+        });
+      });
+    })
+    .catch((e) => {
+      console.error('Failed to start type 6 special effect:', e);
+    });
 
   return { audioElement, totalDuration };
 }
@@ -500,9 +947,11 @@ function playType3Effect(
   const enterDuration = definition.enterDuration ?? 300;
   const stayDuration = definition.stayDuration ?? 800;
   const fadeOutDuration = definition.fadeOutDuration ?? 500;
+  const isClickToClose = fadeOutDuration === -1;
+  const actualFadeOutDuration = isClickToClose ? 500 : fadeOutDuration;
   const displayWidthRatio = definition.displayWidthRatio ?? 1.0;
 
-  const totalDuration = enterDuration + stayDuration + fadeOutDuration;
+  const totalDuration = isClickToClose ? 999999999 : (enterDuration + stayDuration + fadeOutDuration);
 
   let audioElement: HTMLAudioElement | null = null;
 
@@ -590,30 +1039,36 @@ function playType3Effect(
     });
 
     setTimeout(() => {
-      requestAnimationFrame(() => {
-        if (displayWidthRatio < 1.0) {
-          const w = image.naturalWidth * displayWidthRatio * finalScale;
-          const h = image.naturalHeight * finalScale;
+      if (isClickToClose) {
+        // 点击关闭模式：添加点击关闭功能
+        setupClickToClose(container, actualFadeOutDuration);
+      } else {
+        // 自动渐隐模式
+        requestAnimationFrame(() => {
+          if (displayWidthRatio < 1.0) {
+            const w = image.naturalWidth * displayWidthRatio * finalScale;
+            const h = image.naturalHeight * finalScale;
 
-          image.style.transition = `
-            opacity ${fadeOutDuration}ms ease-out,
-            width ${fadeOutDuration}ms ease-out,
-            height ${fadeOutDuration}ms ease-out
-          `;
-          image.style.opacity = '0';
-          image.style.width = `${w}px`;
-          image.style.height = `${h}px`;
-        } else {
-          image.style.transition = `
-            opacity ${fadeOutDuration}ms ease-out,
-            transform ${fadeOutDuration}ms ease-out
-          `;
-          image.style.opacity = '0';
-          image.style.transform = `translateY(-50%) scale(${finalScale})`;
-        }
-      });
+            image.style.transition = `
+              opacity ${fadeOutDuration}ms ease-out,
+              width ${fadeOutDuration}ms ease-out,
+              height ${fadeOutDuration}ms ease-out
+            `;
+            image.style.opacity = '0';
+            image.style.width = `${w}px`;
+            image.style.height = `${h}px`;
+          } else {
+            image.style.transition = `
+              opacity ${fadeOutDuration}ms ease-out,
+              transform ${fadeOutDuration}ms ease-out
+            `;
+            image.style.opacity = '0';
+            image.style.transform = `translateY(-50%) scale(${finalScale})`;
+          }
+        });
 
-      setTimeout(() => container.remove(), fadeOutDuration);
+        setTimeout(() => container.remove(), fadeOutDuration);
+      }
     }, enterDuration + stayDuration);
   };
 
@@ -638,10 +1093,12 @@ function playType4Effect(
   const finalScale = definition.finalScale ?? 1.0;
   const scaleDuration = definition.scaleDuration ?? 300;
   const fadeOutDuration = definition.fadeOutDuration ?? 500;
+  const isClickToClose = fadeOutDuration === -1;
+  const actualFadeOutDuration = isClickToClose ? 500 : fadeOutDuration;
   const alignPercent = definition.alignPercent ?? 50;
 
-  // 计算特效总时长：缩放时间 + 渐隐时间
-  const totalDuration = scaleDuration + fadeOutDuration;
+  // 计算特效总时长：缩放时间 + 渐隐时间（如果点击关闭，则不考虑渐隐时间）
+  const totalDuration = isClickToClose ? 999999999 : (scaleDuration + fadeOutDuration);
 
   let audioElement: HTMLAudioElement | null = null;
 
@@ -733,14 +1190,20 @@ function playType4Effect(
 
   waitForImage();
 
-  // 缩放动画完成后渐隐消失
+  // 缩放动画完成后处理
   setTimeout(() => {
-    image.style.opacity = '0';
-    
-    // 等待渐隐完成后移除
-    setTimeout(() => {
-      container.remove();
-    }, fadeOutDuration);
+    if (isClickToClose) {
+      // 点击关闭模式：添加点击关闭功能
+      setupClickToClose(container, actualFadeOutDuration);
+    } else {
+      // 自动渐隐模式
+      image.style.opacity = '0';
+      
+      // 等待渐隐完成后移除
+      setTimeout(() => {
+        container.remove();
+      }, fadeOutDuration);
+    }
   }, scaleDuration);
 
   return { audioElement, totalDuration };

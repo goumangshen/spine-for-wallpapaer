@@ -87,6 +87,22 @@ export type Configs = {
    * 其他 mesh 元素作为备用，不会被加载，避免冲突
    */
   activeMeshIndex?: number;
+  /** 可选：便签配置（全局配置，不与 mesh 绑定） */
+  notes?: NoteConfig[];
+};
+
+/**
+ * 便签配置
+ */
+export type NoteConfig = {
+  /** 是否显示此便签，默认 true */
+  visible?: boolean;
+  /** 便签背景图片文件名（相对于 assets 目录） */
+  backgroundImage: string;
+  /** 便签文字内容 */
+  text: string;
+  /** 可选：便签初始缩放比例，默认 1.0 */
+  scale?: number;
 };
 
 export type ClickEffectConfig = {
@@ -151,8 +167,59 @@ export type SpecialEffectDefinition =
       image1Scale?: number;
       /** 可选：渐隐消失持续时间（毫秒），默认 500 */
       fadeOutDuration?: number;
-      /** 可选：特效开始时播放的语音文件名（相对于 assets 目录），语音会一直播放到结束，不会在特效结束时停止 */
+      /** 
+       * 可选：特效开始时播放的语音文件名（相对于 assets 目录），语音会一直播放到结束，不会在特效结束时停止
+       * - 字符串：播放指定的语音文件
+       * - 字符串数组：随机选择一个语音文件播放
+       */
+      audioFileName?: string | string[];
+      /** 可选：特效开始时播放的 Spine 动画名称，会立即停止当前动画并播放一次指定动画 */
+      animationName?: string;
+    }
+  | {
+      /**
+       * 特效类型：6 = 单图片 + 文本，从小到大缩放并旋转（带回弹），结束后渐隐消失
+       * - 图片与文字一起缩放、旋转、消失
+       * - 位置参照背景图片的实际显示区域（与 canvas 对齐逻辑一致）
+       */
+      type: 6;
+      /** 图片文件名（相对于 assets 目录） */
+      image1FileName: string;
+      /** 图片初始缩放比 */
+      initialScale: number;
+      /** 图片最终缩放比 */
+      finalScale: number;
+      /** 图片初始旋转角度（度） */
+      initialRotation: number;
+      /** 图片最终旋转角度（度） */
+      finalRotation: number;
+      /**
+       * 图片左右位置：参照 canvasAlignLeftPercent/canvasAlignRightPercent 的规则
+       * - 0~1：按比例（例如 0.17 表示 17%）
+       * - 0~100：按百分数（例如 17 表示 17%）
+       * - alignLeftPercent：以图片左边缘对齐，从背景图左边缘向右偏移指定比例
+       * - alignRightPercent：以图片右边缘对齐，从背景图右边缘向左偏移指定比例
+       * - 当 left/right 同时存在时，优先使用 left
+       * - 都不提供则默认居中（以图片中心点定位）
+       */
+      alignLeftPercent?: number;
+      alignRightPercent?: number;
+      /**
+       * 图片垂直位置：从下到上相对于背景图片的比例
+       * - 0~1：按比例（0=底部，1=顶部）
+       * - 0~100：按百分数
+       */
+      verticalFromBottomPercent: number;
+      /** 缩放/旋转过程持续时间（毫秒） */
+      scaleDuration: number;
+      /** 渐隐消失时间（毫秒） */
+      fadeOutDuration: number;
+      /** 文字内容（会叠在图片上居中显示，黑色楷体） */
+      text: string;
+      /** 可选：特效开始时播放的语音文件名（相对于 assets 目录） */
       audioFileName?: string;
+      /** 可选：当设置为 true 时，语音循环播放直到特效消失 */
+      loop?: boolean;
       /** 可选：特效开始时播放的 Spine 动画名称，会立即停止当前动画并播放一次指定动画 */
       animationName?: string;
     }
@@ -289,6 +356,14 @@ export type SpecialEffectTrigger = {
     /** 需要达到的累计次数 */
     count: number;
   }>;
+  /** 
+   * 当每天的指定秒数时触发（时间触发）
+   * - 范围：0-86399（0表示00:00:00，86399表示23:59:59）
+   * - 例如：3600 表示每天 01:00:00 触发
+   * - 例如：43200 表示每天 12:00:00 触发
+   * - 每天只触发一次，在到达指定秒数时触发
+   */
+  triggerAtSecondOfDay?: number;
   /** 
    * 要触发的特效索引数组（引用特效库中的索引，从0开始）
    * - 一维数组：每个数字是一个特效索引，按顺序播放

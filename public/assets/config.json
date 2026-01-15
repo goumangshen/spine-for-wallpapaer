@@ -2,284 +2,89 @@
   "width": 1650,
   "height": 1920,
   "backgroundImageFit": "auto",
-  "canvasEdgeTransition": 1,
+  "canvasAlignLeftPercent": -1,
+  "canvasAlignRightPercent": -1,
+  "canvasEdgeTransition": 0,
   "backgroundMusic": {
-    "fileName": "bg.mp3",
-    "volume": 0.2
+    "fileName": "bg.flac",
+    "volume": 0.1
   },
+  "notes": [
+    {
+      "visible": false,
+      "backgroundImage": "12.png",
+      "text": "这是第一个便签",
+      "scale": 0.5
+    }
+  ],
   "specialEffectLibrary": [
     {
-      "type": 2,
-      "image1FileName": "p1.webp",
-      "image2FileName": "0.png",
-      "image3FileName": "1.png",
-      "image1Duration": 500,
-      "scaleDuration": 200,
-      "fadeOutDuration": 1500,
-      "audioFileName": "enci.mp3",
-      "animationName": "casting1"
+      "type": 6,
+      "image1FileName": "13.png",
+      "initialScale": 0.5,
+      "finalScale": 1,
+      "initialRotation": 90,
+      "alignLeftPercent": 0.52,
+      "alignRightPercent": -1,
+      "verticalFromBottomPercent": 85,
+      "text":"给我坐下好好吃饭！",
+      "scaleDuration": 500,
+      "fadeOutDuration": -1,
+      "audioFileName": "hhcf.mp3"
     },
     {
-      "type": 2,
-      "image1FileName": "p2.webp",
-      "image2FileName": "0.png",
-      "image3FileName": "2.png",
-      "image1Duration": 500,
-      "scaleDuration": 200,
-      "fadeOutDuration": 1500,
-      "audioFileName": "py.mp3",
-      "animationName": "casting1"
+      "type": 6,
+      "image1FileName": "13.png",
+      "initialScale": 0.5,
+      "finalScale": 1,
+      "initialRotation": 90,
+      "alignLeftPercent": 0.52,
+      "alignRightPercent": -1,
+      "verticalFromBottomPercent": 85,
+      "text":"想吃点什么？任何料理我都能做给你哦！",
+      "scaleDuration": 500,
+      "fadeOutDuration": -1,
+      "audioFileName": "zlzgn.mp3"
+    },
+    {
+      "type": 1,
+      "image1FileName": "s1.png",
+      "image1Duration": 10,
+      "fadeOutDuration": 10,
+      "audioFileName": ["jiao1.mp3", "jiao2.mp3", "jiao3.mp3", "jiao4.mp3"]
+    },
+    {
+      "type": 1,
+      "image1FileName": "s2.png",
+      "image1Duration": 10,
+      "fadeOutDuration": 10,
+      "audioFileName": ["shen1.mp3", "shen2.mp3", "shen3.mp3", "shen4.mp3", "shen5.mp3", "shen6.mp3"]
+    },
+    {
+      "type": 1,
+      "image1FileName": "s3.png",
+      "image1Duration": 10,
+      "fadeOutDuration": 10,
+      "audioFileName": ["tou1.mp3", "tou2.mp3", "tou3.mp3", "tou4.mp3", "tou5.mp3", "tou6.mp3", "tou7.mp3", "tou8.mp3"]
+    },
+    {
+      "type": 1,
+      "image1FileName": "s4.png",
+      "image1Duration": 10,
+      "fadeOutDuration": 10,
+      "audioFileName": ["shou1.mp3", "shou2.mp3", "shou3.mp3", "shou4.mp3", "shou5.mp3", "shou6.mp3"]
     }
   ],
   "meshes": [
     {
       "type": "spine",
-      "scale": 6.3,
-      "width": 1800,
-      "jsonFileName": "22508.json",
-      "atlasFileName": "22508.atlas",
+      "scale": 2.8,
+      "jsonFileName": "25300.json",
+      "atlasFileName": "25300.atlas",
       "backgroundImage": [
         "bg2.png"
       ],
-      "canvasAlignLeftPercent": 0.03,
-      "canvasAlignRightPercent": -1,
-      "alphaTest": 0.3,
-      "hiddenSlots": ["0","dengguang"],
-      "position": {
-        "x": 0,
-        "y": 0,
-        "z": -1200
-      },
-      "animations": [
-        {
-          "name": "battlestand",
-          "weight": 94
-        },
-        {
-          "name": "born_break",
-          "weight": 2,
-          "audioFileName": "dst1.mp3"
-        },
-        {
-          "name": "casting1",
-          "weight": 2,
-          "audioFileName": "dst2.mp3"
-        },
-        {
-          "name": "combat1",
-          "weight": 2,
-          "audioFileName": "dst3.mp3"
-        }
-      ],
-      "controlSlots": {
-        "backgroundMusic": [
-          "houjinger9_2",
-          "qianjing11",
-          "yshqz14",
-          "yshqz18_2"
-        ],
-        "voiceAnimation": [
-          "dst1_0",
-          "dst1_1",
-          "dst1_2",
-          "dst1_3",
-          "dst1_4",
-          "dst1_5",
-          "dst1_6",
-          "dst1_7",
-          "dst1_8",
-          "dst1_9",
-          "dst1_10",
-          "dst1_11",
-          "dst1_12",
-          "dst1_13",
-          "dst1_14",
-          "dst1_15",
-          "dst1_16",
-          "dst1_17",
-          "dst1_18",
-          "dst1_19"
-        ]
-      },
-      "clickEffects": [
-        {
-          "imageFileName": "d21.png",
-          "weight": 47,
-          "duration": 500,
-          "scale": 0.15,
-          "effect": 0
-        },
-        {
-          "imageFileName": "d22.png",
-          "weight": 46,
-          "duration": 500,
-          "scale": 0.15,
-          "effect": 0
-        },
-        {
-          "imageFileName": "d3.png",
-          "weight": 5,
-          "duration": 500,
-          "scale": 0.1,
-          "effect": 0
-        },
-        {
-          "imageFileName": "s.png",
-          "weight": 2,
-          "duration": 500,
-          "scale": 0.3,
-          "effect": 0
-        }
-      ],
-      "overlayMedia": [
-        {
-          "triggerSlot": [
-            "yueliang6"
-          ],
-          "videoFileName": "1full.webm",
-          "pauseBackgroundMusic": true,
-          "switchToMeshIndex": 1
-        },
-        {
-          "triggerSlot": [
-            "dst32"
-          ],
-          "videoFileName": "axl2.webm",
-          "pauseBackgroundMusic": true,
-          "switchToMeshIndex": 2
-        }
-      ],
-      "specialEffectTriggers": [
-        {
-          "triggerEffectsWhenActive": "s.png",
-          "effectIndices": [
-            0
-          ]
-        }
-      ]
-    },
-    {
-      "type": "spine",
-      "scale": 4,
-      "width": 1800,
-      "jsonFileName": "2250801.json",
-      "atlasFileName": "2250801.atlas",
-      "backgroundImage": [
-        "bg1.jpg"
-      ],
-      "canvasAlignLeftPercent": -1,
-      "canvasAlignRightPercent": 0,
-      "position": {
-        "x": 0,
-        "y": 0,
-        "z": -1200
-      },
-      "animations": [
-        {
-          "name": "battlestand",
-          "weight": 94
-        },
-        {
-          "name": "born_break",
-          "weight": 2,
-          "audioFileName": "dst1.mp3"
-        },
-        {
-          "name": "casting1",
-          "weight": 2,
-          "audioFileName": "dst2.mp3"
-        },
-        {
-          "name": "combat1",
-          "weight": 2,
-          "audioFileName": "dst3.mp3"
-        }
-      ],
-      "controlSlots": {
-        "backgroundMusic": [
-          "beijing_55",
-          "beijing_56",
-          "beijing_58",
-          "beijing_61",
-          "beijing_62",
-          "beijing_64",
-          "xiaorenwu_9",
-          "xiaorenwu_10",
-          "xiaorenwu_12"
-        ],
-        "voiceAnimation": [
-          "beijing_19"
-        ]
-      },
-      "clickEffects": [
-        {
-          "imageFileName": "d11.png",
-          "weight": 47,
-          "duration": 500,
-          "scale": 0.25,
-          "effect": 0
-        },
-        {
-          "imageFileName": "d12.png",
-          "weight": 46,
-          "duration": 500,
-          "scale": 0.15,
-          "effect": 0
-        },
-        {
-          "imageFileName": "d3.png",
-          "weight": 5,
-          "duration": 500,
-          "scale": 0.1,
-          "effect": 0
-        },
-        {
-          "imageFileName": "s.png",
-          "weight": 2,
-          "duration": 500,
-          "scale": 0.3,
-          "effect": 0
-        }
-      ],
-      "overlayMedia": [
-        {
-          "triggerSlot": [
-            "beijing_88"
-          ],
-          "videoFileName": "2full.webm",
-          "pauseBackgroundMusic": true,
-          "switchToMeshIndex": 0
-        },
-        {
-          "triggerSlot": [
-            "renwu_99"
-          ],
-          "videoFileName": "axl1.webm",
-          "pauseBackgroundMusic": true,
-          "switchToMeshIndex": 3
-        }
-      ],
-      "specialEffectTriggers": [
-        {
-          "triggerEffectsWhenActive": "s.png",
-          "effectIndices": [
-            0
-          ]
-        }
-      ]
-    },
-    {
-      "type": "spine",
-      "scale": 5.2,
-      "width": 1400,
       "premultipliedAlpha": true,
-      "jsonFileName": "22401.json",
-      "atlasFileName": "22401.atlas",
-      "backgroundImage": [
-        "beijing1.png"
-      ],
-      "canvasAlignLeftPercent": -1,
-      "canvasAlignRightPercent": -1,
       "position": {
         "x": 0,
         "y": 0,
@@ -287,204 +92,174 @@
       },
       "animations": [
         {
-          "name": "battlestand",
-          "weight": 94
-        },
-        {
-          "name": "born_break",
-          "weight": 2,
-          "audioFileName": "axl1.mp3"
-        },
-        {
-          "name": "casting1",
-          "weight": 2,
-          "audioFileName": "axl2.mp3"
-        },
-        {
-          "name": "combat1",
-          "weight": 2,
-          "audioFileName": "axl3.mp3"
+          "name": "deck_idle",
+          "weight": 100
         }
       ],
       "controlSlots": {
         "backgroundMusic": [
-          "gutou2",
-          "gutou3"
-        ],
-        "voiceAnimation": [
-          "kulou"
+          "daren23"
         ]
       },
-      "clickEffects": [
+      "slotHideRules": [
         {
-          "imageFileName": "d31.png",
-          "weight": 47,
-          "duration": 500,
-          "scale": 0.1,
-          "effect": 0
-        },
-        {
-          "imageFileName": "d32.png",
-          "weight": 46,
-          "duration": 500,
-          "scale": 0.15,
-          "effect": 0
-        },
-        {
-          "imageFileName": "d33.png",
-          "weight": 5,
-          "duration": 500,
-          "scale": 0.1,
-          "effect": 0
-        },
-        {
-          "imageFileName": "s.png",
-          "weight": 2,
-          "duration": 500,
-          "scale": 0.3,
-          "effect": 0
+          "triggerSlots": [
+            "daren22"
+          ],
+          "hideSlots": [
+            "youren1",
+            "youren2",
+            "youren3",
+            "youren4",
+            "youren5",
+            "youren6",
+            "youren7",
+            "youren8",
+            "youren9",
+            "youren10",
+            "youren11",
+            "youren12",
+            "youren13",
+            "youren14",
+            "youren15",
+            "youren16",
+            "youren17",
+            "youren18",
+            "youren19",
+            "youren20",
+            "youren21",
+            "youren22",
+            "youren23",
+            "youren24",
+            "youren25",
+            "youren26",
+            "youren27",
+            "youren28",
+            "youren29",
+            "youren30",
+            "youren31",
+            "youren32",
+            "youren33",
+            "youren34",
+            "youren35",
+            "youren36",
+            "youren37",
+            "youren38",
+            "youren39",
+            "youren40",
+            "youren41",
+            "youren42",
+            "youren43",
+            "youren44",
+            "youren45",
+            "youren46",
+            "youren47",
+            "youren48",
+            "youren49",
+            "youren50",
+            "youren51",
+            "youren52",
+            "youren53",
+            "youren54",
+            "youren55",
+            "youren56",
+            "youren57",
+            "youren6_1"
+          ],
+          "hideDuration": -1
         }
       ],
-      "overlayMedia": [
+      "clickEffects": [
         {
-          "triggerSlot": [
-            "shou1"
-          ],
-          "videoFileName": "axl1.webm",
-          "pauseBackgroundMusic": true,
-          "switchToMeshIndex": 3
+          "imageFileName": "d1.png",
+          "weight": 10,
+          "scale": 0.3
         },
         {
-          "triggerSlot": [
-            "qugan"
-          ],
-          "videoFileName": "2full.webm",
-          "pauseBackgroundMusic": true,
-          "switchToMeshIndex": 0
+          "imageFileName": "d2.png",
+          "weight": 10,
+          "scale": 0.3
+        },
+        {
+          "imageFileName": "d3.png",
+          "weight": 10,
+          "scale": 0.3
+        },
+        {
+          "imageFileName": "d4.png",
+          "weight": 10,
+          "scale": 0.3
+        },
+        {
+          "imageFileName": "d5.png",
+          "weight": 10,
+          "scale": 0.4
+        },
+        {
+          "imageFileName": "d6.png",
+          "weight": 10,
+          "scale": 0.3
+        },
+        {
+          "imageFileName": "d7.png",
+          "weight": 10,
+          "scale": 0.3
+        },
+        {
+          "imageFileName": "d8.png",
+          "weight": 10,
+          "scale": 0.3
+        },
+        {
+          "imageFileName": "d9.png",
+          "weight": 10,
+          "scale": 0.3
+        },
+        {
+          "imageFileName": "d10.png",
+          "weight": 10,
+          "scale": 0.3
         }
       ],
       "specialEffectTriggers": [
         {
-          "triggerEffectsWhenActive": "s.png",
+          "triggerAtSecondOfDay": "43200",
+          "effectIndices": [
+            0
+          ]
+        },
+        {
+          "triggerAtSecondOfDay": "64800",
           "effectIndices": [
             1
           ]
-        }
-      ]
-    },
-    {
-      "type": "spine",
-      "scale": 5.2,
-      "width": 5000,
-      "alphaTest": 0.3,
-      "jsonFileName": "2240101.json",
-      "atlasFileName": "2240101.atlas",
-      "backgroundImage": [
-        "bg.jpg"
-      ],
-      "canvasAlignLeftPercent": -1,
-      "canvasAlignRightPercent": -1,
-      "position": {
-        "x": -300,
-        "y": 0,
-        "z": -1200
-      },
-      "hiddenSlots":["2"],
-      "animations": [
-        {
-          "name": "battlestand",
-          "weight": 94
         },
         {
-          "name": "born_break",
-          "weight": 2,
-          "audioFileName": "axl1.mp3"
-        },
-        {
-          "name": "casting1",
-          "weight": 2,
-          "audioFileName": "axl2.mp3"
-        },
-        {
-          "name": "combat1",
-          "weight": 2,
-          "audioFileName": "axl3.mp3"
-        }
-      ],
-      "controlSlots": {
-        "backgroundMusic": [
-          "xiua"
-        ],
-        "voiceAnimation": [
-          "renwu66a",
-          "renwu661a",
-          "renwu662a",
-          "renwu663a",
-          "renwu664a",
-          "renwu665a",
-          "renwu666a",
-          "renwu667a"
-        ]
-      },
-      "clickEffects": [
-        {
-          "imageFileName": "d41.png",
-          "weight": 47,
-          "duration": 500,
-          "scale": 0.5,
-          "effect": 0
-        },
-        {
-          "imageFileName": "d42.png",
-          "weight": 46,
-          "duration": 500,
-          "scale": 0.5,
-          "effect": 0
-        },
-        {
-          "imageFileName": "d33.png",
-          "weight": 5,
-          "duration": 500,
-          "scale": 0.1,
-          "effect": 0
-        },
-        {
-          "imageFileName": "s.png",
-          "weight": 2,
-          "duration": 500,
-          "scale": 0.3,
-          "effect": 0
-        }
-      ],
-      "overlayMedia": [
-        {
-          "triggerSlot": [
-            "renwu20",
-            "renwu21",
-            "renwu22"
-          ],
-          "videoFileName": "axl2.webm",
-          "pauseBackgroundMusic": true,
-          "switchToMeshIndex": 2
-        },
-        {
-          "triggerSlot": [
-            "renwu38"
-          ],
-          "videoFileName": "1full.webm",
-          "pauseBackgroundMusic": true,
-          "switchToMeshIndex": 1
-        }
-      ],
-      "specialEffectTriggers": [
-        {
-          "triggerEffectsWhenActive": "s.png",
+          "triggerSlot": "daren2",
           "effectIndices": [
-            1
+            2
+          ]
+        },
+        {
+          "triggerSlot": ["daren28","daren30"],
+          "effectIndices": [
+            5
+          ]
+        },
+        {
+          "triggerSlot": "daren49",
+          "effectIndices": [
+            3
+          ]
+        },
+        {
+          "triggerSlot": "rentou57",
+          "effectIndices": [
+            4
           ]
         }
       ]
     }
   ],
-  "activeMeshIndex": 2
+  "activeMeshIndex": 0
 }
