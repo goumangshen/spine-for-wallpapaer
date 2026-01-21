@@ -27,10 +27,10 @@ import { switchBackgroundImage, setMeshBackgroundImage, setMeshCanvasAlignment, 
 import { playOverlayMediaItem, setOverlayMediaEndCallback, setOverlayMediaStartCallback } from './overlayMedia';
 import { handleClickEffect, preloadClickEffectImages, areClickEffectsActive, areClickEffectsCountReached, clearAllClickEffects, setClickEffectCompleteCallback } from './clickEffect';
 import { playSpecialEffectsSequence, setSpecialEffectCompleteCallback } from './specialEffect';
-import { initNotes } from './note';
+import { initNotes, syncNotes } from './note';
 
 const main = async () => {
-  const configs: Configs = await (await fetch('./assets/config.json')).json();
+  let configs: Configs = await (await fetch('./assets/config.json')).json();
   Scene.initScene(configs);
   
   // 初始化便签功能（全局配置，不与 mesh 绑定）
@@ -1067,6 +1067,152 @@ const main = async () => {
   };
 
   requestAnimationFrame(waitLoad);
+
+  /**
+   * 配置自动刷新功能
+   * 当 refresh 为 true 时，每隔10秒重新读取配置文件并同步变动
+   */
+  let refreshTimer: number | null = null;
+  let currentConfigs: Configs = configs; // 保存当前配置的引用
+
+  const refreshConfig = async () => {
+    try {
+      const newConfigs: Configs = await (await fetch('./assets/config.json')).json();
+      
+      // 检查 refresh 配置是否变更
+      const refreshChanged = currentConfigs.refresh !== newConfigs.refresh;
+      if (refreshChanged) {
+        if (newConfigs.refresh === true && !refreshTimer) {
+          // 从 false 变为 true，启动刷新
+          console.log('[Config Refresh] 已启用配置自动刷新（每10秒）');
+          refreshTimer = window.setInterval(refreshConfig, 10000);
+        } else if (newConfigs.refresh !== true && refreshTimer) {
+          // 从 true 变为 false，停止刷新
+          console.log('[Config Refresh] 已禁用配置自动刷新');
+          clearInterval(refreshTimer);
+          refreshTimer = null;
+          // 更新配置后直接返回，不再执行后续同步
+          currentConfigs = newConfigs;
+          return;
+        }
+      }
+      
+      // 如果当前 refresh 为 false，直接返回（不应该执行到这里，但为了安全）
+      if (newConfigs.refresh !== true) {
+        return;
+      }
+      
+      // 1. 同步便签配置
+      if (JSON.stringify(currentConfigs.notes) !== JSON.stringify(newConfigs.notes)) {
+        console.log('[Config Refresh] 便签配置已更新，正在同步...');
+        syncNotes(newConfigs.notes);
+      }
+
+      // 2. 同步特殊特效库（更新引用）
+      if (JSON.stringify(currentConfigs.specialEffectLibrary) !== JSON.stringify(newConfigs.specialEffectLibrary)) {
+        console.log('[Config Refresh] 特殊特效库已更新');
+        // 更新全局配置引用，新的触发会使用新的特效库
+        currentConfigs.specialEffectLibrary = newConfigs.specialEffectLibrary;
+        configs.specialEffectLibrary = newConfigs.specialEffectLibrary;
+      }
+
+      // 3. 同步特殊特效触发配置（需要重新初始化）
+      // 注意：这里使用 currentActiveMeshConfig 变量（已在外部作用域定义）
+      if (currentActiveMeshConfig && newConfigs.meshes?.[currentActiveMeshIndex]) {
+        const newActiveMeshConfig = newConfigs.meshes[currentActiveMeshIndex];
+        const currentTriggers = currentActiveMeshConfig.specialEffectTriggers
+          ? (Array.isArray(currentActiveMeshConfig.specialEffectTriggers)
+              ? currentActiveMeshConfig.specialEffectTriggers
+              : [currentActiveMeshConfig.specialEffectTriggers])
+          : [];
+        const newTriggers = newActiveMeshConfig.specialEffectTriggers
+          ? (Array.isArray(newActiveMeshConfig.specialEffectTriggers)
+              ? newActiveMeshConfig.specialEffectTriggers
+              : [newActiveMeshConfig.specialEffectTriggers])
+          : [];
+
+        if (JSON.stringify(currentTriggers) !== JSON.stringify(newTriggers)) {
+          console.log('[Config Refresh] 特殊特效触发配置已更新，正在重新初始化...');
+          
+          // 更新配置引用（同时更新 configs 和 currentActiveMeshConfig）
+          if (configs.meshes && configs.meshes[currentActiveMeshIndex]) {
+            configs.meshes[currentActiveMeshIndex].specialEffectTriggers = newActiveMeshConfig.specialEffectTriggers;
+          }
+          currentActiveMeshConfig.specialEffectTriggers = newActiveMeshConfig.specialEffectTriggers;
+          
+          // 清空已触发的标记（允许重新触发）
+          triggeredSpecialEffectTriggers.clear();
+          timeTriggeredDates.clear();
+          
+          // 重新获取条件触发的 specialEffectTriggers
+          const allSpecialEffectTriggers = newActiveMeshConfig.specialEffectTriggers
+            ? (Array.isArray(newActiveMeshConfig.specialEffectTriggers)
+                ? newActiveMeshConfig.specialEffectTriggers
+                : [newActiveMeshConfig.specialEffectTriggers])
+            : [];
+          conditionalSpecialEffectTriggers = allSpecialEffectTriggers.filter((it: SpecialEffectTrigger) => 
+            !!it?.triggerSlotsWhenHidden || !!it?.triggerEffectsWhenActive || !!it?.triggerEffectsWhenCountReached || (it?.triggerAtSecondOfDay !== undefined && it.triggerAtSecondOfDay >= 0)
+          );
+          
+          // 重新初始化时间触发检查
+          const now = new Date();
+          const currentSecondOfDay = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+          const todayDateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+          const EXPIRED_THRESHOLD = 60;
+          
+          for (const trigger of conditionalSpecialEffectTriggers) {
+            if (trigger.triggerAtSecondOfDay !== undefined && trigger.triggerAtSecondOfDay >= 0) {
+              const targetSecond = Number(trigger.triggerAtSecondOfDay);
+              if (currentSecondOfDay > targetSecond + EXPIRED_THRESHOLD) {
+                timeTriggeredDates.set(trigger, todayDateStr);
+              }
+            }
+          }
+          
+          // 重新初始化累计计数触发的 specialEffectTriggers
+          totalCountSpecialEffectTriggers = allSpecialEffectTriggers.filter((it: SpecialEffectTrigger) => 
+            !!it?.triggerEffectsWhenTotalCountReached && it.triggerEffectsWhenTotalCountReached.length > 0
+          );
+          
+          // 重新初始化累计计数器和触发器映射（保留当前计数）
+          totalCountTriggerMap.clear();
+          for (const trigger of totalCountSpecialEffectTriggers) {
+            if (trigger.triggerEffectsWhenTotalCountReached) {
+              for (const config of trigger.triggerEffectsWhenTotalCountReached) {
+                const identifier = config.effectIdentifier;
+                // 如果计数器不存在，初始化；否则保留当前计数
+                if (!totalCounters.has(identifier)) {
+                  totalCounters.set(identifier, 0);
+                }
+                // 建立映射关系
+                if (!totalCountTriggerMap.has(identifier)) {
+                  totalCountTriggerMap.set(identifier, []);
+                }
+                totalCountTriggerMap.get(identifier)!.push(trigger);
+              }
+            }
+          }
+        }
+      }
+
+      // 更新当前配置引用（在同步完成后）
+      currentConfigs = newConfigs;
+      // 同时更新 configs 的 refresh 配置（如果变更了）
+      if (refreshChanged) {
+        configs.refresh = newConfigs.refresh;
+      }
+      
+      console.log('[Config Refresh] 配置刷新完成');
+    } catch (error) {
+      console.error('[Config Refresh] 配置刷新失败:', error);
+    }
+  };
+
+  // 如果启用了自动刷新，设置定时器
+  if (configs.refresh === true) {
+    console.log('[Config Refresh] 已启用配置自动刷新（每10秒）');
+    refreshTimer = window.setInterval(refreshConfig, 10000); // 10秒 = 10000毫秒
+  }
 };
 
 /**

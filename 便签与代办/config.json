@@ -2,7 +2,7 @@
   "width": 1650,
   "height": 1920,
   "backgroundImageFit": "auto",
-  "refresh": true,
+  "refresh":true,
   "canvasAlignLeftPercent": -1,
   "canvasAlignRightPercent": -1,
   "canvasEdgeTransition": 0,
@@ -12,37 +12,37 @@
   },
   "notes": [
     {
-      "visible": false,
-      "backgroundImage": "note.png",
-      "text": "这是一个示例便签",
+      "visible": true,
+      "backgroundImage": "12.png",
+      "text": "但是这个",
       "scale": 0.5
     }
   ],
   "specialEffectLibrary": [
     {
       "type": 6,
-      "image1FileName": "dhk.png",
+      "image1FileName": "13.png",
       "initialScale": 0.5,
       "finalScale": 1,
       "initialRotation": 90,
       "alignLeftPercent": 0.52,
       "alignRightPercent": -1,
       "verticalFromBottomPercent": 85,
-      "text": "给我坐下好好吃饭！",
+      "text":"给我坐下好好吃饭！!",
       "scaleDuration": 500,
       "fadeOutDuration": -1,
       "audioFileName": "hhcf.mp3"
     },
     {
       "type": 6,
-      "image1FileName": "dhk.png",
+      "image1FileName": "13.png",
       "initialScale": 0.5,
       "finalScale": 1,
       "initialRotation": 90,
       "alignLeftPercent": 0.52,
       "alignRightPercent": -1,
       "verticalFromBottomPercent": 85,
-      "text": "想吃点什么？\n任何料理我都能做给你哦！",
+      "text":"想吃点什么？任何料理我都能做给你哦！",
       "scaleDuration": 500,
       "fadeOutDuration": -1,
       "audioFileName": "zlzgn.mp3"
@@ -52,56 +52,28 @@
       "image1FileName": "s1.png",
       "image1Duration": 10,
       "fadeOutDuration": 10,
-      "audioFileName": [
-        "jiao1.mp3",
-        "jiao2.mp3",
-        "jiao3.mp3",
-        "jiao4.mp3"
-      ]
+      "audioFileName": ["jiao1.mp3", "jiao2.mp3", "jiao3.mp3", "jiao4.mp3"]
     },
     {
       "type": 1,
       "image1FileName": "s2.png",
       "image1Duration": 10,
       "fadeOutDuration": 10,
-      "audioFileName": [
-        "shen1.mp3",
-        "shen2.mp3",
-        "shen3.mp3",
-        "shen4.mp3",
-        "shen5.mp3",
-        "shen6.mp3"
-      ]
+      "audioFileName": ["shen1.mp3", "shen2.mp3", "shen3.mp3", "shen4.mp3", "shen5.mp3", "shen6.mp3"]
     },
     {
       "type": 1,
       "image1FileName": "s3.png",
       "image1Duration": 10,
       "fadeOutDuration": 10,
-      "audioFileName": [
-        "tou1.mp3",
-        "tou2.mp3",
-        "tou3.mp3",
-        "tou4.mp3",
-        "tou5.mp3",
-        "tou6.mp3",
-        "tou7.mp3",
-        "tou8.mp3"
-      ]
+      "audioFileName": ["tou1.mp3", "tou2.mp3", "tou3.mp3", "tou4.mp3", "tou5.mp3", "tou6.mp3", "tou7.mp3", "tou8.mp3"]
     },
     {
       "type": 1,
       "image1FileName": "s4.png",
       "image1Duration": 10,
       "fadeOutDuration": 10,
-      "audioFileName": [
-        "shou1.mp3",
-        "shou2.mp3",
-        "shou3.mp3",
-        "shou4.mp3",
-        "shou5.mp3",
-        "shou6.mp3"
-      ]
+      "audioFileName": ["shou1.mp3", "shou2.mp3", "shou3.mp3", "shou4.mp3", "shou5.mp3", "shou6.mp3"]
     }
   ],
   "meshes": [
@@ -252,16 +224,25 @@
       ],
       "specialEffectTriggers": [
         {
+          "triggerAtSecondOfDay": "43200",
+          "effectIndices": [
+            0
+          ]
+        },
+        {
+          "triggerAtSecondOfDay": "64800",
+          "effectIndices": [
+            1
+          ]
+        },
+        {
           "triggerSlot": "daren2",
           "effectIndices": [
             2
           ]
         },
         {
-          "triggerSlot": [
-            "daren28",
-            "daren30"
-          ],
+          "triggerSlot": ["daren28","daren30"],
           "effectIndices": [
             5
           ]
@@ -279,15 +260,9 @@
           ]
         },
         {
-          "triggerAtSecondOfDay": "43200",
+          "triggerSlot": "shaozi",
           "effectIndices": [
             0
-          ]
-        },
-        {
-          "triggerAtSecondOfDay": "64800",
-          "effectIndices": [
-            1
           ]
         }
       ]

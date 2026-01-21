@@ -66,7 +66,7 @@ function createNote(noteConfig: NoteConfig, index: number, totalNotes: number): 
 
   // 背景图片
   const bgImage = document.createElement('img');
-  bgImage.src = ASSET_PATH + noteConfig.backgroundImage;
+  bgImage.src = ASSET_PATH + (noteConfig.backgroundImage ?? 'note.png');
   bgImage.style.display = 'block';
   bgImage.style.width = '100%';
   bgImage.style.height = '100%';
@@ -119,7 +119,7 @@ function createNote(noteConfig: NoteConfig, index: number, totalNotes: number): 
   let collapseTimeout: number | null = null;
   let expandTimeout: number | null = null; // 展开后自动收起的定时器
   let expandedPosition: { x: number; y: number } | null = null; // 展开时的位置
-  let currentScale = noteConfig.scale ?? 1.0; // 当前缩放比例
+  let currentScale = noteConfig.scale ?? 0.5; // 当前缩放比例
 
   // 计算上边缘区域（用于点击检测）
   const TOP_EDGE_HEIGHT = 20; // 上边缘高度（像素）
@@ -558,6 +558,9 @@ function createNote(noteConfig: NoteConfig, index: number, totalNotes: number): 
   return container;
 }
 
+// 存储当前所有便签元素的映射：key 为索引，value 为便签元素
+const noteElementsMap = new Map<number, HTMLElement>();
+
 /**
  * 初始化便签功能
  * @param notes 便签配置数组
@@ -572,6 +575,131 @@ export function initNotes(notes: NoteConfig[] | undefined): void {
     const noteElement = createNote(noteConfig, index, notes.length);
     if (noteElement) {
       document.body.appendChild(noteElement);
+      noteElementsMap.set(index, noteElement);
     }
   });
+}
+
+/**
+ * 同步便签配置（删除、修改、新增）
+ * @param newNotes 新的便签配置数组
+ */
+export function syncNotes(newNotes: NoteConfig[] | undefined): void {
+  const newNotesArray = newNotes || [];
+  const newNotesMap = new Map<number, NoteConfig>();
+  
+  // 构建新配置的映射
+  newNotesArray.forEach((noteConfig, index) => {
+    newNotesMap.set(index, noteConfig);
+  });
+
+  // 1. 删除：移除在新配置中不存在的便签
+  for (const [index, element] of noteElementsMap.entries()) {
+    if (!newNotesMap.has(index)) {
+      // 便签已被删除
+      if (element.parentNode) {
+        element.parentNode.removeChild(element);
+      }
+      noteElementsMap.delete(index);
+    }
+  }
+
+  // 2. 修改和新增：遍历新配置
+  newNotesArray.forEach((noteConfig, index) => {
+    const existingElement = noteElementsMap.get(index);
+    
+    if (existingElement) {
+      // 便签已存在，检查是否需要更新
+      const bgImage = existingElement.querySelector('img') as HTMLImageElement;
+      const textEl = existingElement.querySelector('div > div') as HTMLElement;
+      
+      if (!bgImage || !textEl) {
+        // 元素结构异常，重新创建
+        if (existingElement.parentNode) {
+          existingElement.parentNode.removeChild(existingElement);
+        }
+        noteElementsMap.delete(index);
+        
+        const newElement = createNote(noteConfig, index, newNotesArray.length);
+        if (newElement) {
+          document.body.appendChild(newElement);
+          noteElementsMap.set(index, newElement);
+        }
+        return;
+      }
+      
+      // 检查配置是否有变化
+      const currentBgSrc = bgImage.src;
+      const newBgSrc = ASSET_PATH + (noteConfig.backgroundImage ?? 'note.png');
+      const currentText = textEl.textContent;
+      const newText = noteConfig.text ?? '';
+      const currentScale = parseFloat(existingElement.style.width) / (bgImage.naturalWidth || 1);
+      const newScale = noteConfig.scale ?? 0.5;
+      
+      let needsUpdate = false;
+      
+      // 检查背景图片
+      if (currentBgSrc !== newBgSrc) {
+        bgImage.src = newBgSrc;
+        needsUpdate = true;
+      }
+      
+      // 检查文字内容
+      if (currentText !== newText) {
+        textEl.textContent = newText;
+        needsUpdate = true;
+      }
+      
+      // 检查可见性
+      if (noteConfig.visible === false) {
+        existingElement.style.display = 'none';
+      } else {
+        existingElement.style.display = '';
+      }
+      
+      // 如果配置有变化，需要重新设置尺寸和文字大小
+      if (needsUpdate || Math.abs(currentScale - newScale) > 0.01) {
+        // 等待图片加载完成后更新
+        if (bgImage.complete && bgImage.naturalWidth > 0) {
+          updateNoteSize(existingElement, bgImage, textEl, newScale);
+        } else {
+          bgImage.addEventListener('load', () => {
+            updateNoteSize(existingElement, bgImage, textEl, newScale);
+          }, { once: true });
+        }
+      }
+    } else {
+      // 便签不存在，创建新的
+      if (noteConfig.visible !== false) {
+        const newElement = createNote(noteConfig, index, newNotesArray.length);
+        if (newElement) {
+          document.body.appendChild(newElement);
+          noteElementsMap.set(index, newElement);
+        }
+      }
+    }
+  });
+}
+
+/**
+ * 更新便签尺寸和文字大小
+ */
+function updateNoteSize(
+  container: HTMLElement,
+  bgImage: HTMLImageElement,
+  textEl: HTMLElement,
+  scale: number
+): void {
+  if (!bgImage.complete || bgImage.naturalWidth === 0) {
+    return;
+  }
+  
+  const base = Math.min(bgImage.naturalWidth, bgImage.naturalHeight) * scale;
+  const maxPx = Math.max(16, Math.min(120, Math.floor(base / 6)));
+  const minPx = 10;
+  autoFitText(textEl, bgImage, minPx, maxPx, Math.floor(base * 0.08));
+  
+  // 更新容器尺寸
+  container.style.width = `${bgImage.naturalWidth * scale}px`;
+  container.style.height = `${bgImage.naturalHeight * scale}px`;
 }

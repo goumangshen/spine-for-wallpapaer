@@ -568,16 +568,16 @@ function playType6Effect(
   spineAnimator: SpineAnimator | null = null
 ): { audioElement: HTMLAudioElement | null; totalDuration: number } {
   const {
-    image1FileName,
-    initialScale,
-    finalScale,
-    initialRotation,
+    image1FileName = 'dhk.png',
+    initialScale = 0.5,
+    finalScale = 1,
+    initialRotation = 90,
     finalRotation,
-    alignLeftPercent,
-    alignRightPercent,
-    verticalFromBottomPercent,
-    scaleDuration,
-    fadeOutDuration,
+    alignLeftPercent = 0.52,
+    alignRightPercent = -1,
+    verticalFromBottomPercent = 85,
+    scaleDuration = 500,
+    fadeOutDuration = -1,
     text,
   } = definition;
 
@@ -620,9 +620,10 @@ function playType6Effect(
     }),
   ])
     .then(([bgRect]) => {
-      const leftRatio = alignLeftPercent !== undefined ? normalizePercentToRatio(alignLeftPercent) : null;
-      const rightRatio = alignRightPercent !== undefined ? normalizePercentToRatio(alignRightPercent) : null;
-      const vRatio = normalizePercentToRatio(verticalFromBottomPercent) ?? 0.5;
+      // 处理 alignRightPercent = -1 的特殊情况（表示不使用右对齐）
+      const leftRatio = alignLeftPercent !== undefined && alignLeftPercent >= 0 ? normalizePercentToRatio(alignLeftPercent) : null;
+      const rightRatio = alignRightPercent !== undefined && alignRightPercent >= 0 ? normalizePercentToRatio(alignRightPercent) : null;
+      const vRatio = normalizePercentToRatio(verticalFromBottomPercent) ?? 0.85;
 
       const bgLeft = bgRect.left;
       const bgTop = bgRect.top;

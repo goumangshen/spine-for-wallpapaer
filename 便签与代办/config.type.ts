@@ -103,11 +103,11 @@ export type Configs = {
 export type NoteConfig = {
   /** 是否显示此便签，默认 true */
   visible?: boolean;
-  /** 便签背景图片文件名（相对于 assets 目录），默认 "note.png" */
-  backgroundImage?: string;
+  /** 便签背景图片文件名（相对于 assets 目录） */
+  backgroundImage: string;
   /** 便签文字内容 */
   text: string;
-  /** 可选：便签初始缩放比例，默认 0.5 */
+  /** 可选：便签初始缩放比例，默认 1.0 */
   scale?: number;
 };
 
@@ -189,22 +189,22 @@ export type SpecialEffectDefinition =
        * - 位置参照背景图片的实际显示区域（与 canvas 对齐逻辑一致）
        */
       type: 6;
-      /** 图片文件名（相对于 assets 目录），默认 "dhk.png" */
-      image1FileName?: string;
-      /** 图片初始缩放比，默认 0.5 */
-      initialScale?: number;
-      /** 图片最终缩放比，默认 1 */
-      finalScale?: number;
-      /** 图片初始旋转角度（度），默认 90 */
-      initialRotation?: number;
+      /** 图片文件名（相对于 assets 目录） */
+      image1FileName: string;
+      /** 图片初始缩放比 */
+      initialScale: number;
+      /** 图片最终缩放比 */
+      finalScale: number;
+      /** 图片初始旋转角度（度） */
+      initialRotation: number;
       /** 图片最终旋转角度（度） */
       finalRotation: number;
       /**
        * 图片左右位置：参照 canvasAlignLeftPercent/canvasAlignRightPercent 的规则
        * - 0~1：按比例（例如 0.17 表示 17%）
        * - 0~100：按百分数（例如 17 表示 17%）
-       * - alignLeftPercent：以图片左边缘对齐，从背景图左边缘向右偏移指定比例，默认 0.52
-       * - alignRightPercent：以图片右边缘对齐，从背景图右边缘向左偏移指定比例，默认 -1
+       * - alignLeftPercent：以图片左边缘对齐，从背景图左边缘向右偏移指定比例
+       * - alignRightPercent：以图片右边缘对齐，从背景图右边缘向左偏移指定比例
        * - 当 left/right 同时存在时，优先使用 left
        * - 都不提供则默认居中（以图片中心点定位）
        */
@@ -214,13 +214,12 @@ export type SpecialEffectDefinition =
        * 图片垂直位置：从下到上相对于背景图片的比例
        * - 0~1：按比例（0=底部，1=顶部）
        * - 0~100：按百分数
-       * - 默认 85
        */
-      verticalFromBottomPercent?: number;
-      /** 缩放/旋转过程持续时间（毫秒），默认 500 */
-      scaleDuration?: number;
-      /** 渐隐消失时间（毫秒），默认 -1（点击关闭模式） */
-      fadeOutDuration?: number;
+      verticalFromBottomPercent: number;
+      /** 缩放/旋转过程持续时间（毫秒） */
+      scaleDuration: number;
+      /** 渐隐消失时间（毫秒） */
+      fadeOutDuration: number;
       /** 文字内容（会叠在图片上居中显示，黑色楷体） */
       text: string;
       /** 可选：特效开始时播放的语音文件名（相对于 assets 目录） */
